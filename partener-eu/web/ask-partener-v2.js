@@ -58,7 +58,75 @@ function knownValue(x){const v=fold(x?.value);return !!(x&&v&&x.confidence!=='UN
 function factKnown(d,label){return knownValue(fact(d,label))}
 function knownFacts(d){const labels=['Termen','Grant','Finanțare','Buget','Contribuție proprie'];return labels.map(l=>fact(d,l)).filter(knownValue).slice(0,4)}
 function knownAudience(d){return (d.audience||[]).filter(Boolean).some(x=>{const v=fold(x);return v&&!/^(conform ghid(?:ului)?|de verificat|neconfirmat)\b/.test(v)&&!/forma exacta.*se verifica/.test(v)})}
-function statusProjection(d){const c=canonicalCall(d),canonical=String(c?.status||'').toUpperCase();if(statusLabels[canonical])return {key:canonical,label:statusLabels[canonical],source:'CANONICAL'};const dossier=String(d.status||'').toUpperCase();if(statusLabels[dossier])return {key:dossier,label:statusLabels[dossier],source:'DOSSIER'};const f=fact(d,'Status');if(knownValue(f))return {key:'VERIFIED_FACT',label:String(f.value||'').trim(),source:'QUICK_FACT'};return {key:'UNKNOWN',label:'NECONFIRMAT',source:'UNKNOWN'}}
+// Ask has a separate compact index and may load before the homepage freshness
+// guard. Verify its current OPEN claim at read-time, independently of an old
+// generatedAt. This is a display-only REVIEW hold, never a canonical CLOSED.
+const askReview=()=>({key:'REVIEW',label:statusLabels.REVIEW,source:'OPEN_FRESHNESS_REVIEW'});
+const roMonths={ianuarie:0,februarie:1,martie:2,aprilie:3,mai:4,iunie:5,iulie:6,august:7,septembrie:8,octombrie:9,noiembrie:10,decembrie:11};
+function bucharestExactMs(year,month,day,hour,minute,second=0){
+  const date=new Date(Date.UTC(year,month,day,hour,minute,second));
+  if(date.getUTCFullYear()!==year||date.getUTCMonth()!==month||date.getUTCDate()!==day||
+     date.getUTCHours()!==hour||date.getUTCMinutes()!==minute||date.getUTCSeconds()!==second)return null;
+  const lastSunday=m=>{const last=new Date(Date.UTC(year,m+1,0));return last.getUTCDate()-last.getUTCDay()};
+  const march=lastSunday(2),october=lastSunday(9);
+  if(hour===3&&((month===2&&day===march)||(month===9&&day===october)))return null;
+  const summer=(month>2&&month<9)||(month===2&&(day>march||(day===march&&hour>=4)))||
+    (month===9&&(day<october||(day===october&&hour<3)));
+  return date.getTime()-(summer?3:2)*3600000;
+}
+function exactAskClock(value){
+  if(typeof value!=='string')return null;
+  const raw=value.trim();
+  const iso=raw.match(/^(20\d{2})-(\d{2})-(\d{2})[Tt ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?(Z|[+-]\d{2}:\d{2})$/i);
+  if(iso){
+    const [,year,month,day,hour,minute,second,,zone]=iso;
+    const calendar=new Date(Date.UTC(+year,+month-1,+day));
+    if(calendar.getUTCFullYear()!==+year||calendar.getUTCMonth()!==+month-1||
+      calendar.getUTCDate()!==+day||+hour>23||+minute>59||+(second||0)>59||
+      (!/z/i.test(zone)&&(+zone.slice(1,3)>23||+zone.slice(-2)>59)))return null;
+    const stamp=Date.parse(raw);return Number.isFinite(stamp)?stamp:null;
+  }
+  const numeric=raw.match(/^(\d{1,2})[./](\d{1,2})[./](20\d{2})\s*,?\s*(?:(?:la\s+)?ora\s*)?(\d{1,2})[:.](\d{2})(?::(\d{2}))?$/i);
+  if(numeric)return bucharestExactMs(+numeric[3],+numeric[2]-1,+numeric[1],+numeric[4],+numeric[5],+(numeric[6]||0));
+  const ro=fold(raw).match(/^(\d{1,2})\s+(ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)\s+(20\d{2})\s+(?:(?:la\s+)?ora\s+|la\s+)?(\d{1,2})\s+(\d{2})(?:\s+(\d{2}))?$/);
+  // fold() erases the clock separator; require the original explicit HH:mm.
+  if(ro&&/(\d{1,2})[:.](\d{2})/.test(raw))return bucharestExactMs(+ro[3],roMonths[ro[2]],+ro[1],+ro[4],+ro[5],+(ro[6]||0));
+  return null;
+}
+function askOpenVerifiedNow(d){
+  const facts=d.quickFacts||[];
+  const status=facts.filter(x=>fold(x?.label)==='status');
+  const terms=facts.filter(x=>fold(x?.label)==='termen');
+  if(status.length!==1||terms.length!==1||String(status[0].confidence||'').toUpperCase()!=='CONFIRMED'||
+     String(terms[0].confidence||'').toUpperCase()!=='CONFIRMED'||!['open','deschis'].includes(fold(status[0].value)))return false;
+  const cutoffs=[terms[0].value,...['deadline','closesAt','closeAt'].filter(k=>d[k]!=null&&d[k]!=='').map(k=>d[k])];
+  const endings=cutoffs.map(exactAskClock);
+  if(endings.some(v=>v===null)||endings.some(v=>v!==endings[0])||endings[0]<=Date.now())return false;
+  const starts=facts.filter(x=>fold(x?.label)==='deschidere');
+  if(starts.length>1||(starts.length===1&&String(starts[0].confidence||'').toUpperCase()!=='CONFIRMED'))return false;
+  const openings=[...['openFrom','opensAt','openAt'].filter(k=>d[k]!=null&&d[k]!=='').map(k=>d[k]),...starts.map(x=>x.value)].map(exactAskClock);
+  return !openings.some(v=>v===null||v>Date.now()||v!==openings[0]);
+}
+function statusProjection(d){
+  const c=canonicalCall(d),canonical=String(c?.status||'').toUpperCase();
+  const dossier=String(d.status||'').toUpperCase();
+  // A stale or contradictory canonical OPEN may not override missing exact
+  // evidence or a competing dossier lifecycle. A confirmed future window is
+  // necessary but never independently sufficient for source admission.
+  if(canonical==='OPEN')return dossier==='OPEN'&&askOpenVerifiedNow(d)?
+    {key:'OPEN',label:statusLabels.OPEN,source:'CANONICAL'}:askReview();
+  if(statusLabels[canonical])return {key:canonical,label:statusLabels[canonical],source:'CANONICAL'};
+  if(dossier==='OPEN')return askOpenVerifiedNow(d)?
+    {key:'OPEN',label:statusLabels.OPEN,source:'DOSSIER'}:askReview();
+  if(statusLabels[dossier])return {key:dossier,label:statusLabels[dossier],source:'DOSSIER'};
+  const f=fact(d,'Status');
+  if(knownValue(f)){
+    // Unstructured "deschis pentru depunere" text is not an OPEN authority.
+    if(/\b(open|deschis)\b/.test(fold(f.value)))return askReview();
+    return {key:'VERIFIED_FACT',label:String(f.value||'').trim(),source:'QUICK_FACT'};
+  }
+  return {key:'UNKNOWN',label:'NECONFIRMAT',source:'UNKNOWN'};
+}
 function unknownFacts(d){const out=[];if(statusProjection(d).key==='UNKNOWN')out.push('Statutul apelului nu este încă confirmat.');if(!factKnown(d,'Termen'))out.push('Termenul de depunere nu este încă confirmat.');if(!['Grant','Finanțare','Buget'].some(l=>factKnown(d,l)))out.push('Valoarea finanțării nu este încă confirmată.');if(!knownAudience(d))out.push('Eligibilitatea solicitantului nu este încă confirmată în datele structurate.');const s=(d.sections||[]).find(x=>/nu este.*confirmat|nu sunt.*confirmat|neconfirmat/i.test(x.title||''));for(const item of (s?.items||[]).filter(Boolean)){if(out.length>=4)break;if(!out.includes(item))out.push(item)}return out.slice(0,4)}
 function sourceEvidence(d){const sources=(d.sources||[]).filter(x=>x&&x.url);const official=sources.find(x=>officialTier(x.tier));if(official)return {source:official,kind:'OFFICIAL'};return sources[0]?{source:sources[0],kind:'PUBLIC_EVIDENCE'}:null}
 function provenanceBlock(d){const ev=sourceEvidence(d);if(!ev)return '<div class="askV2Unknown"><b>Proveniență</b><p>Nu există încă o sursă publică legată direct în această proiecție; verifică dosarul înainte de decizie.</p></div>';const src=ev.source;if(ev.kind==='OFFICIAL')return `<div class="askV2Block"><b>Proveniență</b><p><a href="${esc(src.url)}" target="_blank" rel="noreferrer">Sursa oficială ↗</a> · ${esc(src.label||'evidență oficială')}</p></div>`;return `<div class="askV2Unknown"><b>Proveniență</b><p><a href="${esc(src.url)}" target="_blank" rel="noreferrer">Evidență publică ↗</a> · ${esc(src.label||'sursă publică')}. Nu este clasificată drept sursă oficială primară; verifică dosarul înainte de decizie.</p></div>`}
@@ -67,7 +135,7 @@ function openHub(){const ui=decisionUI();if(ui&&typeof ui.openHub==='function'&&
 function openDossier(id){const path=ROUTES()[id];if(path){location.assign(path);return true}const ui=decisionUI();if(ui&&typeof ui.openDossier==='function')return !!ui.openDossier(id);const load=window.PARTENER_LOAD_DECISION_HUB;if(typeof load==='function'){load().then(()=>decisionUI()?.openDossier?.(id)).catch(()=>{});return true}return false}
 function beneficiaryBlock(r){return r.beneficiary==='UNKNOWN'?'<div class="askV2Unknown"><b>Beneficiar</b><p>Tipul de beneficiar cerut a fost înțeles, dar eligibilitatea acestui dosar nu este încă suficient de structurată pentru confirmarea potrivirii.</p></div>':''}
 function geographyBlock(r){return r.geo==='UNKNOWN'?'<div class="askV2Unknown"><b>Zonă</b><p>Zona cerută a fost înțeleasă, dar acoperirea geografică a acestui dosar nu este încă suficient de structurată pentru confirmare.</p></div>':''}
-function resultCard(r,i){const d=r.d,known=knownFacts(d),unknown=unknownFacts(d),aud=knownAudience(d)?(d.audience||[]).slice(0,2):[],st=statusProjection(d);return `<article class="askV2Card"><div class="askV2Top"><span class="askV2Rank">${i===0?'Cea mai bună potrivire':`Potrivire ${i+1}`}</span><span class="askV2Status ${esc(st.key)}">${esc(st.label)}</span></div><h3>${esc(d.title)}</h3><div class="askV2Programme">${esc(d.programme||'')} ${d.region?`· ${esc(d.region)}`:''}</div><p class="askV2Why"><b>De ce apare:</b> ${esc(r.why.length?r.why.join(', '):'există termeni relevanți în dosarul verificat')}.</p>${beneficiaryBlock(r)}${geographyBlock(r)}${aud.length?`<div class="askV2Block"><b>Cine poate aplica</b><p>${aud.map(esc).join(' · ')}</p></div>`:'<div class="askV2Unknown"><b>Eligibilitate</b><p>Nu este încă structurată suficient pentru a fi afirmată aici.</p></div>'}${known.length?`<div class="askV2Facts">${known.map(x=>`<span><small>${esc(x.label)}</small><b>${esc(x.value)}</b></span>`).join('')}</div>`:''}<div class="askV2Block"><b>Ce faci acum</b><p>${esc(d.decisionAction||'Verifică dosarul și sursele oficiale înainte de decizie.')}</p></div>${unknown.length?`<div class="askV2Unknown"><b>Încă neconfirmat</b><p>${unknown.map(esc).join(' · ')}</p></div>`:''}${provenanceBlock(d)}<button class="askV2Open" data-ask-open="${esc(d.id)}">Deschide dosarul verificat →</button></article>`}
+function resultCard(r,i){const d=r.d,st=statusProjection(d),heldOpen=st.source==='OPEN_FRESHNESS_REVIEW',known=knownFacts(d).map(x=>heldOpen&&fold(x.label)==='termen'?{...x,label:'Ultimul termen raportat (de reverificat)'}:x),unknown=unknownFacts(d),aud=knownAudience(d)?(d.audience||[]).slice(0,2):[];return `<article class="askV2Card"><div class="askV2Top"><span class="askV2Rank">${i===0?'Cea mai bună potrivire':`Potrivire ${i+1}`}</span><span class="askV2Status ${esc(st.key)}">${esc(st.label)}</span></div><h3>${esc(d.title)}</h3><div class="askV2Programme">${esc(d.programme||'')} ${d.region?`· ${esc(d.region)}`:''}</div><p class="askV2Why"><b>De ce apare:</b> ${esc(r.why.length?r.why.join(', '):'există termeni relevanți în dosarul verificat')}.</p>${beneficiaryBlock(r)}${geographyBlock(r)}${aud.length?`<div class="askV2Block"><b>Cine poate aplica</b><p>${aud.map(esc).join(' · ')}</p></div>`:'<div class="askV2Unknown"><b>Eligibilitate</b><p>Nu este încă structurată suficient pentru a fi afirmată aici.</p></div>'}${known.length?`<div class="askV2Facts">${known.map(x=>`<span><small>${esc(x.label)}</small><b>${esc(x.value)}</b></span>`).join('')}</div>`:''}<div class="askV2Block"><b>Ce faci acum</b><p>${esc(heldOpen?'Starea curentă a apelului necesită reverificare la sursa oficială; nu începe depunerea pe baza unui termen expirat sau neconfirmat.':(d.decisionAction||'Verifică dosarul și sursele oficiale înainte de decizie.'))}</p></div>${unknown.length?`<div class="askV2Unknown"><b>Încă neconfirmat</b><p>${unknown.map(esc).join(' · ')}</p></div>`:''}${provenanceBlock(d)}<button class="askV2Open" data-ask-open="${esc(d.id)}">Deschide dosarul verificat →</button></article>`}
 function interpretationBlock(i){return `<div class="askV2Summary"><span><b>Am înțeles întrebarea astfel:</b> ${esc(interpretationText(i))}</span><small>Tipul de beneficiar și zona cerute sunt tratate ca limite numai când dosarul are suficiente date structurate; necunoscutele rămân marcate.</small></div>`}
 function answer(){const input=document.querySelector('#aq'),out=document.querySelector('#ans');if(!input||!out)return;const q=input.value.trim();if(q.length<3){out.innerHTML='<div class="askV2Empty">Scrie ce organizație ai și ce vrei să finanțezi. Exemplu: „IMM din Vâlcea, baterii și panouri fotovoltaice”.</div>';return}const interpretation=interpretQuestion(q),ts=interpretation.tokens;let ranked=P.dossiers.filter(publishable).map(d=>rank(d,ts,interpretation)).filter(x=>!x.canonicalConflict&&!x.geoConflict&&!x.beneficiaryConflict&&x.score>=Math.max(7,(interpretation.groups.length||1)*3)).sort((a,b)=>b.score-a.score||Number(b.d.quality?.completeness||0)-Number(a.d.quality?.completeness||0));const actionable=ranked.filter(x=>statusProjection(x.d).key!=='CLOSED').slice(0,5);ranked=(actionable.length?actionable:ranked.slice(0,5));const understood=interpretationBlock(interpretation);if(!ranked.length){out.innerHTML=understood+'<div class="askV2Empty"><b>Nu am găsit încă o potrivire suficient de sigură în dosarele verificate.</b><p>Nu îți afișăm apeluri aleatorii sau cu beneficiar ori zonă structurată incompatibilă. Reformulează cu tipul organizației, județul/regiunea și investiția dorită sau verifică toate dosarele.</p><button class="askV2Browse" data-ask-browse>Vezi toate dosarele →</button></div>';out.querySelector('[data-ask-browse]')?.addEventListener('click',()=>openHub());return}out.innerHTML=understood+`<div class="askV2Summary"><span>${ranked.length} potriviri relevante în dosarele verificate</span><b>Rezultatul este orientativ pentru selecție, nu o confirmare automată a eligibilității.</b><small>Dosarele sunt sursa pentru faptele afișate; datele verificate suplimentare sunt folosite numai pentru ordonarea relevanței. Necunoscutele rămân marcate.</small></div><div class="askV2Grid">${ranked.map(resultCard).join('')}</div>`;out.querySelectorAll('[data-ask-open]').forEach(btn=>btn.addEventListener('click',()=>{const d=P.dossiers.find(x=>x.id===btn.dataset.askOpen);if(d)openDossier(d.id)}))}
 function enhance(){const ask=document.querySelector('.main .ask');if(!ask||ask.dataset.askV2==='1')return;ask.dataset.askV2='1';const eyebrow=ask.querySelector('.eyebrow'),h1=ask.querySelector('h1'),input=ask.querySelector('#aq'),button=ask.querySelector('#ago');if(eyebrow)eyebrow.textContent='Caută în dosarele PARTENER.EU';if(h1)h1.textContent='Spune cine ești și ce vrei să finanțezi.';if(input){if(/industria alimentară.*energie regenerabilă/i.test(input.value))input.value='';input.placeholder='Ex.: IMM din Vâlcea, panouri fotovoltaice și baterii';input.autocomplete='off';input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();answer()}})}if(button){button.textContent='Găsește finanțări';button.onclick=e=>{e.preventDefault();answer()}}let initial=null;try{initial=new URLSearchParams(location.search).get('q')}catch{}if(input&&initial&&!input.value){input.value=initial;setTimeout(answer,0)}const search=ask.querySelector('.searchBox');if(search&&!ask.querySelector('.askV2Hint'))search.insertAdjacentHTML('afterend','<div class="askV2Hint">Căutarea interpretează beneficiarul, investiția și zona, apoi ordonează dosarele folosind datele verificate disponibile. Nu afișează apeluri cu beneficiar sau zonă structurată incompatibilă și nu completează golurile prin presupuneri.</div>')}
