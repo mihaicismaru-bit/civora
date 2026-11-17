@@ -2163,6 +2163,59 @@ def main():
     }.issubset(extracts):
         fail("IF26 planned grant/auction/Info Day details promoted or conflated")
 
+
+    # PR_CENTRU_CM_20261112_MARKET_PROGRAMMING_FAIL_CLOSED.
+    # One official article reports historical programme-level volumes and only
+    # an aspiration for six future launches. It is NOT six executable calls.
+    cm = by_id.get("SRC-PRC-20261112-CM-ABSORPTION-SIX-PLANNED-LAUNCHES")
+    if cm is None:
+        fail("PR Centru 12 November Monitoring Committee market signal missing")
+    if (cm.get("url") !=
+            "https://www.regiocentru.ro/tinta-de-absorbtie-a-fondurilor-europene-nerambursabile-stabilita-pentru-anul-2026-in-cadrul-programului-regiunea-centru-a-fost-deja-depasita/"
+            or cm.get("tier") != "T1"
+            or cm.get("event_date_discovery") != "2026-11-12"
+            or cm.get("observation_state") != "PROGRAMMING_PIPELINE"
+            or cm.get("authority_scope") != "PROGRAMMING_FRAMEWORK"):
+        fail("PR Centru CM historic demand or planned launches identity drift")
+    cm_program = "PR Centru / November 2026 committee market and planned launches"
+    if (cm.get("programmes") != [cm_program] or
+            set(programme_domains.get(cm_program, [])) !=
+            {"COHESION_CROSS_PROGRAMME", "PROGRAMMING_FUTURE"}):
+        fail("PR Centru CM programme market/planning plane not explicit")
+    if not {"ROMANIA", "ADR", "MARKET_INTELLIGENCE", "PROGRAMMING_PIPELINE", "DISCOVERY"}.issubset(
+            set(cm.get("source_families") or [])):
+        fail("PR Centru six planned launches not separated as non-OPEN programming")
+    for row in (cm, by_id.get("SRC-PRC-WEEKLY-SUBMITTED-PROJECTS-INDEX-20261117")):
+        if row is None:
+            fail("PR Centru dated weekly document index discovery missing")
+        if any(row.get(key) is not False for key in (
+                "material_fact_use", "credentials_required", "open_call_authorized",
+                "material_fact_publication_authorized")):
+            fail("PR Centru unacquired market source promoted material or OPEN_CALL")
+        if any(key in row for key in (
+                "status", "call_status", "deadline", "application_deadline",
+                "budget", "budget_eur", "eligibility", "submission_endpoint",
+                "fetched_at", "final_url", "raw_sha256", "semantic_sha256",
+                "parser_version", "run_id", "handoff_sha256", "exact_call_identifier")):
+            fail("PR Centru market/index discovery fabricated call fact or raw receipt")
+        note = (row.get("note") or "").lower()
+        if not all(token in note for token in ("403", "not_captured", "open_call")):
+            fail("PR Centru source lost 403/raw-pending/non-OPEN boundary")
+    note_cm = cm["note"].lower()
+    if not all(token in note_cm for token in (
+            "1,837", "1,037", "315m", "six", "33m", "aspiration", "not six identified calls")):
+        fail("PR Centru dated factual vs aspirational quantities conflated")
+    weekly = by_id["SRC-PRC-WEEKLY-SUBMITTED-PROJECTS-INDEX-20261117"]
+    if (weekly.get("url") != "https://www.regiocentru.ro/situatie-proiecte-depuse/"
+            or weekly.get("tier") != "T1"
+            or weekly.get("readback_date_discovery") != "2026-11-17"
+            or weekly.get("latest_indexed_attachment_date_discovery") != "2026-11-09"
+            or weekly.get("observation_state") != "SOURCE_INDEX_READBACK_RAW_PENDING"):
+        fail("PR Centru week-index date provenance blurred with report date")
+    if ("PROGRAMMING_PIPELINE" in (weekly.get("source_families") or []) or
+            "dated child documents" not in weekly["note"].lower()):
+        fail("PR Centru weekly evidence index conflated with future launch programme")
+
     # Cluster 5 Commission CCSE is 7+10 PLANNED topic discovery, not a live topic.
     cl5_id = "SRC-EU-EC-CCSE-CL5-2027-01-02-PLANNED-TOPICS"
     cl5 = by_id.get(cl5_id)
