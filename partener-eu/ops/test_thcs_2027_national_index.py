@@ -154,8 +154,8 @@ def test():
     assert by_id[launched]["supersedes_preannouncement_source_id"] == "SRC-EU-THCS-2027-PREANNOUNCEMENT"
     assert by_id["SRC-EU-THCS-2027-PREANNOUNCEMENT"]["observation_state"] == "PROGRAMMING_PIPELINE"
     assert by_id["SRC-RO-UEFISCDI-THCS-2027"]["observation_state"] == "PROGRAMMING_PIPELINE"
-    assert "Annex 1.24 Romania" in by_id[call_text]["note"]
-    assert "EPSS" in by_id[epss]["note"]
+    assert "1.24 Romania" in by_id[call_text]["note"]
+    assert "epss.proposals.ee/thcs/" in by_id[epss]["note"]
     # UEFISCDI index moved the 2027 edition into OPEN; do not let the
     # old planned-only raw extractor silently accept this as either stage.
     moved = RAW.decode().replace(
