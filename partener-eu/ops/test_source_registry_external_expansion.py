@@ -2253,6 +2253,79 @@ def main():
     if not all(token in note_cl5 for token in ("17 november 2026", "3 december 2026", "http 429", "not_captured", "open_call", "immutable")):
         fail("Cluster 5 pending raw/OPEN_CALL warning missing")
 
+    # 16-Nov-2026 Danube MA/JS consultation: a deadline for responding to
+    # a TERRITORIAL ANALYSIS survey is never a funding application deadline.
+    # Register only the distinct primary article; original PDF/HTML receipts
+    # and adoption of the future programme remain review-gated.
+    danube_consult_id = "SRC-INTERREG-DANUBE-2028-2034-TERRITORIAL-CONSULT-20261116"
+    danube_consult = by_id.get(danube_consult_id)
+    if danube_consult is None:
+        fail("missing Danube 2028-2034 draft Territorial Analysis consultation")
+
+    def _check_danube_consultation(row):
+        exact = {
+            "id": danube_consult_id,
+            "url": "https://interreg-danube.eu/news/help-shape-the-future-of-the-danube-region",
+            "linked_programming_source_id": "SRC-INTERREG-DANUBE-2028-2034",
+            "tier": "T1",
+            "class": "official_programming_pipeline_consultation",
+            "programmes": ["Interreg Danube Region Programme 2028-2034"],
+            "programme_family": "Interreg Danube Region Programme 2028-2034",
+            "authority_scope": "PROGRAMMING_FRAMEWORK",
+            "observation_state": "PROGRAMMING_PIPELINE",
+            "event_date_discovery": "2026-11-16",
+            "readback_date_discovery": "2026-11-17",
+            "consultation_response_deadline_discovery": "2027-01-15",
+            "adapter_required": "INTERREG_DANUBE_DRAFT_TERRITORIAL_ANALYSIS_CONSULTATION_RAW_RECONCILE_V1",
+        }
+        for key, expected in exact.items():
+            if row.get(key) != expected:
+                fail("Danube future consultation source identity drift: " + key)
+        required_families = {"INTERREG", "TRANSNATIONAL", "PROGRAMMING_PIPELINE", "CONSULTATION", "DISCOVERY"}
+        if not required_families.issubset(set(row.get("source_families") or [])):
+            fail("Danube consultation lost non-call programme source taxonomy")
+        if not {"future_programming_consultations", "future_programming_updates"}.issubset(
+                set(row.get("extract") or [])):
+            fail("Danube consultation missing acquisition-only programming extraction")
+        for key in ("material_fact_use", "credentials_required",
+                    "open_call_authorized", "material_fact_publication_authorized"):
+            if row.get(key) is not False:
+                fail("Danube consultation illegally authorized material funding fact: " + key)
+        prohibited = {
+            "status", "call_status", "deadline", "budget", "budget_eur", "eligibility",
+            "submission_endpoint", "exact_call_identifier", "fetched_at",
+            "final_url", "raw_sha256", "semantic_sha256", "parser_version",
+            "run_id", "handoff_sha256",
+        }
+        if prohibited.intersection(row):
+            fail("Danube consultation fabricated current call or immutable raw receipt")
+        note = row.get("note") or ""
+        for token in ("16 November 2026", "15 January 2027", "CONSULTATION RESPONSES",
+                      "OPEN_CALL", "NOT_CAPTURED", "SURFACEMC"):
+            if token not in note:
+                fail("Danube consultation lacks provenance/non-call warning: " + token)
+
+    _check_danube_consultation(danube_consult)
+    # Negative replay: a future-programme consultation must remain held even
+    # if a later operator or source changes one of its sensitive fields.
+    for change in (
+        {"observation_state": "OPEN_CALL"},
+        {"open_call_authorized": True},
+        {"material_fact_use": True},
+        {"material_fact_publication_authorized": True},
+        {"deadline": "2027-01-15"},
+        {"run_id": "invented"},
+        {"consultation_response_deadline_discovery": "2026-11-17"},
+        {"url": "https://example.com/danube-opens"},
+    ):
+        tampered = dict(danube_consult, **change)
+        try:
+            _check_danube_consultation(tampered)
+        except SystemExit:
+            pass
+        else:
+            fail("Danube consultation negative replay admitted " + repr(change))
+
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
