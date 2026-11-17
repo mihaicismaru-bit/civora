@@ -2174,8 +2174,10 @@ def main():
         fail("Cluster 5 search-index readback wrong state")
     if cl5.get("index_readback_state_discovery") != "OFFICIAL_EC_FUTURE_TOPIC_SCHEDULE_SEARCH_INDEX_READBACK_RAW_PENDING":
         fail("Cluster 5 original-unacquired index readback warning lost")
-    if cl5.get("authority_scope") != "PROGRAMMING_AND_FUTURE_TOPIC_SCHEDULE_ONLY":
+    if cl5.get("authority_scope") != "PROGRAMMING_FRAMEWORK":
         fail("Cluster 5 programming authority scope expanded")
+    if set(programme_domains.get("Horizon Europe / Cluster 5 / 2027-01 and 2027-02 planned topic sets", [])) != {"EU_DIRECT_FUNDING", "PROGRAMMING_FUTURE"}:
+        fail("Cluster 5 future-topic programming not registered in data plane")
     if cl5.get("adapter_required") != "HORIZON_CL5_2027_EXACT_TOPIC_FT_CURRENT_GATEWAY_RECONCILE_V1":
         fail("Cluster 5 independent live topic reconciliation missing")
     if not {"EU_DIRECT", "BRUSSELS", "HORIZON_EUROPE", "PROGRAMMING_PIPELINE", "DISCOVERY"}.issubset(set(cl5.get("source_families") or [])):
