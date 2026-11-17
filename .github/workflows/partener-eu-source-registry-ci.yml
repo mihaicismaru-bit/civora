@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/source_registry.json'
+      - 'partener-eu/ops/test_cl4_2027_photonics_topic_identity.py'
       - 'partener-eu/ops/test_afir_email_advisory.py'
       - 'partener-eu/validation/discovery/afir-email-incident-20261113.json'
       - 'partener-eu/ingest/thcs_2027_national_index.py'
@@ -158,6 +159,9 @@ jobs:
           python -m py_compile partener-eu/ops/test_eea_civil_society_fetch.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_reconcile.py
           python -m py_compile partener-eu/ops/test_regiocentru_actions_fetch.py
+
+      - name: Validate CL4 photonics exact topic ID conflict (no OPEN promotion)
+        run: python partener-eu/ops/test_cl4_2027_photonics_topic_identity.py
 
       - name: Validate P10 and canonical source authority compatibility
         run: python partener-eu/ops/test_p10_policy_regression.py
