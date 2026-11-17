@@ -2401,6 +2401,95 @@ def main():
         else:
             fail("MAI MPF negative replay admitted " + repr(change))
 
+    # DGCONNECT_CL4_2027_DIGITAL_LAUNCH_FAIL_CLOSED
+    # Commission's 17-Nov official programme launch announcement describes 2 calls
+    # and 12 digital topics. It does NOT replace an original, live exact-topic
+    # Funding & Tenders status and accepting application endpoint.
+    cl4_id = "SRC-EU-DGCONNECT-HORIZON-CL4-2027-DIGITAL-LAUNCH-20261117"
+    cl4 = by_id.get(cl4_id)
+    if cl4 is None:
+        fail("DG CONNECT 17 Nov Horizon Cluster 4 digital announcement missing")
+
+    def _check_cl4_news(row):
+        fixed = {
+            "id": cl4_id,
+            "tier": "T1",
+            "url": "https://digital-strategy.ec.europa.eu/en/news/commission-launches-over-eu290-million-boost-eu-tech-sovereignty-and-beyond",
+            "class": "official_european_commission_dg_connect_horizon_digital_launch_announcement",
+            "authority_class": "T1_OFFICIAL_EUROPEAN_COMMISSION_DG_CONNECT_PROGRAMME_ANNOUNCEMENT",
+            "authority_scope": "PROGRAMME_LAUNCH_ANNOUNCEMENT_NOT_EXACT_TOPIC_GATEWAY",
+            "observation_state": "OFFICIAL_COMMISSION_LAUNCH_ANNOUNCEMENT_RAW_PENDING",
+            "event_date_discovery": "2026-11-17",
+            "readback_date_discovery": "2026-11-17",
+            "programmes": ["EU direct programmes"],
+            "announced_call_count_discovery": 2,
+            "announced_topic_count_discovery": 12,
+            "adapter_required": "HORIZON_CL4_DIGITAL_2027_DG_CONNECT_NEWS_EXACT_FT_TOPIC_RAW_RECONCILE_V1",
+        }
+        for key, expected in fixed.items():
+            if row.get(key) != expected:
+                fail("DG CONNECT launch discovery identity/status drift: " + key)
+        if not {"EU_DIRECT", "BRUSSELS", "HORIZON_EUROPE",
+                "CALL_LAUNCH_ANNOUNCEMENT", "DISCOVERY"}.issubset(
+                set(row.get("source_families") or [])):
+            fail("DG CONNECT digital announcement incorrectly classified")
+        if "PROGRAMMING_PIPELINE" in (row.get("source_families") or []):
+            fail("DG CONNECT official launch wrongly rewound to pre-announcement")
+        if set(programme_domains.get("EU direct programmes", [])) != {"EU_DIRECT_FUNDING"}:
+            fail("DG CONNECT EU-direct programme plane missing")
+        extracts = set(row.get("extract") or [])
+        if not {
+            "commission_17_november_2026_digital_launch_announcement_two_calls_12_topics",
+            "announced_297m_eur_total_envelope_not_topic_or_applicant_budget",
+            "announced_18_march_2027_programme_level_end_not_exact_topic_submission_deadline",
+            "live_ft_topic_status_and_exact_application_endpoint_independently_required",
+            "original_dgconnect_and_ft_topic_receipts_not_yet_acquired",
+        }.issubset(extracts):
+            fail("DG CONNECT launch announcement count/envelope/deadline distinctions lost")
+        for key in ("material_fact_use", "credentials_required",
+                    "open_call_authorized", "material_fact_publication_authorized"):
+            if row.get(key) is not False:
+                fail("DG CONNECT unacquired launch promoted material status: " + key)
+        forbidden = {
+            "status", "call_status", "deadline", "application_deadline",
+            "budget", "budget_eur", "eligibility", "exact_call_identifier",
+            "exact_topic_identifier", "submission_endpoint", "fetched_at",
+            "final_url", "raw_sha256", "semantic_sha256", "parser_version",
+            "run_id", "handoff_sha256",
+        }
+        if forbidden.intersection(row):
+            fail("DG CONNECT announcement fabricated exact-topic or immutable receipt")
+        note = row.get("note") or ""
+        for token in ("17 November 2026", "12 topics", "EUR 297 million",
+                      "18 March 2027", "Forthcoming", "NOT_CAPTURED",
+                      "SURFACEMC", "OPEN_CALL", "exact current Funding & Tenders"):
+            if token not in note:
+                fail("DG CONNECT announcement lost provenance/semantic hold: " + token)
+
+    _check_cl4_news(cl4)
+    # Adversarial replay: new launched programme != confirmed exact OPEN_CALL.
+    for change in (
+        {"observation_state": "OPEN_CALL"},
+        {"open_call_authorized": True},
+        {"material_fact_use": True},
+        {"material_fact_publication_authorized": True},
+        {"announced_topic_count_discovery": 11},
+        {"deadline": "2027-03-18"},
+        {"budget_eur": 297000000},
+        {"eligibility": ["all SMEs"]},
+        {"exact_topic_identifier": "HORIZON-CL4-2027-04-ASSUMED"},
+        {"submission_endpoint": "https://example.com/submit"},
+        {"fetched_at": "2026-11-17T20:00:00Z"},
+        {"url": "https://example.com/unverified-news"},
+    ):
+        tampered = dict(cl4, **change)
+        try:
+            _check_cl4_news(tampered)
+        except SystemExit:
+            pass
+        else:
+            fail("DG CONNECT launch negative replay illegally admitted " + repr(change))
+
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
