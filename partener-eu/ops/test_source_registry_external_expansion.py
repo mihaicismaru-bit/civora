@@ -2163,6 +2163,39 @@ def main():
     }.issubset(extracts):
         fail("IF26 planned grant/auction/Info Day details promoted or conflated")
 
+    # Cluster 5 Commission CCSE is 7+10 PLANNED topic discovery, not a live topic.
+    cl5_id = "SRC-EU-EC-CCSE-CL5-2027-01-02-PLANNED-TOPICS"
+    cl5 = by_id.get(cl5_id)
+    if cl5 is None:
+        fail("Cluster 5 future-topic official source missing")
+    if cl5.get("url") != "https://research-and-innovation.ec.europa.eu/strategy/strategy-research-and-innovation/europe-world/international-cooperation/regional-dialogues-and-international-organisations/eu-africa-cooperation/partnership-climate-change-and-sustainable-energy-ccse_en":
+        fail("Cluster 5 Commission official source URL drift")
+    if cl5.get("observation_state") != "OFFICIAL_EC_FUTURE_TOPIC_SCHEDULE_SEARCH_INDEX_READBACK_RAW_PENDING":
+        fail("Cluster 5 search-index readback wrong state")
+    if cl5.get("authority_scope") != "PROGRAMMING_AND_FUTURE_TOPIC_SCHEDULE_ONLY":
+        fail("Cluster 5 programming authority scope expanded")
+    if cl5.get("adapter_required") != "HORIZON_CL5_2027_EXACT_TOPIC_FT_CURRENT_GATEWAY_RECONCILE_V1":
+        fail("Cluster 5 independent live topic reconciliation missing")
+    if not {"EU_DIRECT", "BRUSSELS", "HORIZON_EUROPE", "PROGRAMMING_PIPELINE", "DISCOVERY"}.issubset(set(cl5.get("source_families") or [])):
+        fail("Cluster 5 future topic must remain programming intelligence")
+    if "CALL_REGISTRY" in (cl5.get("source_families") or []):
+        fail("Cluster 5 future topic misclassified live call")
+    for key in ("material_fact_use", "credentials_required", "open_call_authorized", "material_fact_publication_authorized"):
+        if cl5.get(key) is not False:
+            fail("Cluster 5 programming witness illegally authorized material fact: " + key)
+    forbidden = {"status", "call_status", "deadline", "budget", "eligibility", "submission_endpoint", "fetched_at", "final_url", "raw_sha256", "parser_version", "run_id", "handoff_sha256", "exact_topic_identifier"}
+    if forbidden.intersection(cl5):
+        fail("Cluster 5 programme discovery fabricated topic/receipt authority")
+    climate = {"HORIZON-CL5-2027-01-D1-" + f"{i:02d}" for i in range(7, 14)}
+    energy = {"HORIZON-CL5-2027-02-" + suffix for suffix in (
+        "D2-05", "D2-06", "D3-07", "D3-08", "D3-09", "D3-10", "D3-15", "D3-24", "D3-30", "D3-31")}
+    topics = cl5.get("planned_topic_identifiers_discovery") or []
+    if len(topics) != 17 or set(topics) != (climate | energy):
+        fail("Cluster 5 seven-plus-ten exact topic grouping misidentified")
+    note_cl5 = (cl5.get("note") or "").lower()
+    if not all(token in note_cl5 for token in ("17 november 2026", "3 december 2026", "http 429", "not_captured", "open_call", "immutable")):
+        fail("Cluster 5 pending raw/OPEN_CALL warning missing")
+
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
