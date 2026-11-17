@@ -1816,14 +1816,14 @@ def main():
             "T1", "PREANNOUNCEMENT_AND_EXPECTED_LAUNCH_DISCOVERY_ONLY",
             "PREANNOUNCEMENT_STILL_DISPLAYED_ON_LAUNCH_DATE_RAW_PENDING",
             "SRC-RO-UEFISCDI-ERA4HEALTH-NANODIAGNCD-2027-JTC10",
-            {"EU_DIRECT", "BRUSSELS", "PROGRAMMING_PIPELINE", "DISCOVERY"},
+            {"EU_DIRECT", "BRUSSELS", "JOINT_TRANSNATIONAL_CALL", "DISCOVERY"},
         ),
         "SRC-RO-UEFISCDI-ERA4HEALTH-NANODIAGNCD-2027-JTC10": (
             "https://uefiscdi.gov.ro/fostering-a-european-research-area-for-health-era4health",
             "T1B", "ROMANIAN_JTC10_REFERENCE_AND_NATIONAL_PACKAGE_DISCOVERY_ONLY",
             "NATIONAL_LAUNCH_DATE_LISTED_PARTNERSHIP_PREANNOUNCEMENT_RAW_PENDING",
             "SRC-EU-ERA4HEALTH-NANODIAGNCD-2027-JTC10",
-            {"ROMANIA", "EU_DIRECT", "PROGRAMMING_PIPELINE", "DISCOVERY"},
+            {"ROMANIA", "EU_DIRECT", "JOINT_TRANSNATIONAL_CALL", "DISCOVERY"},
         ),
     }
     for source_id, (url, tier, scope, state, paired, families) in nanodiag_pair.items():
@@ -1840,6 +1840,8 @@ def main():
         if row.get("programmes") != ["EU direct programmes"] or not families.issubset(
                 set(row.get("source_families") or [])):
             fail(f"{source_id}: source family taxonomy missing")
+        if "PROGRAMMING_PIPELINE" in (row.get("source_families") or []):
+            fail(f"{source_id}: call preannouncement misclassified as future MFF programming")
         if row.get("event_date_discovery") != "2026-11-17":
             fail(f"{source_id}: launch-date witness silently shifted")
         if row.get("adapter_required") != (
