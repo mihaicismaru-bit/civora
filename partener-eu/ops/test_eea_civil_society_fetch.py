@@ -471,8 +471,11 @@ def main():
     # server-renders the seven exact call-detail anchors (November 2026).
     transitioned_index = (
         b"<html><body><h1>Calls</h1>"
-        b"EEA Civil Society Fund in Romania: a total of 863 applications "
-        b"validated under the seven calls for proposals."
+        b"EEA Civil Society Fund in Romania. A total of 863 funding applications "
+        b"were validated under the seven calls for proposals launched through "
+        b"the programme by the submission deadline of 8 October 2026, at 16:00."
+        b"<p>Preliminary clarification for applicants exceeding maximum limits.</p>"
+        b"<p>Next step: administrative compliance and eligibility checks.</p>"
         b"<p>No results found</p></body></html>"
     )
     fallback, mode, direct_count = module.discover_with_official_fallback(
@@ -505,6 +508,28 @@ def main():
         fail("fallback origin must be explicit in the evidence")
     if resumed["source_index"]["raw_hash"] != hashlib.sha256(transitioned_index).hexdigest():
         fail("changed official index raw SHA-256 must be preserved")
+    intake = resumed["source_index"].get("post_deadline_application_intelligence")
+    if not isinstance(intake, dict) or intake.get("programme_wide_validated_application_count_candidate") != 863:
+        fail("official programme-wide 863 intake total must be source-bound as candidate only")
+    if intake.get("observation_state") != "POST_DEADLINE_INTAKE_VALIDATED":
+        fail("post-deadline intake observation may not become a call lifecycle state")
+    if intake.get("publish_authorized") or intake.get("material_fact_use"):
+        fail("programme-wide intake must never authorize publication or OPEN")
+    if intake.get("award_or_selection_results_observed") or intake.get("call_level_allocation_inferred"):
+        fail("validated applications cannot imply award results or call-level totals")
+    for corrupted in (
+        transitioned_index.replace(b"863", b"863 and 864", 1),
+        transitioned_index.replace(b"863", b"864", 1).replace(
+            b"validated under", b"validated, while 863 applications were validated under", 1
+        ),
+        transitioned_index.replace(b"8 October 2026, at 16:00", b"unknown date", 1),
+        transitioned_index.replace(b"EEA Civil Society Fund in Romania", b"External non-official source", 1),
+        b"<html><body>EEA Civil Society Fund in Romania seven calls for proposals "
+        b"submission deadline of 8 October 2026, at 16:00"
+        b"<script>863 funding applications were validated</script></body></html>",
+    ):
+        if module.index_post_deadline_application_intelligence(corrupted) is not None:
+            fail("ambiguous, ungrounded or hidden intake totals must fail closed")
     if resumed["publish_authorized"] or resumed["material_fact_use"]:
         fail("pinned fallback cannot authorize any material fact or publication")
 
