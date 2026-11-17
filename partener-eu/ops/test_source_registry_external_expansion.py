@@ -1874,6 +1874,84 @@ def main():
         fail("ERA4Health expected launch date cannot authorize OPEN_CALL")
 
 
+    # EIT_STEM_TALENT_2026_DEADLINE_CONFLICT: original operator call
+    # (including its PDF) has 17:00 CET, but UEFISCDI NCP says 00:00 CET.
+    # The divergent NCP time is never canonicalized by a registry descriptor.
+    eit_stem_sources = {
+        "SRC-EU-EIT-STEM-TALENT-2026-OPERATOR": (
+            "https://eitstemtalent.eu/calls-and-opportunities/now-open-eit-stem-talent-call-for-proposals-2026/",
+            "T1", "T1_OFFICIAL_EIT_DELEGATED_CALL_OPERATOR",
+            "OFFICIAL_OPERATOR_1700_VS_NCP_0000_CET_DEADLINE_CONFLICT_RAW_PENDING",
+            "SRC-RO-UEFISCDI-EIT-STEM-TALENT-2026-NCP",
+            {"EU_DIRECT", "BRUSSELS", "EIT", "CALL_REGISTRY", "DISCOVERY"},
+        ),
+        "SRC-EU-EIT-STEM-TALENT-2026-CALL-TEXT": (
+            "https://eitstemtalent.eu/wp-content/uploads/gb/2026/10/call_for_proposals_2026.pdf",
+            "T1", "T1_OFFICIAL_DELEGATED_CALL_DOCUMENT",
+            "OFFICIAL_PDF_1700_VS_NCP_0000_CET_DEADLINE_CONFLICT_RAW_PENDING",
+            "SRC-EU-EIT-STEM-TALENT-2026-OPERATOR",
+            {"EU_DIRECT", "BRUSSELS", "EIT", "CALL_DOCUMENT", "DISCOVERY"},
+        ),
+        "SRC-RO-UEFISCDI-EIT-STEM-TALENT-2026-NCP": (
+            "https://uefiscdi.gov.ro/news-s-a-deschis-apelul-eit-stem-talent-2026",
+            "T1B", "T1B_ROMANIAN_NCP_INFORMATION_NOT_CALL_OPERATOR",
+            "NATIONAL_NCP_0000_VS_OPERATOR_1700_CET_DEADLINE_CONFLICT_RAW_PENDING",
+            "SRC-EU-EIT-STEM-TALENT-2026-OPERATOR",
+            {"ROMANIA", "EU_DIRECT", "EIT", "CALL_REGISTRY", "DISCOVERY"},
+        ),
+    }
+    eit_stem_family = "EIT STEM Tech Talent Induction / Building Future-Ready STEM Talent / Call 2026"
+    eit_stem_adapter = "EIT_STEM_TALENT_2026_OPERATOR_PDF_NCP_DEADLINE_RECONCILE_V1"
+    for source_id, (url, tier, authority, state, paired, families) in eit_stem_sources.items():
+        source = by_id.get(source_id)
+        if not source:
+            fail(f"EIT STEM Talent 2026 authority witness missing: {source_id}")
+        expected = {
+            "url": url, "tier": tier, "authority_class": authority,
+            "observation_state": state,
+            "paired_official_source_id": paired,
+            "programme_family": eit_stem_family,
+            "exact_edition_identifier_discovery": "EIT STEM Tech Talent Induction 2026 Call: Building Future-Ready STEM Talent",
+            "adapter_required": eit_stem_adapter,
+            "readback_date_discovery": "2026-11-17",
+            "programmes": ["EU direct programmes"],
+        }
+        for key, value in expected.items():
+            if source.get(key) != value:
+                fail(f"{source_id}: operator/NCP deadline conflict identity drift: {key}")
+        if not families.issubset(set(source.get("source_families") or [])):
+            fail(f"{source_id}: missing official EIT or Romanian NCP discovery family")
+        if "PROGRAMMING_PIPELINE" in (source.get("source_families") or []):
+            fail(f"{source_id}: live call witness wrongly classified as future programming")
+        for key in ("material_fact_use", "credentials_required",
+                    "open_call_authorized", "material_fact_publication_authorized"):
+            if source.get(key) is not False:
+                fail(f"{source_id}: raw-pending source illegally authorized material facts: {key}")
+        forbidden = {
+            "status", "call_status", "deadline", "close_at", "budget",
+            "eligibility", "submission_endpoint", "fetched_at", "raw_sha256",
+            "parser_version", "run_id", "handoff_sha256",
+        }
+        if forbidden.intersection(source):
+            fail(f"{source_id}: fabricated authoritative current call/receipt field")
+        note = (source.get("note") or "").lower()
+        if not all(token in note for token in (
+                "14 december 2026", "17:00 cet", "00:00 cet", "not_captured")):
+            fail(f"{source_id}: unacknowledged 17-hour NCP/operator discrepancy")
+        if not any(token in note for token in ("no open_call", "no open_call,")):
+            fail(f"{source_id}: missing fail-closed publication disclaimer")
+    eit_stem_operator = by_id["SRC-EU-EIT-STEM-TALENT-2026-OPERATOR"]
+    eit_stem_pdf = by_id["SRC-EU-EIT-STEM-TALENT-2026-CALL-TEXT"]
+    eit_stem_ncp = by_id["SRC-RO-UEFISCDI-EIT-STEM-TALENT-2026-NCP"]
+    if (eit_stem_operator["id"] == eit_stem_ncp["id"] or
+            eit_stem_pdf["url"] == eit_stem_operator["url"] or
+            eit_stem_operator["programme_family"] ==
+            by_id["SRC-EU-EIT-HEI-2026-EXACT-CALL"]["programme_family"]):
+        fail("EIT STEM Talent 2026 incorrectly aliased to EIT HEI or its NCP")
+    if not ("1700_cet" in " ".join(eit_stem_pdf["extract"]) and
+            "0000_cet" in " ".join(eit_stem_ncp["extract"])):
+        fail("EIT STEM Talent 2026 exact call PDF / national time conflict lost")
+
     # EIT Community NEB 2027 has two DIFFERENT opportunities. The Enhance
     # source is corroborated by a Romanian informational notice; the Catalyse
     # accelerator is not an alternative name for Enhance. Neither registry
