@@ -431,6 +431,11 @@ def index_post_deadline_application_intelligence(raw: bytes) -> dict[str, Any] |
         return None
     if not re.search(r"submission deadline of 8 October 2026,?\s*(?:at\s*)?16:00", flat, flags=re.I):
         return None
+    official_totals = re.findall(
+        r"\bA total of\s+(\d{1,3}(?:,\d{3})+|\d+)\s+funding applications\s+"
+        r"(?:were|have\s+been)\s+validated\b",
+        flat, flags=re.I,
+    )
     numbers = {
         int(value.replace(",", ""))
         for value in re.findall(
@@ -439,8 +444,10 @@ def index_post_deadline_application_intelligence(raw: bytes) -> dict[str, Any] |
             flat, flags=re.I,
         )
     }
-    # Conflicting, absent or implausible source totals remain unclassified.
-    if len(numbers) != 1 or not (0 < next(iter(numbers)) < 1_000_000):
+    # Reject missing, duplicated or contradictory visible total claims.
+    if (len(official_totals) != 1 or len(numbers) != 1
+            or int(official_totals[0].replace(",", "")) not in numbers
+            or not (0 < next(iter(numbers)) < 1_000_000)):
         return None
     return {
         "observation_state": "POST_DEADLINE_INTAKE_VALIDATED",
