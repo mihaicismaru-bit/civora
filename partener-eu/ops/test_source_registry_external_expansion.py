@@ -1771,9 +1771,9 @@ def main():
                 "handoff_sha256", "last_verified_open")):
             fail(f"{source_id} fabricated raw acquisition or material call fields")
         note = (row.get("note") or "").lower()
-        if not all(x in note for x in (
-                "second call", "third call", "immutable", "no open_call",
-                "national", "reconcil")):
+        if (not all(x in note for x in (
+                "second call", "immutable", "no open_call", "national", "reconcil"))
+                or not any(x in note for x in ("third call", "third joint call"))):
             fail(f"{source_id} lost old-index/non-authorizing and provenance gates")
     europe = by_id["SRC-EU-FUTUREFOODS-2026-GETS-JTC3"]
     romania = by_id["SRC-RO-UEFISCDI-FUTUREFOODS-2026-JTC3"]
