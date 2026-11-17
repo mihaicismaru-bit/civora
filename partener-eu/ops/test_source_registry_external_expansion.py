@@ -2326,6 +2326,81 @@ def main():
         else:
             fail("Danube consultation negative replay admitted " + repr(change))
 
+    # MPF_INFORMATION_SESSION_DISCOVERY_FAIL_CLOSED
+    # A national public body's 17-Nov webinar relay is NOT an exact operator
+    # call, submission endpoint, or grant application deadline.
+    mpf_id = "SRC-RO-MAI-MPF-INFORMATION-SESSION-20261117"
+    mpf = by_id.get(mpf_id)
+    if mpf is None:
+        fail("17 November MAI/DG HOME MPF official briefing discovery missing")
+
+    def _check_mpf_briefing(row):
+        expected = {
+            "id": mpf_id,
+            "url": "https://fed.mai.gov.ro/11767/11767/",
+            "tier": "T2",
+            "class": "official_public_body_information_event_relay",
+            "authority_class": "T2_NATIONAL_PUBLIC_BODY_RELAY_OF_DG_HOME_MPF_INFORMATION_EVENT",
+            "authority_scope": "INFORMATION_EVENT_DISCOVERY_NOT_APPLICATION_AUTHORITY",
+            "observation_state": "OFFICIAL_INFORMATION_EVENT_DISCOVERED_RAW_PENDING",
+            "event_announcement_date_discovery": "2026-11-17",
+            "event_date_discovery": "2026-11-27",
+            "event_time_discovery": "13:00-14:30 CET",
+            "readback_date_discovery": "2026-11-17",
+            "adapter_required": "MPF_2026_ORGANISER_EXACT_CALL_ID_AND_GATEWAY_RECONCILE_V1",
+            "programmes": ["EU direct programmes"],
+        }
+        for field, value in expected.items():
+            if row.get(field) != value:
+                fail("MAI MPF briefing identity drift: " + field)
+        required_families = {"ROMANIA", "MAI", "EU_DIRECT", "BRUSSELS", "INFORMATION_EVENT", "DISCOVERY"}
+        if not required_families.issubset(set(row.get("source_families") or [])):
+            fail("MAI MPF event lost cross-border discovery family")
+        if set(programme_domains.get("EU direct programmes", [])) != {"EU_DIRECT_FUNDING"}:
+            fail("MAI MPF event lost explicit EU-direct programme domain")
+        for field in ("material_fact_use", "credentials_required", "open_call_authorized",
+                      "material_fact_publication_authorized"):
+            if row.get(field) is not False:
+                fail("MAI MPF information session illegally promoted: " + field)
+        forbidden = {
+            "status", "call_status", "deadline", "application_deadline",
+            "budget", "budget_eur", "eligibility", "submission_endpoint",
+            "exact_call_identifier", "fetched_at", "final_url", "raw_sha256",
+            "semantic_sha256", "parser_version", "run_id", "handoff_sha256",
+        }
+        if forbidden.intersection(row):
+            fail("MAI MPF briefing fabricated exact call or original raw provenance")
+        note = row.get("note", "")
+        for token in ("17 November 2026", "27 November 2026",
+                      "13:00–14:30 CET", "AMIF", "BMVI", "ISF",
+                      "NOT exact call/topic identifiers",
+                      "NOT an application deadline", "NOT_CAPTURED",
+                      "SURFACEMC", "OPEN_CALL"):
+            if token not in note:
+                fail("MAI MPF briefing lost stage/authority warning: " + token)
+
+    _check_mpf_briefing(mpf)
+    # Negative semantic/provenance replay must fail for every forged promotion.
+    for change in (
+        {"observation_state": "OPEN_CALL"},
+        {"open_call_authorized": True},
+        {"material_fact_use": True},
+        {"material_fact_publication_authorized": True},
+        {"deadline": "2026-11-27"},
+        {"eligibility": ["Romanian NGOs"]},
+        {"fetched_at": "2026-11-17T19:00:00Z"},
+        {"exact_call_identifier": "AMIF"},
+        {"event_date_discovery": "2026-11-17"},
+        {"url": "https://example.com/fictional-mpf-call"},
+    ):
+        tampered = dict(mpf, **change)
+        try:
+            _check_mpf_briefing(tampered)
+        except SystemExit:
+            pass
+        else:
+            fail("MAI MPF negative replay admitted " + repr(change))
+
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
