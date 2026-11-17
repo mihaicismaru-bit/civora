@@ -416,6 +416,45 @@ def parse_call_page(raw: bytes, *, authority_url: str) -> dict[str, Any]:
     }
 
 
+def index_post_deadline_application_intelligence(raw: bytes) -> dict[str, Any] | None:
+    """Extract non-publishing intake intelligence from visible official index text.
+
+    Validated applications are NOT approved grants, award results or an OPEN
+    call. Do not infer individual call counts from a programme-wide total.
+    The enclosing acquisition envelope binds this observation to the index
+    URL, raw SHA-256, fetched_at, parser version, run_id and authority class.
+    """
+    flat = " ".join(_flat_text(_parse_document(raw)).split())
+    if not re.search(r"EEA Civil Society Fund in Romania", flat, flags=re.I):
+        return None
+    if not re.search(r"seven calls for proposals", flat, flags=re.I):
+        return None
+    if not re.search(r"submission deadline of 8 October 2026,?\s*(?:at\s*)?16:00", flat, flags=re.I):
+        return None
+    numbers = {
+        int(value.replace(",", ""))
+        for value in re.findall(
+            r"\b(\d{1,3}(?:,\d{3})+|\d+)\s+(?:funding\s+)?applications?\s+"
+            r"(?:were|have\s+been)\s+validated\b",
+            flat, flags=re.I,
+        )
+    }
+    # Conflicting, absent or implausible source totals remain unclassified.
+    if len(numbers) != 1 or not (0 < next(iter(numbers)) < 1_000_000):
+        return None
+    return {
+        "observation_state": "POST_DEADLINE_INTAKE_VALIDATED",
+        "programme_wide_validated_application_count_candidate": next(iter(numbers)),
+        "reference_call_count": 7,
+        "reference_submission_cutoff": "2026-10-08T16:00:00+03:00",
+        "award_or_selection_results_observed": False,
+        "call_level_allocation_inferred": False,
+        "material_fact_use": False,
+        "publish_authorized": False,
+        "requires_reconcile": True,
+    }
+
+
 def discover_with_official_fallback(
     raw: bytes, *, base_url: str, minimum_calls: int
 ) -> tuple[list[str], str, int]:
@@ -549,6 +588,7 @@ def collect_live(
             "bytes": len(index_raw),
             "discovery_mode": discovery_mode,
             "direct_exact_call_links": index_link_count,
+            "post_deadline_application_intelligence": index_post_deadline_application_intelligence(index_raw),
         },
         "fetched_at": fetched_at,
         "parser_version": PARSER_VERSION,
