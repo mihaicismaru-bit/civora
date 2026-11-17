@@ -2692,7 +2692,8 @@
       "adapter_required": "THCS_2027_OFFICIAL_LAUNCH_NATIONAL_RULES_RECONCILE_V1",
       "open_call_authorized": false,
       "material_fact_publication_authorized": false,
-      "note": "Official THCS JTC 2027 pre-announcement readback on 11 November 2026 schedules publication of the call for 16 November 2026, pre-proposals 21 January 2027 and full proposals 24 June 2027. These dates are prospective planning signals, NOT a live OPEN_CALL, immutable source acquisition, final call text, verified current submission endpoint, Romanian national rules or eligibility. Preserve PLANNED/PROGRAMMING_PIPELINE until the official launched call, current application route, original documents, Romanian annex and stage-specific semantic review are acquired and reconciled. No material publication or distribution."
+      "note": "Official THCS JTC 2027 pre-announcement readback on 11 November 2026 schedules publication of the call for 16 November 2026, pre-proposals 21 January 2027 and full proposals 24 June 2027. These dates are prospective planning signals, NOT a live OPEN_CALL, immutable source acquisition, final call text, verified current submission endpoint, Romanian national rules or eligibility. Preserve PLANNED/PROGRAMMING_PIPELINE until the official launched call, current application route, original documents, Romanian annex and stage-specific semantic review are acquired and reconciled. No material publication or distribution. 17 November 2026 operator readback: this PREANNOUNCEMENT URL is now a historical/superseded discovery witness (direct retrieval returned HTTP 404); newer exact call page is https://www.thcspartnership.eu/funding/jtc-2027.kl. Keep this original historical row PROGRAMMING_PIPELINE only for old receipt replay; never infer current call state from it. Separate launched-call discovery remains RAW_PENDING/REVIEW_REQUIRED.",
+      "superseded_by_exact_launch_source_id": "SRC-EU-THCS-JTC2027-LAUNCH"
     },
     {
       "id": "SRC-RO-UEFISCDI-THCS-2027",
@@ -2729,7 +2730,7 @@
       "adapter_required": "THCS_2027_OFFICIAL_LAUNCH_NATIONAL_RULES_RECONCILE_V1",
       "open_call_authorized": false,
       "material_fact_publication_authorized": false,
-      "note": "UEFISCDI THCS-2027 section readback on 11 November 2026 links to the THCS official pre-announcement and lists a planned 16 November 2026 launch, not OPEN_CALL. The mixed-year national landing page and its generic national-package link are not verified THCS 2027 call-specific legal rules, receipt or application proof. No inference of eligibility or Romanian funding from a summary number. Require current official launch, exact call identifier and endpoint, original national package, hashes/provenance and reviewed stage-specific semantic reconciliation before material facts, LKG or distribution."
+      "note": "UEFISCDI THCS-2027 section readback on 11 November 2026 links to the THCS official pre-announcement and lists a planned 16 November 2026 launch, not OPEN_CALL. The mixed-year national landing page and its generic national-package link are not verified THCS 2027 call-specific legal rules, receipt or application proof. No inference of eligibility or Romanian funding from a summary number. Require current official launch, exact call identifier and endpoint, original national package, hashes/provenance and reviewed stage-specific semantic reconciliation before material facts, LKG or distribution. 17 November 2026: current UEFISCDI transnational index search readback places THCS under open competitions, while this national detail still links the now-superseded European pre-announcement. New operator JTC2027 launch page and exact EPSS were discovered; stage mismatch is not yet an authorized national OPEN_CALL. Capture authoritative raws and reconcile stage/Annex Romania before public facts."
     },
     {
       "id": "SRC-RO-AFIR-DR31-CONSULTATION-20261111",
@@ -3782,6 +3783,120 @@
         "exact_live_28digital_submission_acceptance_unverified"
       ],
       "note": "UEFISCDI NCP news for EIT STEM Talent 2026, published 14 October 2026, says 14 December 2026 00:00 CET, whereas the official delegated operator and original EIT call text show 17:00 CET. NCP is a discovery/corroboration source and cannot override delegated EIT call operator evidence. Treat this as unresolved informational discrepancy for user-facing deadline decisions, not a Romanian allocation or a second competition. Requested URL only; fetched_at, original HTML bytes, raw_sha256, parser_version, run_id, immutable handoff, semantic reconciliation and official live form status not_captured. NO OPEN_CALL, deadline, budget, eligibility, publication or distribution permitted by this row."
+    },
+    {
+      "id": "SRC-EU-THCS-JTC2027-LAUNCH",
+      "tier": "T1",
+      "programmes": [
+        "Horizon Europe / THCS Joint Transnational Call 2027"
+      ],
+      "programme_family": "Horizon Europe / THCS Joint Transnational Call 2027",
+      "exact_call_identifier_discovery": "THCS2027 / fifth JTC 2027",
+      "readback_date_discovery": "2026-11-17",
+      "material_fact_use": false,
+      "credentials_required": false,
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "adapter_required": "THCS_JTC2027_LAUNCHED_CALL_ORIGINALS_EPSS_NATIONAL_RECONCILE_V1",
+      "class": "official_thcs_joint_call_launched_2027",
+      "owner": "European Partnership THCS / JTC2027 Joint Call Secretariat",
+      "url": "https://www.thcspartnership.eu/funding/jtc-2027.kl",
+      "paired_official_source_id": "SRC-RO-UEFISCDI-THCS-2027",
+      "supersedes_preannouncement_source_id": "SRC-EU-THCS-2027-PREANNOUNCEMENT",
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "RESEARCH",
+        "JOINT_TRANSNATIONAL_CALL",
+        "CALL_REGISTRY",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_OFFICIAL_JOINT_CALL_OPERATOR",
+      "authority_scope": "EXACT_JTC2027_LAUNCH_DISCOVERY_ONLY",
+      "observation_state": "OFFICIAL_LAUNCH_PAGE_READBACK_RAW_PENDING",
+      "extract": [
+        "16_nov_2026_call_launch_page_readback",
+        "fifth_jtc2027_workforce_theme_identity",
+        "exact_public_call_text_v1_and_epps_links_discovery",
+        "romanian_national_funder_2027_crosscheck",
+        "raw_epps_current_acceptance_and_national_annex_review_pending"
+      ],
+      "note": "17 November 2026 current readback: THCS operator has replaced its historical pre-announcement URL (now 404 in direct readback) with launched JTC 2027 page dated 16 November 2026, linking current call text, guidance and THCS2027 EPSS. This is a MATERIAL stage transition from previous PROGRAMMING_PIPELINE. UEFISCDI national page still links the superseded pre-announcement while national transnational index discovery lists THCS in open competitions. This descriptor is NOT an admitted OPEN_CALL: capture exact original HTML, final URL, fetched_at UTC, SHA-256, parser_version, run_id, immutable handoff; reconcile exact THCS2027 EPSS acceptance, official call text Annex 1.24 Romania and current national package before canon/publication/alerts. No deadline, amount, eligibility or OPEN_CALL promotion here."
+    },
+    {
+      "id": "SRC-EU-THCS-JTC2027-CALL-TEXT-V1",
+      "tier": "T1",
+      "programmes": [
+        "Horizon Europe / THCS Joint Transnational Call 2027"
+      ],
+      "programme_family": "Horizon Europe / THCS Joint Transnational Call 2027",
+      "exact_call_identifier_discovery": "THCS2027 / fifth JTC 2027",
+      "readback_date_discovery": "2026-11-17",
+      "material_fact_use": false,
+      "credentials_required": false,
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "adapter_required": "THCS_JTC2027_LAUNCHED_CALL_ORIGINALS_EPSS_NATIONAL_RECONCILE_V1",
+      "class": "official_thcs_joint_call_text_exact_pdf_v1",
+      "owner": "European Partnership THCS / JTC2027 original call-text publisher",
+      "url": "https://www.thcspartnership.eu/kdocs/2254775/thcs-jtc-2027-call-text-v1.0-02.pdf",
+      "paired_official_source_id": "SRC-EU-THCS-JTC2027-LAUNCH",
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "RESEARCH",
+        "JOINT_TRANSNATIONAL_CALL",
+        "CALL_DOCUMENT",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_OFFICIAL_JOINT_CALL_TEXT",
+      "authority_scope": "EXACT_JTC2027_CALL_TEXT_DISCOVERY_ONLY",
+      "observation_state": "OFFICIAL_CALL_TEXT_2026_11_16_V1_PDF_RAW_PENDING",
+      "extract": [
+        "joint_transnational_call_2027_version_1_0",
+        "16_nov_2026_publication_and_preproposal_stage_readback",
+        "annex_1_24_romania_uefiscdi_present_but_not_reconciled",
+        "national_eligibility_and_budget_require_original_pdf_replay",
+        "exact_epps_thcs2027_login_portal_required"
+      ],
+      "note": "Official THCS JTC2027 call text PDF Version 1.0 dated 16 November 2026; cover shows 21 Jan 2027 14:00 CET pre-proposal and 24 Jun 2027 14:00 CEST full-proposal timeline, and printed Annex I section 1.24 Romania UEFISCDI (PDF page 94/123) contains national conditions. These are source discovery readbacks ONLY, not trusted canonical facts until original PDF bytes/hash, parser_version, run_id, fetched_at UTC and immutable evidence replay; national package and eligibility reviewed separately. Paired launch page and EPSS live submission route remain distinct. NO OPEN_CALL, deadline, funding, eligibility, publication or distribution from this descriptor."
+    },
+    {
+      "id": "SRC-EU-THCS-JTC2027-EPSS-EXACT",
+      "tier": "T1",
+      "programmes": [
+        "Horizon Europe / THCS Joint Transnational Call 2027"
+      ],
+      "programme_family": "Horizon Europe / THCS Joint Transnational Call 2027",
+      "exact_call_identifier_discovery": "THCS2027 / fifth JTC 2027",
+      "readback_date_discovery": "2026-11-17",
+      "material_fact_use": false,
+      "credentials_required": false,
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "adapter_required": "THCS_JTC2027_LAUNCHED_CALL_ORIGINALS_EPSS_NATIONAL_RECONCILE_V1",
+      "class": "official_thcs_joint_call_exact_epps_public_gateway",
+      "owner": "THCS Joint Call Secretariat / EPSS delegated application gateway",
+      "url": "https://epss.proposals.ee/thcs/2027",
+      "paired_official_source_id": "SRC-EU-THCS-JTC2027-LAUNCH",
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "RESEARCH",
+        "JOINT_TRANSNATIONAL_CALL",
+        "SUBMISSION_ENDPOINT",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_DELEGATED_JOINT_CALL_SUBMISSION_GATEWAY",
+      "authority_scope": "EXACT_THCS2027_PUBLIC_LOGIN_DISCOVERY_ONLY",
+      "observation_state": "THCS2027_EPSS_EXACT_LOGIN_VISIBLE_ACCEPTANCE_UNVERIFIED_RAW_PENDING",
+      "extract": [
+        "exact_thcs2027_public_epps_landing_heading",
+        "fifth_joint_transnational_call_theme_match",
+        "2026_and_2025_epps_rows_distinct",
+        "auth_required_submission_transaction_unverified"
+      ],
+      "note": "THCS operator's electronic submission system navigates to https://epss.proposals.ee/thcs/ and its Select Call 2027 resolves to the exact /thcs/2027 public login surface. The heading explicitly says Fifth Joint Transnational Call - THCS2027; this is not proof that a signed-in applicant can submit or that the 2027 transaction is currently enabled. Do not conflate with THCS 2026/2025. Acquire strict-TLS original HTML, final URL, fetched_at UTC, SHA-256, parser_version, run_id, immutable handoff, and reconcile live authorized submission route and Romanian legal annex before promotion. NO OPEN_CALL, deadlines, eligibility, amounts or alerts."
     }
   ]
 }

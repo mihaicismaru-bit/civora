@@ -125,6 +125,48 @@ def test():
         linked = Path(tmp) / "symlink"
         linked.symlink_to(folder, target_is_directory=True)
         reject(lambda: mod.replay(linked), "symlinked")
+    # 17 Nov 2026 exact live stage: operator JTC2027 call and EPSS exist,
+    # but this registry is evidence only; legacy pre-announcement is NOT open.
+    import urllib.parse
+    registry = json.loads(core.REGISTRY.read_text(encoding="utf-8"))
+    by_id = {r["id"]: r for r in registry["sources"]}
+    launched = "SRC-EU-THCS-JTC2027-LAUNCH"
+    call_text = "SRC-EU-THCS-JTC2027-CALL-TEXT-V1"
+    epss = "SRC-EU-THCS-JTC2027-EPSS-EXACT"
+    expected_urls = {
+        launched: "https://www.thcspartnership.eu/funding/jtc-2027.kl",
+        call_text: "https://www.thcspartnership.eu/kdocs/2254775/thcs-jtc-2027-call-text-v1.0-02.pdf",
+        epss: "https://epss.proposals.ee/thcs/2027",
+    }
+    for sid, url in expected_urls.items():
+        r = by_id[sid]
+        assert r["url"] == url
+        assert urllib.parse.urlsplit(url).scheme == "https"
+        assert r["exact_call_identifier_discovery"] == "THCS2027 / fifth JTC 2027"
+        assert r["programme_family"] == "Horizon Europe / THCS Joint Transnational Call 2027"
+        assert r["readback_date_discovery"] == "2026-11-17"
+        assert r["authority_scope"].endswith("DISCOVERY_ONLY")
+        assert r["observation_state"] != "OPEN_CALL"
+        for gate in ("material_fact_use", "open_call_authorized", "material_fact_publication_authorized"):
+            assert r[gate] is False
+        assert "RAW_PENDING" in r["observation_state"]
+    assert by_id[launched]["paired_official_source_id"] == "SRC-RO-UEFISCDI-THCS-2027"
+    assert by_id[launched]["supersedes_preannouncement_source_id"] == "SRC-EU-THCS-2027-PREANNOUNCEMENT"
+    assert by_id["SRC-EU-THCS-2027-PREANNOUNCEMENT"]["observation_state"] == "PROGRAMMING_PIPELINE"
+    assert by_id["SRC-RO-UEFISCDI-THCS-2027"]["observation_state"] == "PROGRAMMING_PIPELINE"
+    assert "Annex 1.24 Romania" in by_id[call_text]["note"]
+    assert "EPSS" in by_id[epss]["note"]
+    # UEFISCDI index moved the 2027 edition into OPEN; do not let the
+    # old planned-only raw extractor silently accept this as either stage.
+    moved = RAW.decode().replace(
+        "<li>Transforming Health and Care Systems (THCS) Lansare: 16 Noiembrie 2026</li>", ""
+    ).replace("<li>ERA4Health IICS4all 2027</li>",
+              "<li>ERA4Health IICS4all 2027</li><li>Transforming Health and Care Systems (THCS)</li>").encode()
+    reject(lambda: mod.validate_html(moved, MIME), "outside planned lifecycle")
+    moved_manifest = mod.build(moved, MIME, stamp, "THCS-JTC2027-NATIONAL-INDEX-TRANSITION")
+    assert moved_manifest["source_identity_verified"] is False
+    assert moved_manifest["observation_state"] == "NATIONAL_INDEX_RAW_QUARANTINED"
+    assert all(moved_manifest[k] is False for k in mod.OFF)
     print("PASS UEFISCDI exact planned index raw/replay; detail quarantine preserved")
 
 
