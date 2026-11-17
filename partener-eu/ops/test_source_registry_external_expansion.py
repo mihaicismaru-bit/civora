@@ -2057,13 +2057,13 @@ def main():
     expected_if26 = {
         "tier": "T1",
         "authority_class": "T1_OFFICIAL_CINEA_COMMISSION_CALL_PROGRAMMING_ANNOUNCEMENT",
-        "authority_scope": "IF26_FIVE_PLANNED_CALL_FAMILIES_DECEMBER_2026_PROGRAMMING_ONLY",
-        "observation_state": "PROGRAMMING_PIPELINE_OFFICIAL_2026_11_17_DECEMBER_03_PLANNED_FIVE_CALLS_RAW_PENDING",
+        "authority_scope": "PROGRAMMING_FRAMEWORK",
+        "observation_state": "PROGRAMMING_PIPELINE",
         "programme_family": "Innovation Fund / IF26 planned grant calls and auctions / December 2026",
         "adapter_required": "IF26_DECEMBER_2026_CALL_IDENTIFIERS_FT_ORIGINALS_RECONCILE_V1",
         "readback_date_discovery": "2026-11-17",
         "event_date_discovery": "2026-11-17",
-        "programmes": ["EU Innovation Fund"],
+        "programmes": ["Innovation Fund / IF26 planned grant calls and auctions / December 2026"],
     }
     for key, expected in expected_if26.items():
         if if26.get(key) != expected:
