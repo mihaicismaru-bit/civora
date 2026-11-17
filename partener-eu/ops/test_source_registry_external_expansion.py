@@ -1599,6 +1599,77 @@ def main():
     )):
         fail("AFIR energy source must explicitly distinguish scheduled from current status")
 
+    # AFIR's 30-Oct dated press notice supplies application-demand intelligence
+    # for TWO distinct public-energy calls; historical demand is never proof
+    # of current intake status, awards or exact gateway availability.
+    demand_id = "SRC-RO-AFIR-ENERGY-PUBLIC-INTAKE-20261030"
+    demand = by_id.get(demand_id)
+    if demand is None:
+        fail("missing AFIR 30-Oct public energy application-demand source")
+    if demand.get("url") != (
+        "https://www.afir.ro/info-la-zi/"
+        "peste-760-de-milioane-solicitate-de-entit%C4%83%C8%9Bile-publice-"
+        "pentru-producerea-%C8%99i-stocarea-energiei-regenerabile/"
+    ):
+        fail("AFIR energy-demand primary official URL drift")
+    expected_demand = {
+        "tier": "T1",
+        "authority_class": "T1_OFFICIAL_AGENCY",
+        "authority_scope": "TWO_DISTINCT_CALLS_HISTORICAL_SUBMISSION_DEMAND_INTELLIGENCE_ONLY",
+        "observation_state": "HISTORICAL_SUBMISSION_VOLUME_DISCOVERED_RAW_PENDING",
+        "event_date_discovery": "2026-10-30",
+        "paired_official_source_id": "SRC-RO-AFIR-ENERGY-PUBLIC-20260917",
+        "adapter_required": "AFIR_ENERGY_2026_APPLICATION_VOLUME_RAW_RECONCILE_V1",
+        "material_fact_use": False,
+        "open_call_authorized": False,
+        "material_fact_publication_authorized": False,
+        "call_identifiers_verified": False,
+        "current_application_endpoints_verified": False,
+    }
+    if any(demand.get(key) != value for key, value in expected_demand.items()):
+        fail("AFIR energy-demand identity, source authority or negative gate drift")
+    if not {"ROMANIA", "AFIR", "ENERGY", "DISCOVERY"}.issubset(
+            set(demand.get("source_families") or [])):
+        fail("AFIR energy-demand provenance taxonomy missing")
+    disallowed = {
+        "status", "call_status", "deadline", "close_at", "open_at", "budget",
+        "eligibility", "submission_endpoint", "raw_sha256", "semantic_sha256",
+        "fetched_at", "parser_version", "run_id", "handoff_sha256",
+    }
+    if disallowed.intersection(demand):
+        fail("AFIR energy-demand discovery invented live material fact or raw receipt")
+    demand_obs = demand.get("discovery_only_submission_observation") or {}
+    if demand_obs.get("as_of_date") != "2026-10-30":
+        fail("AFIR demand as-of date cannot be replaced by the execution date")
+    solar = demand_obs.get("solar_with_integrated_storage") or {}
+    storage = demand_obs.get("standalone_storage") or {}
+    if (solar.get("submitted_applications"), solar.get("requested_eur"),
+            solar.get("announced_allocation_eur")) != (1520, 448675448, 500000000):
+        fail("AFIR solar demand/allocation changed without official raw reconciliation")
+    if (storage.get("submitted_applications"), storage.get("requested_eur"),
+            storage.get("announced_allocation_eur")) != (925, 311690380, 150000000):
+        fail("AFIR independent storage demand/allocation changed without raw reconciliation")
+    if demand_obs.get("total_submitted_applications") != 2445 or (
+            demand_obs.get("total_requested_eur") != 760365828 or
+            demand_obs.get("aggregate_announced_allocations_eur") != 650000000):
+        fail("AFIR aggregate demand is not grounded to the 30-Oct authority")
+    if (solar["submitted_applications"] + storage["submitted_applications"] !=
+            demand_obs["total_submitted_applications"] or
+            solar["requested_eur"] + storage["requested_eur"] !=
+            demand_obs["total_requested_eur"] or
+            solar["announced_allocation_eur"] + storage["announced_allocation_eur"] !=
+            demand_obs["aggregate_announced_allocations_eur"]):
+        fail("AFIR per-call submission/allocations arithmetic mismatch")
+    if demand_obs.get("raw_receipt_state") != "NOT_CAPTURED" or (
+            demand_obs.get("observation_kind") !=
+            "DEMAND_ONLY_NOT_APPROVAL_OR_LIVE_OPEN_STATUS"):
+        fail("AFIR demand metadata fabricated immutable receipt or grants awarded")
+    note = (demand.get("note") or "").lower()
+    if not all(token in note for token in (
+            "two distinct", "not prove current open_call", "not approved grants",
+            "not_capture", "no open_call", "solar allocation itself")):
+        fail("AFIR demand market-intelligence evidence and fail-closed caveats missing")
+
     validate_thcs_2027_preannouncement(by_id, programme_domains)
     validate_impact_lot3_pair(by_id)
     validate_water4all_2026_pair(by_id)
