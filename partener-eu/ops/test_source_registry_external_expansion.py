@@ -1946,7 +1946,7 @@ def main():
     if (eit_stem_operator["id"] == eit_stem_ncp["id"] or
             eit_stem_pdf["url"] == eit_stem_operator["url"] or
             eit_stem_operator["programme_family"] ==
-            by_id["SRC-EU-EIT-HEI-2026-EXACT-CALL"]["programme_family"]):
+            by_id["SRC-EU-EIT-HEI-2026-EXACT-CALL"].get("programme_family", "")):
         fail("EIT STEM Talent 2026 incorrectly aliased to EIT HEI or its NCP")
     if not ("1700_cet" in " ".join(eit_stem_pdf["extract"]) and
             "0000_cet" in " ".join(eit_stem_ncp["extract"])):
