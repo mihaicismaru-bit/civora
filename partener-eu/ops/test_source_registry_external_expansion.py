@@ -2170,8 +2170,10 @@ def main():
         fail("Cluster 5 future-topic official source missing")
     if cl5.get("url") != "https://research-and-innovation.ec.europa.eu/strategy/strategy-research-and-innovation/europe-world/international-cooperation/regional-dialogues-and-international-organisations/eu-africa-cooperation/partnership-climate-change-and-sustainable-energy-ccse_en":
         fail("Cluster 5 Commission official source URL drift")
-    if cl5.get("observation_state") != "OFFICIAL_EC_FUTURE_TOPIC_SCHEDULE_SEARCH_INDEX_READBACK_RAW_PENDING":
+    if cl5.get("observation_state") != "PROGRAMMING_PIPELINE":
         fail("Cluster 5 search-index readback wrong state")
+    if cl5.get("index_readback_state_discovery") != "OFFICIAL_EC_FUTURE_TOPIC_SCHEDULE_SEARCH_INDEX_READBACK_RAW_PENDING":
+        fail("Cluster 5 original-unacquired index readback warning lost")
     if cl5.get("authority_scope") != "PROGRAMMING_AND_FUTURE_TOPIC_SCHEDULE_ONLY":
         fail("Cluster 5 programming authority scope expanded")
     if cl5.get("adapter_required") != "HORIZON_CL5_2027_EXACT_TOPIC_FT_CURRENT_GATEWAY_RECONCILE_V1":
