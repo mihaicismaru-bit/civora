@@ -1682,6 +1682,26 @@ def main():
     if "dedicated" not in direct_rule or "programme-specific" not in direct_rule or "call index" not in direct_rule:
         fail("direct funding policy must require programme-specific dedicated exact-call/action evidence and keep indexes/guides non-authorizing")
 
+
+    # HaDEA agency reference drops a separator relative to the actual F&T topic URL.
+    # A coarse agency "Open" label must never resolve exact F&T submission status.
+    hadea = by_id.get("SRC-EU-HADEA-CL4-2027-PHOTONICS-ID-WITNESS") or {}
+    ft_photonics = by_id.get("SRC-EU-HORIZON-CL4-2027-PHOTONICS-FORTHCOMING") or {}
+    if not hadea or not ft_photonics:
+        fail("HaDEA photonics identity witness and exact F&T topic source must be paired")
+    if hadea.get("paired_official_source_id") != ft_photonics.get("id"):
+        fail("HaDEA witness lost exact F&T pairing")
+    if hadea.get("displayed_reference_discovery") == hadea.get("ft_exact_topic_identifier_discovery"):
+        fail("HaDEA display-id separator drift no longer exposed for reconciliation")
+    if hadea.get("ft_exact_topic_identifier_discovery") != ft_photonics.get("topic_identifier_discovery"):
+        fail("HaDEA witness silently rewrote F&T exact topic identifier")
+    if (hadea.get("material_fact_use") is not False or
+            hadea.get("open_call_authorized") is not False or
+            hadea.get("material_fact_publication_authorized") is not False or
+            hadea.get("status_display_is_current_call_authority") is not False or
+            hadea.get("observation_state") != "AGENCY_REFERENCE_FORMAT_AND_STATUS_WITNESS_RAW_PENDING"):
+        fail("HaDEA readback cannot authorize OPEN_CALL or material publication")
+
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
