@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Regression: a HaDEA topic-ID typo is not an OPEN_CALL admission receipt.
+"""Regression for the existing HaDEA/FT photonics exact topic ID witnesses.
 
-On the 17 November 2026 CL4 digital launch, HaDEA's photonics detail page
-omitted a hyphen in the displayed identifier; its EU Funding & Tenders link
-and the official FT index use the hyphenated exact identifier. Discovery
-witnesses must remain non-authorizing until original immutable receipts
-and live application-route reconciliation are available.
+HaDEA displays HORIZON-CL4-2027-05-DIGITALEMERGING-03 whereas the linked
+Funding & Tenders topic identifier has DIGITAL-EMERGING-03. An earlier indexed
+FT 'Forthcoming' label and the HaDEA 'Open' badge are NOT synchronous current
+call evidence. Neither source alone authorizes OPEN_CALL.
 """
 import copy
 import json
@@ -13,10 +12,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 REGISTRY = Path(__file__).resolve().parents[1] / "ingest" / "source_registry.json"
-HADEA = "SRC-EU-HADEA-CL4-2027-05-PHOTONICS-IDENTITY-CONFLICT"
-FT = "SRC-EU-FT-CL4-2027-05-PHOTONICS-EXACT-TOPIC-WITNESS"
-TRUE_ID = "HORIZON-CL4-2027-05-DIGITAL-EMERGING-03"
-HADEA_PRINTED_ID = "HORIZON-CL4-2027-05-DIGITALEMERGING-03"
+HADEA = "SRC-EU-HADEA-CL4-2027-PHOTONICS-ID-WITNESS"
+FT = "SRC-EU-HORIZON-CL4-2027-PHOTONICS-FORTHCOMING"
+FT_ID = "HORIZON-CL4-2027-05-DIGITAL-EMERGING-03"
+HADEA_ID = "HORIZON-CL4-2027-05-DIGITALEMERGING-03"
 
 
 def validate(rows):
@@ -24,27 +23,31 @@ def validate(rows):
     assert len([x for x in rows if x.get("id") == FT]) == 1
     by_id = {x["id"]: x for x in rows}
     h, f = by_id[HADEA], by_id[FT]
-    assert h["exact_identifier_observed"] == HADEA_PRINTED_ID
-    assert f["exact_identifier_observed"] == TRUE_ID
-    assert HADEA_PRINTED_ID != TRUE_ID
+    assert h["displayed_reference_discovery"] == HADEA_ID
+    assert h["ft_exact_topic_identifier_discovery"] == FT_ID
+    assert f["topic_identifier_discovery"] == FT_ID
+    assert HADEA_ID != FT_ID
     assert h["paired_official_source_id"] == FT
-    assert f["paired_official_source_id"] == HADEA
+    assert h["linked_ft_topic_url"] == f["url"]
     assert urlparse(h["url"]).hostname == "hadea.ec.europa.eu"
     assert urlparse(f["url"]).hostname == "ec.europa.eu"
-    assert TRUE_ID in urlparse(f["url"]).path
-    assert HADEA_PRINTED_ID not in urlparse(f["url"]).path
+    assert FT_ID in urlparse(f["url"]).path
+    assert HADEA_ID not in urlparse(f["url"]).path
+    assert h["tier"] == "T1B" and f["tier"] == "T1"
+    assert h["status_display_discovery"] == "Open"
+    assert h["status_display_is_current_call_authority"] is False
+    assert f["observation_state"] == "FORTHCOMING_EXACT_TOPIC_DISCOVERED_RAW_PENDING"
+    assert h["observation_state"] == "AGENCY_REFERENCE_FORMAT_AND_STATUS_WITNESS_RAW_PENDING"
     for source in (h, f):
-        assert source["tier"] == "T1"
         assert source["material_fact_use"] is False
         assert source["open_call_authorized"] is False
         assert source["material_fact_publication_authorized"] is False
-        assert source["observation_state"].endswith("_RAW_PENDING")
         assert source["authority_scope"]
-        assert "source_families" in source and "EU_DIRECT" in source["source_families"]
-        assert "NOT_CAPTURED" in source["note"]
-        assert "run_id" in source["note"]
-        assert "parser_version" in source["note"]
-        assert "SHA-256" in source["note"]
+        assert "EU_DIRECT" in source["source_families"]
+        note = source["note"].lower()
+        for missing_receipt in ("sha-256", "fetched_at", "parser_version", "run_id"):
+            assert missing_receipt in note, (source["id"], missing_receipt)
+        assert "reconciliation" in note
     assert by_id["SRC-EU-DGCONNECT-HORIZON-CL4-2027-DIGITAL-LAUNCH-20261117"]["open_call_authorized"] is False
 
 
@@ -61,7 +64,7 @@ def main():
                 pass
             else:
                 raise AssertionError(f"unsafe {identifier}.{gate} mutation accepted")
-    print("PASS photonics HaDEA/FT exact-ID conflict: discovery only, fail-closed with mutation controls")
+    print("PASS existing HaDEA/FT photonics witnesses: ID alias and status promotion remain fail-closed")
 
 
 if __name__ == "__main__":
