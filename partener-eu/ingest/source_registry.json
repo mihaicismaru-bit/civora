@@ -808,6 +808,44 @@
       "note": "Official AM dated 09.11.2026 announces Corrigendum 2 for Action 4.1 (urban mobility in municipalities), affecting Annex 19 financing contract conditions. Search/index readback only; original notice and annex raw bytes, official exact-action endpoint, MySMIS exact identifier, current call lifecycle and semantic reconciliation are pending. Does not imply a call extension, OPEN_CALL, changed deadline, budget, eligibility or publication authorization."
     },
     {
+      "id": "SRC-PR-CENTRU-REGENERATION-81-EXACT-ACTION-20261109",
+      "tier": "T1",
+      "class": "official_regional_exact_action_discovery",
+      "owner": "ADR Centru / Autoritatea de Management Programul Regiunea Centru",
+      "url": "https://www.regiocentru.ro/actiuni/8-1dezvoltare-urbana-integrata-prin-regenerarea-spatiilor-publice-punerea-in-valoare-a-patrimoniului-infrastructurii-culturale-si-a-potentialului-turistic-din-municipiile-regiunii-centru-a/",
+      "programme_family": "Programul Regiunea Centru 2021-2027",
+      "programmes": [
+        "Programul Regiunea Centru 2021-2027"
+      ],
+      "extract": [
+        "exact_action_endpoint_discovery",
+        "mysmis_identifier_discovery",
+        "guide_and_corrigenda_discovery",
+        "official_submission_window_candidate"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "ROMANIA",
+        "ADR",
+        "CALL_REGISTRY",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_REGIONAL_MANAGING_AUTHORITY",
+      "authority_scope": "EXACT_ACTION_DISCOVERY_ONLY",
+      "observation_state": "EXACT_ACTION_DISCOVERED_RAW_PENDING",
+      "event_date_discovery": "2026-11-09",
+      "action_identifier_discovery": "8.1",
+      "mysmis_identifier_discovery_hint": "PRC/1204/PRC_P8/OP5/RSO5.1/PRC_A44",
+      "paired_official_source_id": "SRC-PR-CENTRU-REGENERATION-81-CORRIGENDUM2-20261109",
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "adapter_required": "REGIOCENTRU_EXACT_ACTION_RECONCILE_V1",
+      "jurisdiction": "Regiunea Centru",
+      "freshness_hours": 24,
+      "note": "The AM official Action 8.1 exact page was indexed with MySMIS PRC/1204/PRC_P8/OP5/RSO5.1/PRC_A44 and a 20 August to 21 December 2026 submission window candidate; page updated 9 November 2026. The separate 9 November Corrigendum 2 changes Annex 17 contract conditions, not proof of deadline extension or current OPEN_CALL. Direct official action-page readback returned HTTP 403. Discovery/index readback is NOT immutable original receipt: requested/final URL, fetched_at, raw SHA-256, parser_version, run_id, guide bytes and exact live MySMIS status are pending acquisition and semantic reconciliation. NO OPEN_CALL, budget, eligibility, deadline, publishing or distribution authorization."
+    },
+    {
       "id": "SRC-PR-CENTRU-REGENERATION-81-CORRIGENDUM2-20261109",
       "tier": "T1",
       "class": "official_regional_guide_corrigendum_notice",

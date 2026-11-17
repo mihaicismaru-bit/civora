@@ -1105,6 +1105,44 @@ def main():
             "https://www.regiocentru.ro/sesiune-online-de-informare-privind-apelurile-de-proiecte-aferente-interventiei-1-4-3-cresterea-competitivitatii-imm-din-cadrul-iti/"):
         fail("ITI 1.4.3 lost official November information event crosscheck")
 
+    # 9 Nov ADR Centru 8.1 exact-action page is paired with the already
+    # staged Annex 17 corrigendum, not promoted from an indexed window to OPEN.
+    regen_id = "SRC-PR-CENTRU-REGENERATION-81-EXACT-ACTION-20261109"
+    regen = by_id.get(regen_id)
+    if regen is None:
+        fail("missing ADR Centru 8.1 exact MySMIS action discovery")
+    regen_expected = {
+        "tier": "T1",
+        "url": "https://www.regiocentru.ro/actiuni/8-1dezvoltare-urbana-integrata-prin-regenerarea-spatiilor-publice-punerea-in-valoare-a-patrimoniului-infrastructurii-culturale-si-a-potentialului-turistic-din-municipiile-regiunii-centru-a/",
+        "authority_class": "T1_REGIONAL_MANAGING_AUTHORITY",
+        "authority_scope": "EXACT_ACTION_DISCOVERY_ONLY",
+        "observation_state": "EXACT_ACTION_DISCOVERED_RAW_PENDING",
+        "event_date_discovery": "2026-11-09",
+        "mysmis_identifier_discovery_hint": "PRC/1204/PRC_P8/OP5/RSO5.1/PRC_A44",
+        "paired_official_source_id": "SRC-PR-CENTRU-REGENERATION-81-CORRIGENDUM2-20261109",
+        "adapter_required": "REGIOCENTRU_EXACT_ACTION_RECONCILE_V1",
+        "open_call_authorized": False,
+        "material_fact_publication_authorized": False,
+        "material_fact_use": False,
+    }
+    if any(regen.get(key) != expected for key, expected in regen_expected.items()):
+        fail("ADR Centru 8.1 exact-action source identity/negative promotion gate changed")
+    if not {"ROMANIA", "ADR", "CALL_REGISTRY", "DISCOVERY"}.issubset(
+            set(regen.get("source_families") or [])):
+        fail("ADR Centru 8.1 source taxonomy incomplete")
+    forbidden = {
+        "status", "call_status", "deadline", "budget", "eligibility",
+        "fetched_at", "raw_sha256", "parser_version", "run_id",
+        "submission_endpoint", "last_verified_open",
+    }
+    if forbidden.intersection(regen):
+        fail("ADR Centru 8.1 discovery fabricated material facts or raw provenance")
+    if by_id[regen["paired_official_source_id"]].get("action_identifier_discovery") != "8.1":
+        fail("ADR Centru 8.1 pairing points to a different action")
+    if not all(word in (regen.get("note") or "") for word in
+               ("HTTP 403", "Annex 17", "MySMIS", "NO OPEN_CALL", "SHA-256")):
+        fail("ADR Centru 8.1 current-status/raw-acquisition hold lost")
+
     # PR Centru 3.3 municipal exact action + Annex 17 corrigendum: official
     # indexed readback is discovery, not immutable acquisition or OPEN_CALL.
     green_blue_pair = {
