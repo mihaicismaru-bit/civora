@@ -2042,6 +2042,68 @@ def main():
     if national.get("authority_class") != "T1B_ROMANIAN_NCP_INFORMATION_NOT_FUNDER":
         fail("UEFISCDI EIT NEB information was falsely upgraded to Romanian operator")
 
+    # IF26_FIVE_PLANNED_CALLS_FAIL_CLOSED: official CINEA 17 Nov 2026 news
+    # only announces five calls PLANNED for 3 Dec (three grants, two
+    # auctions). Neither the Info Days nor a programme envelope opens them.
+    if26_id = "SRC-EU-CINEA-IF26-20261117-FIVE-PLANNED-CALLS"
+    if26 = by_id.get(if26_id)
+    if not if26:
+        fail("CINEA IF26 17 November five-call programming witness missing")
+    if if26.get("url") != (
+        "https://cinea.ec.europa.eu/news-events/news/"
+        "registrations-open-innovation-fund-2026-info-days-2026-11-17_en"
+    ):
+        fail("IF26 exact official news endpoint lost")
+    expected_if26 = {
+        "tier": "T1",
+        "authority_class": "T1_OFFICIAL_CINEA_COMMISSION_CALL_PROGRAMMING_ANNOUNCEMENT",
+        "authority_scope": "IF26_FIVE_PLANNED_CALL_FAMILIES_DECEMBER_2026_PROGRAMMING_ONLY",
+        "observation_state": "OFFICIAL_2026_11_17_DECEMBER_03_PLANNED_FIVE_CALLS_RAW_PENDING",
+        "programme_family": "Innovation Fund / IF26 planned grant calls and auctions / December 2026",
+        "adapter_required": "IF26_DECEMBER_2026_CALL_IDENTIFIERS_FT_ORIGINALS_RECONCILE_V1",
+        "readback_date_discovery": "2026-11-17",
+        "event_date_discovery": "2026-11-17",
+        "programmes": ["EU Innovation Fund"],
+    }
+    for key, expected in expected_if26.items():
+        if if26.get(key) != expected:
+            fail(f"IF26 programming date/authority/adapter drift: {key}")
+    if not {"EU_DIRECT", "BRUSSELS", "INNOVATION_FUND",
+            "PROGRAMMING_PIPELINE", "DISCOVERY"}.issubset(
+                set(if26.get("source_families") or [])):
+        fail("IF26 is programming-only; call family taxonomy missing")
+    if "CALL_REGISTRY" in (if26.get("source_families") or []):
+        fail("IF26 planned call families conflated with a live call registry")
+    for key in ("material_fact_use", "credentials_required", "open_call_authorized",
+                "material_fact_publication_authorized"):
+        if if26.get(key) is not False:
+            fail(f"IF26 planning announcement illegally authorizes OPEN_CALL: {key}")
+    forbidden_if26 = {
+        "status", "call_status", "open_at", "close_at", "deadline",
+        "application_deadline", "budget", "budget_eur", "eligibility",
+        "exact_call_identifier", "exact_topic_identifier", "submission_endpoint",
+        "fetched_at", "fetched_at_utc", "final_url", "raw_sha256",
+        "semantic_sha256", "parser_version", "run_id", "handoff_sha256",
+        "last_verified_open",
+    }
+    if forbidden_if26.intersection(if26):
+        fail("IF26 programme announcement fabricated call facts or raw receipt")
+    notes = (if26.get("note") or "").lower()
+    if not all(token in notes for token in (
+            "plans", "3 december 2026", "five", "three grants",
+            "two auctions", "up to eur 5.2 billion", "not_captured",
+            "no open_call", "immutable")):
+        fail("IF26 planned rather than open/five distinct calls distinction lost")
+    extracts = set(if26.get("extract") or [])
+    if not {
+        "three_planned_grants_net_zero_sme_maritime_distinct",
+        "two_planned_auctions_hydrogen_industrial_heat_distinct",
+        "future_exact_funding_and_tenders_call_identifiers_missing",
+        "four_december_information_sessions_not_application_windows",
+        "up_to_5_2bn_eur_portfolio_envelope_not_per_call_award",
+    }.issubset(extracts):
+        fail("IF26 planned grant/auction/Info Day details promoted or conflated")
+
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
