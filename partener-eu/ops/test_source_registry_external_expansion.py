@@ -1873,6 +1873,97 @@ def main():
     if "expected_launch_date_not_current_open_status" not in nano_eu.get("extract", []):
         fail("ERA4Health expected launch date cannot authorize OPEN_CALL")
 
+
+    # EIT Community NEB 2027 has two DIFFERENT opportunities. The Enhance
+    # source is corroborated by a Romanian informational notice; the Catalyse
+    # accelerator is not an alternative name for Enhance. Neither registry
+    # witness carries immutable original receipts or publication authority.
+    # EIT_NEBS_2027_DISTINCT_DISCOVERY
+    eit_neb_2027 = {
+        "SRC-EU-EIT-NEB-ENHANCE-2027": (
+            "https://www.eit.europa.eu/our-activities/opportunities/enhance-neb-open-call-2027",
+            "T1", "Enhance NEB 2027",
+            "EIT Community New European Bauhaus / Enhance NEB 2027",
+            "ENHANCE_2027_EXACT_EDITION_DISCOVERY_ONLY",
+            "EIT_ENHANCE_2027_OFFICIAL_PAGE_READBACK_RAW_PENDING",
+            "SRC-RO-UEFISCDI-EIT-NEB-ENHANCE-2027",
+            "EIT_NEB_ENHANCE_2027_EXACT_EDITION_RAW_AND_SUBMISSION_RECONCILE_V1",
+            {"EU_DIRECT", "BRUSSELS", "EIT", "CALL_REGISTRY", "DISCOVERY"},
+        ),
+        "SRC-RO-UEFISCDI-EIT-NEB-ENHANCE-2027": (
+            "https://uefiscdi.gov.ro/news-apel-enhance-neb-2027",
+            "T1B", "Enhance NEB 2027",
+            "EIT Community New European Bauhaus / Enhance NEB 2027",
+            "ENHANCE_2027_ROMANIAN_INFORMATION_DISCOVERY_ONLY",
+            "UEFISCDI_ENHANCE_2027_NATIONAL_NEWS_READBACK_RAW_PENDING",
+            "SRC-EU-EIT-NEB-ENHANCE-2027",
+            "EIT_NEB_ENHANCE_2027_EXACT_EDITION_RAW_AND_SUBMISSION_RECONCILE_V1",
+            {"ROMANIA", "EU_DIRECT", "EIT", "CALL_REGISTRY", "DISCOVERY"},
+        ),
+        "SRC-EU-EIT-NEB-CATALYSE-2027": (
+            "https://www.eit.europa.eu/our-activities/opportunities/catalyse-neb-2027-open-call",
+            "T1", "Catalyse NEB 2027",
+            "EIT Community New European Bauhaus / Catalyse NEB 2027",
+            "CATALYSE_2027_EXACT_EDITION_DISCOVERY_ONLY",
+            "EIT_CATALYSE_2027_OFFICIAL_PAGE_READBACK_RAW_PENDING",
+            None,
+            "EIT_NEB_CATALYSE_2027_EXACT_EDITION_RAW_AND_SUBMISSION_RECONCILE_V1",
+            {"EU_DIRECT", "BRUSSELS", "EIT", "CALL_REGISTRY", "DISCOVERY"},
+        ),
+    }
+    for source_id, (url, tier, edition, family, scope, state, paired,
+                    adapter, families) in eit_neb_2027.items():
+        source = by_id.get(source_id)
+        if not source:
+            fail(f"EIT NEB 2027 official discovery source missing: {source_id}")
+        expected = {
+            "url": url, "tier": tier,
+            "exact_edition_identifier_discovery": edition,
+            "programme_family": family, "authority_scope": scope,
+            "observation_state": state, "adapter_required": adapter,
+            "readback_date_discovery": "2026-11-17",
+            "programmes": ["EU direct programmes"],
+        }
+        for key, value in expected.items():
+            if source.get(key) != value:
+                fail(f"{source_id}: official EIT edition or non-authorizing readback drift: {key}")
+        if source.get("paired_official_source_id") != paired:
+            fail(f"{source_id}: wrong paired information witness or identity alias")
+        if not families.issubset(set(source.get("source_families") or [])):
+            fail(f"{source_id}: missing EU/RO discovery taxonomy")
+        if "PROGRAMMING_PIPELINE" in (source.get("source_families") or []):
+            fail(f"{source_id}: application-opportunity discovery is not MFF programming")
+        if any(source.get(k) is not False for k in (
+                "material_fact_use", "credentials_required",
+                "open_call_authorized", "material_fact_publication_authorized")):
+            fail(f"{source_id}: unacquired readback illegally authorized a material call")
+        forbidden = {
+            "status", "call_status", "open_at", "close_at", "deadline",
+            "application_deadline", "budget", "budget_eur", "eligibility",
+            "submission_endpoint", "fetched_at", "fetched_at_utc",
+            "raw_sha256", "semantic_sha256", "parser_version", "run_id",
+            "handoff_sha256", "last_verified_open",
+        }
+        if forbidden.intersection(source):
+            fail(f"{source_id}: fabricated current call fields or immutable receipt")
+        note = (source.get("note") or "").lower()
+        if not all(token in note for token in (
+                "not_captured", "no open_call", "immutable", "2027")):
+            fail(f"{source_id}: raw-pending or no-OPEN provenance disclaimer missing")
+    enhance = by_id["SRC-EU-EIT-NEB-ENHANCE-2027"]
+    catalyse = by_id["SRC-EU-EIT-NEB-CATALYSE-2027"]
+    national = by_id["SRC-RO-UEFISCDI-EIT-NEB-ENHANCE-2027"]
+    if (enhance["programme_family"] == catalyse["programme_family"] or
+            enhance["exact_edition_identifier_discovery"] ==
+            catalyse["exact_edition_identifier_discovery"] or
+            catalyse.get("paired_official_source_id") == national["id"]):
+        fail("EIT NEB Catalyse startup track was aliased to restricted Enhance call")
+    if not ("17_november" in " ".join(enhance["extract"]) and
+            "15_january" in " ".join(catalyse["extract"])):
+        fail("EIT NEB edition-specific observed cutoff dates were conflated")
+    if national.get("authority_class") != "T1B_ROMANIAN_NCP_INFORMATION_NOT_FUNDER":
+        fail("UEFISCDI EIT NEB information was falsely upgraded to Romanian operator")
+
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
