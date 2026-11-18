@@ -35,6 +35,9 @@ EXPECTED = {
     "programme_envelope_eur_discovery": 50000000,
     "programme_envelope_scope": "PROGRAMME_TOTAL_NOT_CALL_OR_APPLICANT_GRANT",
     "official_organiser_event_listing_readback_date_discovery": "2026-11-18",
+    "event_agenda_url_discovery": "https://www.b2match.com/e/romania-green-business-innovation-programme/components/76255",
+    "event_agenda_authority_scope": "EVENT_HOSTED_SECONDARY_AGENDA_DISCOVERY_ONLY_NOT_OFFICIAL_CALL_ENDPOINT",
+    "event_agenda_session_discovery": "2026-11-18 11:30–13:00 Europe/Bucharest: Call 1 and Call 4 programme presentation only",
     "adapter_required": "INNOVATION_NORWAY_RO_GBI_PROGRAMME_LAUNCH_SURFACEMC_RAW_AND_EXACT_CALL_RECONCILE_V1",
 }
 
@@ -57,11 +60,13 @@ def validate(rows):
     required = {
         "norway_grants_2021_2028_programme_total_50_million_eur_not_call_allocation",
         "event_listing_describes_upcoming_calls_for_proposals_not_current_application_acceptance",
+        "event_hosted_agenda_lists_call_1_and_call_4_presentation_only_no_exact_authorized_submission_calls",
         "exact_future_call_identifiers_and_live_application_endpoints_not_yet_reconciled",
     }
     assert required <= set(row.get("extract") or [])
     note = row.get("note") or ""
     for token in ("18 November 2026", "50 million EUR", "UPCOMING",
+                  "Call 1", "Call 4", "b2match.com", "not an official call endpoint",
                   "NOT_CAPTURED", "final_url", "fetched_at UTC", "raw_sha256",
                   "parser_version", "run_id", "SURFACEMC", "LKG",
                   "OPEN_CALL", "NO MATERIAL PUBLICATION", "NO DISTRIBUTION", "NO ALERT"):
@@ -81,6 +86,9 @@ def main():
         ("programme_envelope_eur_discovery", 5000000),
         ("programme_envelope_scope", "CALL_BUDGET"),
         ("launch_event_date_discovery", "2026-11-17"),
+        ("event_agenda_url_discovery", "https://example.invalid/fake-open-call"),
+        ("event_agenda_authority_scope", "CURRENT_CALL_AUTHORITY"),
+        ("event_agenda_session_discovery", "Call 1 OPEN"),
         ("material_fact_use", True),
         ("open_call_authorized", True),
         ("material_fact_publication_authorized", True),
