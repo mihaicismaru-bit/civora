@@ -6,6 +6,7 @@ on:
       - 'partener-eu/ingest/source_registry.json'
       - 'partener-eu/ops/test_cl4_2027_photonics_topic_identity.py'
       - 'partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py'
+      - 'partener-eu/ops/test_interreg_2026_annual_programming.py'
       - 'partener-eu/ops/test_afir_email_advisory.py'
       - 'partener-eu/validation/discovery/afir-email-incident-20261113.json'
       - 'partener-eu/ingest/thcs_2027_national_index.py'
@@ -152,6 +153,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_p10_policy_regression.py
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
           python -m py_compile partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py
+          python -m py_compile partener-eu/ops/test_interreg_2026_annual_programming.py
           python -m py_compile partener-eu/ingest/pddtj_oi_discovery_acquire.py
           python -m py_compile partener-eu/ops/test_pddtj_oi_discovery_acquire.py
           python -m py_compile partener-eu/ops/test_interreg_rohu_pipeline_split.py
@@ -167,6 +169,9 @@ jobs:
 
       - name: Reject PoIDS 912 interim ETFC list OPEN or final-award promotion
         run: python partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py
+
+      - name: Reject Interact post-2027 event-as-OPEN and unacquired raw evidence
+        run: python partener-eu/ops/test_interreg_2026_annual_programming.py
 
       - name: Validate P10 and canonical source authority compatibility
         run: python partener-eu/ops/test_p10_policy_regression.py
