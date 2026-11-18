@@ -23,6 +23,7 @@ import re
 import shutil
 import unicodedata
 from pathlib import Path
+from zoneinfo import ZoneInfo
 from typing import Any
 from urllib.parse import urlparse
 from xml.sax.saxutils import escape as xml_escape
@@ -31,7 +32,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PRODUCTS = ROOT / "partener-eu" / "ingest" / "state" / "decision_products.json"
 DEFAULT_WEB = ROOT / "partener-eu" / "web"
 BASE_URL = "https://partener.eu"
-RO_TZ = dt.timezone(dt.timedelta(hours=3))
+RO_TZ = ZoneInfo("Europe/Bucharest")
 GENERATED_DIRS = ("finantari", "consultari", "dosare", "schimbari")
 
 STATUS_LABELS = {
@@ -122,6 +123,26 @@ def display_value(value: Any) -> str:
     return text
 
 
+def bucharest_datetime_utc(
+    year: int, month: int, day: int, hour: int, minute: int, second: int = 0
+) -> dt.datetime | None:
+    """Parse a local Romanian cutoff without guessing across DST transitions."""
+    try:
+        naive = dt.datetime(year, month, day, hour, minute, second)
+    except ValueError:
+        return None
+    first = naive.replace(tzinfo=RO_TZ, fold=0)
+    second_fold = naive.replace(tzinfo=RO_TZ, fold=1)
+    # 03:xx during October is ambiguous; 03:xx during March does not exist.
+    # Neither may authorize an OPEN badge without an explicit UTC offset.
+    if first.utcoffset() != second_fold.utcoffset():
+        return None
+    utc = first.astimezone(dt.timezone.utc)
+    if utc.astimezone(RO_TZ).replace(tzinfo=None) != naive:
+        return None
+    return utc
+
+
 def parse_date(value: Any) -> dt.datetime | None:
     raw = str(value or "").strip()
     if not raw:
@@ -132,6 +153,12 @@ def parse_date(value: Any) -> dt.datetime | None:
     try:
         parsed = dt.datetime.fromisoformat(raw.replace("Z", "+00:00"))
         if parsed.tzinfo is None:
+            # A zoneless ISO clock has no proven official timezone. Treating
+            # 2026-11-11T00:00 as UTC could extend a Romanian deadline by
+            # two or three hours. A date-only historical field retains the
+            # existing conservative behavior; a timestamp fails closed.
+            if "T" in raw.upper() or re.search(r"\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}", raw):
+                return None
             parsed = parsed.replace(tzinfo=dt.timezone.utc)
         return parsed.astimezone(dt.timezone.utc)
     except ValueError:
@@ -151,33 +178,123 @@ def parse_date(value: Any) -> dt.datetime | None:
         "noiembrie": 11,
         "decembrie": 12,
     }
+    # fold() deliberately erases punctuation for search, so it cannot parse
+    # official times such as '6 noiembrie 2026, ora 12:00'. Keep : and .
+    # while normalizing diacritics for the public lifecycle cutoff parser.
+    normalized = "".join(
+        ch for ch in unicodedata.normalize("NFKD", raw.lower())
+        if not unicodedata.combining(ch)
+    )
     match = re.search(
-        r"\b(\d{1,2})\s+(" + "|".join(months) + r")\s+(20\d{2})(?:\D+(\d{1,2}):(\d{2}))?",
-        lowered,
+        r"\b(\d{1,2})\s+(" + "|".join(months) + r")\s+(20\d{2})\b",
+        normalized,
     )
     if not match:
         return None
-    return dt.datetime(
-        int(match.group(3)),
-        months[match.group(2)],
-        int(match.group(1)),
-        int(match.group(4) or 23),
-        int(match.group(5) or 59),
-        tzinfo=RO_TZ,
-    ).astimezone(dt.timezone.utc)
+    year, month, day = int(match.group(3)), months[match.group(2)], int(match.group(1))
+    tail = normalized[match.end():]
+    timed = re.match(
+        r"^\s*,?\s*(?:(?:la\s+)?ora\s*|la\s+)?(\d{1,2})[:.](\d{2})(?::(\d{2}))?\b",
+        tail,
+    )
+    if timed:
+        return bucharest_datetime_utc(
+            year, month, day, int(timed.group(1)), int(timed.group(2)), int(timed.group(3) or 0)
+        )
+    # A stated but unparseable hour must never silently become EOD.
+    if re.match(r"^\s*,?\s*(?:(?:la\s+)?ora\b|(?:la\s+)?\d{1,2}[:.])", tail):
+        return None
+    return bucharest_datetime_utc(year, month, day, 23, 59, 59)
+
+def has_explicit_open_deadline_clock(value: Any) -> bool:
+    """A date-only observation is not an exact, actionable OPEN cutoff.
+
+    Preserve date-only values for historical context and consultations, but
+    do not turn them into an invented midnight/end-of-day application window.
+    ISO requires an explicit offset; Romanian dates require a stated local time.
+    The calendar validity and DST check remain in parse_date().
+    """
+    raw = str(value or "").strip()
+    if re.fullmatch(
+        r"20\d{2}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,6})?)?(?:Z|[+-]\d{2}:\d{2})",
+        raw, flags=re.I,
+    ):
+        return True
+    normalized = "".join(
+        ch for ch in unicodedata.normalize("NFKD", raw.lower())
+        if not unicodedata.combining(ch)
+    )
+    month = (
+        r"ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|"
+        r"septembrie|octombrie|noiembrie|decembrie"
+    )
+    romanian = re.search(r"\b\d{1,2}\s+(?:" + month + r")\s+20\d{2}\b(.*)", normalized)
+    if not romanian:
+        return False
+    return bool(re.match(
+        r"^\s*,?\s*(?:(?:la\s+)?ora\s*|la\s+)?\d{1,2}[:.]\d{2}(?::\d{2})?\b",
+        romanian.group(1),
+    ))
 
 
 def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
     if dossier.get("status") != "OPEN" or dossier.get("publicationState") != "PUBLISHABLE":
         return False
+    # Duplicate source claims cannot be reconciled by selecting the first row.
+    for label in ("status", "termen"):
+        rows = [r for r in dossier.get("quickFacts") or [] if fold(r.get("label")) == label]
+        if len(rows) != 1:
+            return False
     status = fact(dossier, "Status")
     deadline = fact(dossier, "Termen")
     if not status or str(status.get("confidence") or "").upper() != "CONFIRMED":
         return False
     if not deadline or str(deadline.get("confidence") or "").upper() != "CONFIRMED":
         return False
+    # Status must be semantically OPEN in the confirmed source fact too.
+    # A stale top-level OPEN cannot override a newer CONFIRMED CLOSED/REVIEW
+    # observation, even if the deadline still lies in the future.
+    if fold(status.get("value")) not in {"open", "deschis"}:
+        return False
+    if not has_explicit_open_deadline_clock(deadline.get("value")):
+        return False
     closes = parse_date(deadline.get("value"))
-    return closes is not None and closes >= clock
+    if closes is None or closes <= clock:
+        return False
+    # Fail closed when the explicitly observed opening is future-dated,
+    # duplicated, imprecise, or conflicts with a second opening field.
+    opening_rows = [r for r in dossier.get("quickFacts") or [] if fold(r.get("label")) == "deschidere"]
+    if len(opening_rows) > 1:
+        return False
+    if opening_rows and str(opening_rows[0].get("confidence") or "").upper() != "CONFIRMED":
+        return False
+    opening_values = [dossier[k] for k in ("openFrom", "opensAt", "openAt") if dossier.get(k) not in (None, "")]
+    if opening_rows:
+        opening_values.append(opening_rows[0].get("value"))
+    parsed_openings = []
+    for value in opening_values:
+        if not has_explicit_open_deadline_clock(value):
+            return False
+        when = parse_date(value)
+        if when is None or when > clock:
+            return False
+        parsed_openings.append(when)
+    if parsed_openings and any(when != parsed_openings[0] for when in parsed_openings):
+        return False
+    # Reject mismatched or unparseable top-level cutoffs rather than silently
+    # selecting the later one. The confirmed Termen remains the comparison
+    # anchor; this is a render-only hold, never a canonical CLOSED assertion.
+    for key in ("deadline", "closesAt", "closeAt"):
+        if dossier.get(key) not in (None, ""):
+            # A date-only competing field may parse to the same UTC instant
+            # as a precise midnight cutoff. Equality does not establish that
+            # its official hour was ever observed. Match the JS OPEN guard.
+            if not has_explicit_open_deadline_clock(dossier[key]):
+                return False
+            other = parse_date(dossier[key])
+            if other is None or other != closes:
+                return False
+    return True
 
 
 def requires_open_refresh(dossier: dict[str, Any], clock: dt.datetime) -> bool:
