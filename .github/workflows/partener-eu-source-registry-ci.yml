@@ -12,6 +12,7 @@ on:
       - 'partener-eu/ops/test_afir_dr36_guide_revision_discovery.py'
       - 'partener-eu/ops/test_eea_norway_gbi_programme_launch_discovery.py'
       - 'partener-eu/ops/test_mpf_maiedit_non_authorizing.py'
+      - 'partener-eu/ops/test_mpf_2026_official_operator_discovery.py'
       - 'partener-eu/ops/test_cinea_if26_planned_component_envelopes.py'
       - 'partener-eu/ops/test_interreg_2026_annual_programming.py'
       - 'partener-eu/ops/test_afir_email_advisory.py'
@@ -166,6 +167,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_afir_dr36_guide_revision_discovery.py
           python -m py_compile partener-eu/ops/test_eea_norway_gbi_programme_launch_discovery.py
           python -m py_compile partener-eu/ops/test_mpf_maiedit_non_authorizing.py
+          python -m py_compile partener-eu/ops/test_mpf_2026_official_operator_discovery.py
           python -m py_compile partener-eu/ops/test_cinea_if26_planned_component_envelopes.py
           python -m py_compile partener-eu/ops/test_interreg_2026_annual_programming.py
           python -m py_compile partener-eu/ingest/pddtj_oi_discovery_acquire.py
@@ -201,6 +203,9 @@ jobs:
 
       - name: Guard MAI MPF publish-edit provenance and event-only authority
         run: python partener-eu/ops/test_mpf_maiedit_non_authorizing.py
+
+      - name: Quarantine MPF 2026 operator rolling call public labels pending exact official application proof
+        run: python partener-eu/ops/test_mpf_2026_official_operator_discovery.py
 
       - name: Reject CINEA IF26 component envelopes as live OPEN call budgets
         run: python partener-eu/ops/test_cinea_if26_planned_component_envelopes.py
