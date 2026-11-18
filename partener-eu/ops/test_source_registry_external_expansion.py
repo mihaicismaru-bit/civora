@@ -2120,7 +2120,7 @@ def main():
         "observation_state": "PROGRAMMING_PIPELINE",
         "programme_family": "Innovation Fund / IF26 planned grant calls and auctions / December 2026",
         "adapter_required": "IF26_DECEMBER_2026_CALL_IDENTIFIERS_FT_ORIGINALS_RECONCILE_V1",
-        "readback_date_discovery": "2026-11-17",
+        "readback_date_discovery": "2026-11-18",
         "event_date_discovery": "2026-11-17",
         "programmes": ["Innovation Fund / IF26 planned grant calls and auctions / December 2026"],
     }
