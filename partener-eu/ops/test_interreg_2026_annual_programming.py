@@ -8,10 +8,13 @@ import copy
 import json
 from pathlib import Path
 from urllib.parse import urlparse
+import sys
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "partener-eu/ingest/source_registry.json"
 PLANE = ROOT / "partener-eu/ingest/data_plane_contract.json"
+sys.path.insert(0, str(ROOT / "partener-eu/ingest"))
+import interreg_programming_live_fetch as live  # noqa: E402
 SOURCE_ID = "SRC-INTERREG-ANNUAL-EVENT-2026-POST2027-INTERACT"
 SOURCE_URL = (
     "https://interreg.eu/news-stories/"
@@ -60,6 +63,22 @@ def main():
     rows = json.loads(REGISTRY.read_text(encoding="utf-8"))["sources"]
     domains = json.loads(PLANE.read_text(encoding="utf-8"))["programmeDomains"]
     validate(rows, domains)
+
+    # A T2 Interact event must NEVER inherit the T1 Managing Authority label
+    # from the separate, official-programme-only Interreg raw adapter.
+    selected = {item["id"] for item in live._programming_sources({"sources": rows})}
+    assert SOURCE_ID not in selected, "T2 source leaked into T1 raw normalizer"
+    assert "SRC-INTERREG-ROHU-2028-2034" in selected
+    for escalated in ({"material_fact_use": True}, {"tier": "T1"},
+                      {"authority_class": "T1_FAKE_PROGRAMME_AUTHORITY"}):
+        altered = copy.deepcopy(rows)
+        next(x for x in altered if x["id"] == SOURCE_ID).update(escalated)
+        try:
+            live._programming_sources({"sources": altered})
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Forged Interact programme authority reached raw adapter")
 
     mutations = {
         "tier": "T1",
