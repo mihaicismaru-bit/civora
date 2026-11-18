@@ -245,6 +245,22 @@ def _programming_sources(registry: dict[str, Any]) -> list[dict[str, Any]]:
             continue
         if "PROGRAMMING_PIPELINE" not in families and not (extract & PROGRAMMING_EXTRACT_KEYS):
             continue
+        # Interact reports are official T2 cross-programme discovery, not a
+        # Managing Authority's original. The MA-only live normalizer stamps
+        # OFFICIAL_INTERREG_PROGRAMME_AUTHORITY, so this exact T2 class must
+        # remain in the general source-health intake instead of borrowing T1.
+        # Any altered tier/authority/material flag falls through to the strict
+        # origin/identity gate (fail-closed), never to publication.
+        if (
+            source.get("tier") == "T2"
+            and source.get("class") == "official_interact_cross_programme_post_2027_event_report"
+            and source.get("authority_class") == "T2_OFFICIAL_INTERACT_PROGRAMMING_INTELLIGENCE_NOT_MA_CALL_AUTHORITY"
+            and source.get("authority_scope") == "PROGRAMMING_FRAMEWORK"
+            and source.get("material_fact_use") is False
+            and source.get("observation_state") == "PROGRAMMING_PIPELINE"
+            and "DISCOVERY" in families
+        ):
+            continue
         programmes = source.get("programmes")
         if not isinstance(programmes, list) or not programmes or any(
             not isinstance(name, str) or not name.strip() for name in programmes
