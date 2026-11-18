@@ -412,4 +412,28 @@ with tempfile.TemporaryDirectory() as td:
     assert synced["home"]["openDossierIds"] == ["synthetic-future-test-only"]
     assert next(row for row in synced["dossiers"] if row["id"] == cluster_probe["id"])["status"] == "OPEN", "Historical source status is preserved; current-facing projection is held only"
 
+# Cross-language/clock truth: no fictitious end-of-day or UTC default may
+# stretch an exact 12:00 Bucharest cutoff into the afternoon.
+assert module.parse_date("6 noiembrie 2026, ora 12:00") == module.parse_date("2026-11-06T10:00:00Z")
+assert module.parse_date("1 iulie 2026, ora 12:00") == module.parse_date("2026-07-01T09:00:00Z")
+assert module.parse_date("25 octombrie 2026, ora 03:30") is None
+assert module.parse_date("29 martie 2026, ora 03:30") is None
+assert module.parse_date("2026-11-11T00:00:00") is None
+assert module.parse_date("31 februarie 2026, ora 12:00") is None
+assert module.current_open({**cluster_probe, "quickFacts": [
+    {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+    {"label": "Termen", "value": "6 noiembrie 2026, ora 12:00", "confidence": "CONFIRMED"},
+]}, before_expiry)
+assert not module.current_open({**cluster_probe, "quickFacts": [
+    {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+    {"label": "Termen", "value": "6 noiembrie 2026", "confidence": "CONFIRMED"},
+]}, before_expiry)
+assert not module.current_open({**cluster_probe, "closesAt": "2026-11-30T16:00:00+02:00"}, before_expiry)
+assert not sync_mod.current_open({**cluster_probe, "closesAt": "2026-11-30T16:00:00+02:00"}, before_expiry)
+assert sync_mod.parse_date("6 noiembrie 2026, ora 12:00") == module.parse_date("2026-11-06T10:00:00Z")
+assert not sync_mod.current_open({**cluster_probe, "quickFacts": [
+    {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+    {"label": "Termen", "value": "6 noiembrie 2026", "confidence": "CONFIRMED"},
+]}, before_expiry)
+
 print("PASS public static IA / sitemap / dossier regression + P0 wall-clock replay")
