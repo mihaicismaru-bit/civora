@@ -10,6 +10,7 @@ on:
       - 'partener-eu/ops/test_imfv_bv1a10_guide_revision_discovery.py'
       - 'partener-eu/ops/test_prnv_114_final_guide_discovery.py'
       - 'partener-eu/ops/test_afir_dr36_guide_revision_discovery.py'
+      - 'partener-eu/ops/test_eea_norway_gbi_programme_launch_discovery.py'
       - 'partener-eu/ops/test_interreg_2026_annual_programming.py'
       - 'partener-eu/ops/test_afir_email_advisory.py'
       - 'partener-eu/validation/discovery/afir-email-incident-20261113.json'
@@ -161,6 +162,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_imfv_bv1a10_guide_revision_discovery.py
           python -m py_compile partener-eu/ops/test_prnv_114_final_guide_discovery.py
           python -m py_compile partener-eu/ops/test_afir_dr36_guide_revision_discovery.py
+          python -m py_compile partener-eu/ops/test_eea_norway_gbi_programme_launch_discovery.py
           python -m py_compile partener-eu/ops/test_interreg_2026_annual_programming.py
           python -m py_compile partener-eu/ingest/pddtj_oi_discovery_acquire.py
           python -m py_compile partener-eu/ops/test_pddtj_oi_discovery_acquire.py
@@ -189,6 +191,9 @@ jobs:
 
       - name: Hold DR36 LEADER approved guide revision out of current GAL OPEN calls
         run: python partener-eu/ops/test_afir_dr36_guide_revision_discovery.py
+
+      - name: Reject Norway Grants Romania GBI programme-launch event as OPEN call
+        run: python partener-eu/ops/test_eea_norway_gbi_programme_launch_discovery.py
 
       - name: Reject Interact post-2027 event-as-OPEN and unacquired raw evidence
         run: python partener-eu/ops/test_interreg_2026_annual_programming.py
