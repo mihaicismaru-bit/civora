@@ -5,6 +5,7 @@ on:
     paths:
       - 'partener-eu/ingest/source_registry.json'
       - 'partener-eu/ops/test_cl4_2027_photonics_topic_identity.py'
+      - 'partener-eu/ops/test_cl4_2027_ai_data_topics_discovery.py'
       - 'partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py'
       - 'partener-eu/ops/test_eea_langspil_future_submission_discovery.py'
       - 'partener-eu/ops/test_imfv_bv1a10_guide_revision_discovery.py'
@@ -160,6 +161,7 @@ jobs:
           python -m py_compile partener-eu/ops/p10_validate.py
           python -m py_compile partener-eu/ops/test_p10_policy_regression.py
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
+          python -m py_compile partener-eu/ops/test_cl4_2027_ai_data_topics_discovery.py
           python -m py_compile partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py
           python -m py_compile partener-eu/ops/test_eea_langspil_future_submission_discovery.py
           python -m py_compile partener-eu/ops/test_imfv_bv1a10_guide_revision_discovery.py
@@ -182,6 +184,9 @@ jobs:
 
       - name: Validate CL4 photonics exact topic ID conflict (no OPEN promotion)
         run: python partener-eu/ops/test_cl4_2027_photonics_topic_identity.py
+
+      - name: Hold CL4 2027 AI data topics at cached indexed discovery (no current OPEN)
+        run: python partener-eu/ops/test_cl4_2027_ai_data_topics_discovery.py
 
       - name: Reject PoIDS 912 interim ETFC list OPEN or final-award promotion
         run: python partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py
