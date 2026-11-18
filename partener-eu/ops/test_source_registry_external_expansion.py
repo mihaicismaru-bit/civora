@@ -2575,6 +2575,99 @@ def main():
         else:
             fail("EIC 2027 negative mutation admitted " + repr(changed))
 
+
+    # ERASMUS_EUR_UNIV_2027_ANNOUNCEMENT_FAIL_CLOSED
+    # Official Erasmus+ landing says OPEN, but exact-topic F&T API and the
+    # accepting live application route have not been acquired as immutable raws.
+    erasmus_id = "SRC-EU-ERASMUS-EUR-UNIV-2027-ANNOUNCEMENT"
+    erasmus = by_id.get(erasmus_id)
+    if not erasmus:
+        fail("Erasmus 2027 European Universities official discovery missing")
+
+    def _check_erasmus(row):
+        expected = {
+            "id": erasmus_id,
+            "tier": "T1",
+            "url": "https://education.ec.europa.eu/education-levels/higher-education/european-universities-initiative/funding",
+            "linked_official_erasmus_listing_url_discovery": "https://erasmus-plus.ec.europa.eu/funding-opportunities/european-universities",
+            "linked_official_funding_tenders_topic_url_discovery": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/ERASMUS-EDU-2027-EUR-UNIV",
+            "topic_identifier_discovery": "ERASMUS-EDU-2027-EUR-UNIV",
+            "programme_family": "Erasmus+ / European Universities / 2027",
+            "programmes": ["EU direct programmes"],
+            "authority_class": "T1_OFFICIAL_EUROPEAN_COMMISSION_DG_EAC_ERASMUS_ANNOUNCEMENT",
+            "authority_scope": "EXACT_TOPIC_LINKED_PROGRAMME_ANNOUNCEMENT_NOT_LIVE_TOPIC_API",
+            "observation_state": "OFFICIAL_CALL_ANNOUNCEMENT_EXACT_TOPIC_DISCOVERED_RAW_PENDING",
+            "landing_last_updated_date_discovery": "2026-11-12",
+            "readback_date_discovery": "2026-11-18",
+            "adapter_required": "ERASMUS_EUR_UNIV_2027_OFFICIAL_RAW_FT_TOPIC_APPLICATION_RECONCILE_V1",
+        }
+        for key, value in expected.items():
+            if row.get(key) != value:
+                fail("Erasmus 2027 exact-source identity/authority drift: " + key)
+        if not {"EU_DIRECT", "BRUSSELS", "ERASMUS_PLUS",
+                "CALL_REGISTRY", "DISCOVERY"}.issubset(
+                set(row.get("source_families") or [])):
+            fail("Erasmus 2027 incorrectly classified")
+        if "PROGRAMMING_PIPELINE" in (row.get("source_families") or []):
+            fail("Erasmus 2027 published announcement misclassified as MFF pipeline")
+        if set(programme_domains.get("EU direct programmes", [])) != {"EU_DIRECT_FUNDING"}:
+            fail("Erasmus 2027 programme data plane not isolated")
+        extracts = set(row.get("extract") or [])
+        if not {
+            "commission_european_universities_2027_open_wording_as_announcement_only",
+            "official_erasmus_reference_erasmus_edu_2027_eur_univ",
+            "announced_4_march_2027_1700_cet_deadline_NOT_exact_live_topic_receipt",
+            "17_november_2026_info_session_not_submission_deadline",
+            "2021_2027_european_universities_programme_envelope_not_2027_topic_budget",
+            "ft_topic_page_js_shell_no_current_machine_readable_topic_status_or_application_endpoint",
+        }.issubset(extracts):
+            fail("Erasmus 2027 announced date/budget conflated with current topic facts")
+        for key in ("material_fact_use", "credentials_required",
+                    "open_call_authorized", "material_fact_publication_authorized"):
+            if row.get(key) is not False:
+                fail("Erasmus 2027 unverified source authorized material fact: " + key)
+        if {"status", "call_status", "deadline", "application_deadline",
+            "budget", "budget_eur", "eligibility", "exact_call_identifier",
+            "exact_topic_identifier", "submission_endpoint", "open_at", "close_at",
+            "final_url", "fetched_at", "raw_sha256", "semantic_sha256",
+            "parser_version", "run_id", "handoff_sha256", "last_verified_open"
+            }.intersection(row):
+            fail("Erasmus 2027 invented raw receipt or material OPEN fact")
+        note = row.get("note") or ""
+        for token in ("12 November 2026", "4 March 2027 17:00 CET",
+                      "ERASMUS-EDU-2027-EUR-UNIV", "Funding & Tenders",
+                      "NOT_CAPTURED", "SURFACEMC", "OPEN_CALL",
+                      "LKG", "application endpoint"):
+            if token not in note:
+                fail("Erasmus 2027 source missing evidence boundary: " + token)
+
+    _check_erasmus(erasmus)
+    # Adversarial replay: never let a programme announcement become a current
+    # call without fresh exact-topic original and application-receipt review.
+    for change in (
+        {"observation_state": "OPEN_CALL"},
+        {"open_call_authorized": True},
+        {"material_fact_use": True},
+        {"material_fact_publication_authorized": True},
+        {"deadline": "2027-03-04"},
+        {"budget_eur": 1200000000},
+        {"eligibility": ["all Romanian organisations"]},
+        {"exact_topic_identifier": "ERASMUS-EDU-2027-EUR-UNIV"},
+        {"submission_endpoint": "https://example.com/apply"},
+        {"raw_sha256": "0" * 64},
+        {"fetched_at": "2026-11-18T04:30:00Z"},
+        {"linked_official_funding_tenders_topic_url_discovery": "https://example.com/topic"},
+        {"topic_identifier_discovery": "ERASMUS-EDU-2026-EUR-UNIV"},
+        {"readback_date_discovery": "2026-11-19"},
+    ):
+        tampered = dict(erasmus, **change)
+        try:
+            _check_erasmus(tampered)
+        except SystemExit:
+            pass
+        else:
+            fail("Erasmus 2027 adversarial mutation admitted " + repr(change))
+
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
