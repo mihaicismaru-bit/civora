@@ -71,10 +71,14 @@ def refresh_quality_pass(payload: dict[str, Any], dossiers: list[dict[str, Any]]
     )
 
 
-def main() -> int:
+def main(*, as_of: dt.datetime | None = None) -> int:
     payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))
     dossiers = payload.get("dossiers") or []
-    clock = parse_date(payload.get("generatedAt")) or dt.datetime.now(dt.timezone.utc)
+    # Preserve generatedAt as source provenance, never as the present-tense
+    # clock that authorizes current OPEN cards in the derived projection.
+    clock = as_of or dt.datetime.now(dt.timezone.utc)
+    if clock.tzinfo is None:
+        raise ValueError("Derived projection evaluation clock must be timezone-aware")
 
     for dossier in dossiers:
         completeness = int((dossier.get("quality") or {}).get("completeness") or 0)
