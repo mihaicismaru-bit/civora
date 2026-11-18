@@ -124,7 +124,18 @@ def main() -> int:
     assert payload["policy"]["derivedProjectionSynchronized"] is True
 
     home_open = payload["home"]["openDossierIds"]
-    assert {"afir-dr14-2026", "afir-dr18-2026"} <= set(home_open)
+    # Historical source status OPEN and September source proofs must never
+    # force DR-14/DR-18 into a *current* shortlist after their checked-in
+    # 31 Oct deadline. The newer 16 Nov official extension remains a separate
+    # source-acquisition/reconciliation task; do not infer it from this fixture.
+    import datetime as dt
+    source_cutoff = dt.datetime.fromisoformat("2026-10-31T16:00:00+03:00")
+    current_time = dt.datetime.now(dt.timezone.utc)
+    expected_dr14_dr18_in_home = current_time < source_cutoff
+    for dr_id in ("afir-dr14-2026", "afir-dr18-2026"):
+        assert (dr_id in home_open) is expected_dr14_dr18_in_home, (
+            dr_id, current_time.isoformat(), sorted(home_open)
+        )
     assert "afir-dr31-2026-2027" in payload["home"]["prepareDossierIds"]
     # The homepage is intentionally a bounded editorial shortlist (max 8),
     # while summary.openCount is the total verified OPEN catalog count.
