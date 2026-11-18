@@ -118,9 +118,12 @@ provisional_ids = {
     if row.get("publicationState") != "PUBLISHABLE"
 }
 
+# The public render must evaluate against present time, never the historic
+# decision-products generatedAt. Capture the same clock for all assertions.
+test_clock = module.dt.datetime.now(module.dt.timezone.utc)
 with tempfile.TemporaryDirectory() as td:
     out = Path(td)
-    manifest = module.build(PRODUCTS, out)
+    manifest = module.build(PRODUCTS, out, as_of=test_clock)
 
     required = [
         "robots.txt",
@@ -247,9 +250,7 @@ with tempfile.TemporaryDirectory() as td:
 
     # OPEN static hub must contain only rows that pass the same current-open gate
     # used by the canonical decision projection.
-    clock = module.parse_date(payload.get("generatedAt"))
-    if clock is None:
-        raise AssertionError("decision products generatedAt is not parseable")
+    clock = test_clock
     expected_open = {
         str(row.get("id") or "")
         for row in publishable
@@ -312,4 +313,103 @@ with tempfile.TemporaryDirectory() as td:
             assert marker in prepare_index
             assert marker not in open_index
 
-print("PASS public static IA / sitemap / dossier regression")
+
+# P0 #1404 replay: a stale source-generatedAt must not keep a 6 November
+# Clustere inovative dossier OPEN on 18 November in the crawler-visible site.
+# The second dossier is deliberately synthetic: it proves that this is a
+# time-scoped hold, not a blanket suppression of every future valid deadline.
+cluster_probe = {
+    "id": "pr-centru-clusters-122",
+    "code": "PRC/1056/PRC_P1/OP1/RSO1.1/PRC_A4",
+    "title": "Clustere inovative",
+    "programme": "Programul Regiunea Centru",
+    "publicationState": "PUBLISHABLE",
+    "status": "OPEN",
+    "statusLabel": "DESCHIS",
+    "standfirst": "Sunt confirmate: open; termen 6 noiembrie 2026.",
+    "decisionLabel": "ACȚIONEAZĂ",
+    "decisionAction": "Începe screeningul și planul de depunere.",
+    "quickFacts": [
+        {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+        {"label": "Termen", "value": "2026-11-06T12:00:00+02:00", "confidence": "CONFIRMED"},
+    ],
+    "sections": [
+        {"title": "Rezumat executiv", "items": ["Stare apel: OPEN."]},
+        {"title": "Decizia rapidă", "items": ["Începe screeningul și planul de depunere."]},
+    ],
+    "sources": [{"tier": "T1", "label": "ADR Centru", "url": "https://www.regiocentru.ro/actiuni/clustere-inovative-1-2-2/"}],
+}
+future_probe = {
+    "id": "synthetic-future-test-only",
+    "title": "Synthetic clock control",
+    "programme": "TEST ONLY",
+    "publicationState": "PUBLISHABLE",
+    "status": "OPEN",
+    "quickFacts": [
+        {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+        {"label": "Termen", "value": "2026-12-01T16:00:00+02:00", "confidence": "CONFIRMED"},
+    ],
+}
+stale_source_timestamp = "2026-08-26T04:00:00Z"
+replay_payload = {"generatedAt": stale_source_timestamp, "dossiers": [cluster_probe, future_probe], "news": []}
+before_expiry = module.parse_date("2026-11-06T09:59:59Z")
+after_expiry = module.parse_date("2026-11-18T11:25:00Z")
+assert before_expiry and after_expiry
+assert module.current_open(cluster_probe, before_expiry) is True
+assert module.current_open(cluster_probe, after_expiry) is False
+
+with tempfile.TemporaryDirectory() as td:
+    root = Path(td)
+    fixture = root / "decision_products.json"
+    fixture.write_text(json.dumps(replay_payload, ensure_ascii=False), encoding="utf-8")
+    before_root = root / "before"
+    after_root = root / "after"
+    before_manifest = module.build(fixture, before_root, as_of=before_expiry)
+    after_manifest = module.build(fixture, after_root, as_of=after_expiry)
+    assert before_manifest["currentOpen"] == 2
+    assert after_manifest["currentOpen"] == 1
+    assert before_manifest["generatedAt"] == after_manifest["generatedAt"] == stale_source_timestamp
+    before_list = (before_root / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    after_list = (after_root / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    assert 'data-dossier-id="pr-centru-clusters-122"' in before_list
+    assert 'data-dossier-id="pr-centru-clusters-122"' not in after_list
+    assert 'data-dossier-id="synthetic-future-test-only"' in after_list
+    after_dossiers = (after_root / "dosare/index.html").read_text(encoding="utf-8")
+    match = re.search(r'<article class="staticCard" data-dossier-id="pr-centru-clusters-122">(.*?)</article>', after_dossiers, re.S)
+    assert match and "status-review" in match.group(1)
+    cluster_pages = [
+        p.read_text(encoding="utf-8")
+        for p in (after_root / "dosare").glob("*/index.html")
+        if "<h1>Clustere inovative</h1>" in p.read_text(encoding="utf-8")
+    ]
+    assert len(cluster_pages) == 1
+    detail = cluster_pages[0]
+    assert '<span class="status status-review">ÎN VERIFICARE</span>' in detail
+    assert module.FAIL_CLOSED_OPEN_ACTION in detail
+    assert "Sunt confirmate: open" not in detail
+    home_js = (after_root / "home-public-data.js").read_text(encoding="utf-8")
+    home = json.loads(home_js.removeprefix("window.PARTENER_HOME_DATA=").strip().removesuffix(";"))
+    assert home["summary"]["openCount"] == 1
+    assert all(row["id"] != "pr-centru-clusters-122" or row["status"] != "OPEN" for row in home["dossiers"])
+
+    # The derived Ask/home projection uses exactly the same wall-clock
+    # discipline; write to temp paths only, never to canonical LKG.
+    sync_path = ROOT / "partener-eu" / "ingest" / "sync_decision_products_projection.py"
+    sync_spec = importlib.util.spec_from_file_location("partener_sync_projection_test", sync_path)
+    sync_mod = importlib.util.module_from_spec(sync_spec)
+    assert sync_spec and sync_spec.loader
+    sync_spec.loader.exec_module(sync_mod)
+    old_products, old_out = sync_mod.PRODUCTS, sync_mod.OUT_JS
+    try:
+        sync_mod.PRODUCTS = fixture
+        sync_mod.OUT_JS = root / "decision-products.js"
+        assert sync_mod.main(as_of=after_expiry) == 0
+    finally:
+        sync_mod.PRODUCTS, sync_mod.OUT_JS = old_products, old_out
+    synced = json.loads(fixture.read_text(encoding="utf-8"))
+    assert synced["generatedAt"] == stale_source_timestamp
+    assert synced["summary"]["openCount"] == 1
+    assert synced["home"]["openDossierIds"] == ["synthetic-future-test-only"]
+    assert next(row for row in synced["dossiers"] if row["id"] == cluster_probe["id"])["status"] == "OPEN", "Historical source status is preserved; current-facing projection is held only"
+
+print("PASS public static IA / sitemap / dossier regression + P0 wall-clock replay")
