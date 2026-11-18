@@ -7,6 +7,7 @@ on:
       - 'partener-eu/ops/test_cl4_2027_photonics_topic_identity.py'
       - 'partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py'
       - 'partener-eu/ops/test_eea_langspil_future_submission_discovery.py'
+      - 'partener-eu/ops/test_imfv_bv1a10_guide_revision_discovery.py'
       - 'partener-eu/ops/test_interreg_2026_annual_programming.py'
       - 'partener-eu/ops/test_afir_email_advisory.py'
       - 'partener-eu/validation/discovery/afir-email-incident-20261113.json'
@@ -155,6 +156,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
           python -m py_compile partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py
           python -m py_compile partener-eu/ops/test_eea_langspil_future_submission_discovery.py
+          python -m py_compile partener-eu/ops/test_imfv_bv1a10_guide_revision_discovery.py
           python -m py_compile partener-eu/ops/test_interreg_2026_annual_programming.py
           python -m py_compile partener-eu/ingest/pddtj_oi_discovery_acquire.py
           python -m py_compile partener-eu/ops/test_pddtj_oi_discovery_acquire.py
@@ -174,6 +176,9 @@ jobs:
 
       - name: Reject LANGSPIL portal Open label before official OSF submission starts
         run: python partener-eu/ops/test_eea_langspil_future_submission_discovery.py
+
+      - name: Reject BV1A10 guide v2 revision as new OPEN call or BV1B6 alias
+        run: python partener-eu/ops/test_imfv_bv1a10_guide_revision_discovery.py
 
       - name: Reject Interact post-2027 event-as-OPEN and unacquired raw evidence
         run: python partener-eu/ops/test_interreg_2026_annual_programming.py
