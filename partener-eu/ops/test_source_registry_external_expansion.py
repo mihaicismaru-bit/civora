@@ -2490,6 +2490,89 @@ def main():
         else:
             fail("DG CONNECT launch negative replay illegally admitted " + repr(change))
 
+    # EIC_2027_ADOPTED_WP_PIPELINE_FAIL_CLOSED
+    # An adopted annual Work Programme and an Info Day are not equivalent to
+    # accepting individual 2027 Funding & Tenders submission endpoints.
+    eic27_id = "SRC-EU-EIC-WP-2027-ADOPTED-20261105"
+    eic27 = by_id.get(eic27_id)
+    if eic27 is None:
+        fail("EIC 2027 adopted work-programme programme-intelligence source missing")
+
+    def _check_eic27(row):
+        expected = {
+            "id": eic27_id,
+            "tier": "T1",
+            "url": "https://eic.ec.europa.eu/eic-funding-opportunities/eic-funding-opportunities-2027_en",
+            "linked_official_info_event_url_discovery": "https://eic.ec.europa.eu/events/online-information-day-eic-funding-opportunities-2027-2026-11-19_en",
+            "class": "official_eic_adopted_2027_work_programme_pipeline",
+            "programmes": ["EU direct programmes"],
+            "programme_family": "European Innovation Council",
+            "authority_class": "T1_OFFICIAL_EIC_EISMEA_ADOPTED_WORK_PROGRAMME",
+            "authority_scope": "PROGRAMME_FRAMEWORK",
+            "observation_state": "PROGRAMMING_PIPELINE",
+            "event_date_discovery": "2026-11-05",
+            "readback_date_discovery": "2026-11-18",
+            "adapter_required": "EIC_2027_WP_PDF_AND_EXACT_FT_TOPIC_RECONCILE_V1",
+        }
+        for key, value in expected.items():
+            if row.get(key) != value:
+                fail("EIC 2027 WP identity/stage drift: " + key)
+        if not {"EU_DIRECT", "BRUSSELS", "EIC", "PROGRAMMING_PIPELINE",
+                "DISCOVERY"}.issubset(set(row.get("source_families") or [])):
+            fail("EIC 2027 source taxonomy must remain programme planning")
+        extracts = set(row.get("extract") or [])
+        if not {
+            "adopted_eic_2027_work_programme_5_november_2026",
+            "over_1_8bn_eur_eic_2027_programme_envelope_not_individual_call_budget",
+            "19_november_2026_eic_work_programme_info_day_not_funding_application",
+            "18_november_2026_0930_cet_info_day_registration_cutoff_not_funding_deadline",
+            "current_eic_2027_pdf_original_hash_not_yet_acquired",
+            "individual_2027_ft_topic_identifiers_and_live_endpoints_unverified",
+        }.issubset(extracts):
+            fail("EIC 2027 work-programme or info-day source distinctions lost")
+        for key in ("material_fact_use", "credentials_required",
+                    "open_call_authorized", "material_fact_publication_authorized"):
+            if row.get(key) is not False:
+                fail("EIC 2027 programme observation promoted: " + key)
+        if any(key in row for key in (
+            "status", "call_status", "deadline", "submission_deadline",
+            "budget", "budget_eur", "eligibility", "exact_call_identifier",
+            "exact_topic_identifier", "submission_endpoint", "fetched_at",
+            "final_url", "raw_sha256", "semantic_sha256", "parser_version",
+            "run_id", "handoff_sha256",
+        )):
+            fail("EIC 2027 source invented individual funding terms or immutable receipt")
+        note = row.get("note") or ""
+        for token in ("ADOPTED", "over EUR 1.8 billion", "19 November 2026",
+                      "18 November 2026 09:30 CET", "NOT_CAPTURED",
+                      "NOT_RECONCILED", "SURFACEMC", "OPEN_CALL"):
+            if token not in note:
+                fail("EIC 2027 source missing hard fail-closed warning: " + token)
+
+    _check_eic27(eic27)
+    for changed in (
+        {"observation_state": "OPEN_CALL"},
+        {"open_call_authorized": True},
+        {"material_fact_use": True},
+        {"material_fact_publication_authorized": True},
+        {"budget_eur": 1800000000},
+        {"deadline": "2026-11-18"},
+        {"submission_deadline": "2026-11-19"},
+        {"eligibility": ["all EU SMEs"]},
+        {"exact_topic_identifier": "EIC-2027-ASSUMED"},
+        {"submission_endpoint": "https://example.com/fake-eic-submit"},
+        {"raw_sha256": "0" * 64},
+        {"fetched_at": "2026-11-18T03:00:00Z"},
+        {"linked_official_info_event_url_discovery": "https://example.com/unverified-eic-event"},
+    ):
+        altered = dict(eic27, **changed)
+        try:
+            _check_eic27(altered)
+        except SystemExit:
+            pass
+        else:
+            fail("EIC 2027 negative mutation admitted " + repr(changed))
+
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
