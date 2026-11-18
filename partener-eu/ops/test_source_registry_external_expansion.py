@@ -2505,7 +2505,7 @@ def main():
             "url": "https://eic.ec.europa.eu/eic-funding-opportunities/eic-funding-opportunities-2027_en",
             "linked_official_info_event_url_discovery": "https://eic.ec.europa.eu/events/online-information-day-eic-funding-opportunities-2027-2026-11-19_en",
             "class": "official_eic_adopted_2027_work_programme_pipeline",
-            "programmes": ["EU direct programmes"],
+            "programmes": ["European Innovation Council / adopted Work Programme 2027"],
             "programme_family": "European Innovation Council",
             "authority_class": "T1_OFFICIAL_EIC_EISMEA_ADOPTED_WORK_PROGRAMME",
             "authority_scope": "PROGRAMME_FRAMEWORK",
@@ -2549,6 +2549,8 @@ def main():
             if token not in note:
                 fail("EIC 2027 source missing hard fail-closed warning: " + token)
 
+    if set(programme_domains.get("European Innovation Council / adopted Work Programme 2027", [])) != {"EU_DIRECT_FUNDING", "PROGRAMMING_FUTURE"}:
+        fail("EIC 2027 work-programme must stay in the future-programming data plane")
     _check_eic27(eic27)
     for changed in (
         {"observation_state": "OPEN_CALL"},
