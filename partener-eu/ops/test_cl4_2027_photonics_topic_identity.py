@@ -48,7 +48,18 @@ def validate(rows):
         for missing_receipt in ("sha-256", "fetched_at", "parser_version", "run_id"):
             assert missing_receipt in note, (source["id"], missing_receipt)
         assert "reconciliation" in note
-    assert by_id["SRC-EU-DGCONNECT-HORIZON-CL4-2027-DIGITAL-LAUNCH-20261117"]["open_call_authorized"] is False
+    # DG CONNECT's event/publication date differs from its Last update line.
+    # Readback metadata is discovery-only, never a fresh exact-topic receipt.
+    announcement = by_id["SRC-EU-DGCONNECT-HORIZON-CL4-2027-DIGITAL-LAUNCH-20261117"]
+    assert announcement["event_date_discovery"] == "2026-11-17"
+    assert announcement["source_last_updated_date_discovery"] == "2026-11-18"
+    assert announcement["readback_date_discovery"] == "2026-11-18"
+    assert announcement["observation_state"] == "OFFICIAL_COMMISSION_LAUNCH_ANNOUNCEMENT_RAW_PENDING"
+    assert announcement["open_call_authorized"] is False
+    assert announcement["material_fact_use"] is False
+    assert announcement["material_fact_publication_authorized"] is False
+    assert announcement["announced_topic_count_discovery"] == 12
+    assert announcement["announced_call_count_discovery"] == 2
 
 
 def main():
