@@ -2346,7 +2346,9 @@ def main():
             "event_announcement_date_discovery": "2026-11-17",
             "event_date_discovery": "2026-11-27",
             "event_time_discovery": "13:00-14:30 CET",
-            "readback_date_discovery": "2026-11-17",
+            "readback_date_discovery": "2026-11-19",
+            "article_edit_date_discovery": "2026-11-18",
+            "redirect_target_browser_observed_discovery": "https://fed.mai.gov.ro/11767/facilitatea-pentru-parteneriate-in-domeniul-migratiei-sesiune-informare-ce/",
             "adapter_required": "MPF_2026_ORGANISER_EXACT_CALL_ID_AND_GATEWAY_RECONCILE_V1",
             "programmes": ["EU direct programmes"],
         }
