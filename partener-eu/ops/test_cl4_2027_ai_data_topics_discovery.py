@@ -50,8 +50,9 @@ def validate(rows):
         assert p.username is None and p.password is None and p.port is None
         listing = urlparse(row["listing_url"])
         assert listing.scheme == "https" and listing.hostname == "ec.europa.eu"
-        assert {"EU_DIRECT", "BRUSSELS", "PROGRAMMING_PIPELINE", "DISCOVERY"} <= set(row["source_families"])
+        assert {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY", "FORTHCOMING", "DISCOVERY"} <= set(row["source_families"])
         assert "OPEN_CALL" not in row["source_families"]
+        assert "PROGRAMMING_PIPELINE" not in row["source_families"]
         assert row["authority_class"] == "T1_OFFICIAL_EC_FUNDING_TENDERS"
         assert row["authority_scope"] == "EXACT_TOPIC_INDEXED_DISCOVERY_ONLY_NO_CURRENT_STATUS_OR_SUBMISSION_PROOF"
         assert row["observation_state"] == "EXACT_TOPIC_INDEXED_DISCOVERY_RAW_PENDING"
