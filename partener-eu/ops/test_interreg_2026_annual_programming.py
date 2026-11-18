@@ -36,13 +36,13 @@ def validate(rows, domains):
     assert urlparse(row["url"]).hostname == "interreg.eu"
     assert row["tier"] == "T2"
     assert row["authority_class"] == "T2_OFFICIAL_INTERACT_PROGRAMMING_INTELLIGENCE_NOT_MA_CALL_AUTHORITY"
-    assert row["authority_scope"] == "POST2027_PROGRAMMING_EVENT_DISCOVERY_ONLY"
+    assert row["authority_scope"] == "PROGRAMMING_FRAMEWORK"
     assert row["observation_state"] == "PROGRAMMING_PIPELINE"
     assert row["event_dates_discovery"] == ["2026-11-12", "2026-11-13"]
     assert row["report_publication_date_discovery"] == "2026-11-17"
     assert row["orientation_papers_count_discovery"] == 85
-    assert row["programmes"] == ["multiple"]
-    assert set(domains.get("multiple", [])) == {"MULTI_PROGRAMME_DISCOVERY"}
+    assert row["programmes"] == ["Interreg cross-programme 2028-2034"]
+    assert set(domains.get("Interreg cross-programme 2028-2034", [])) == {"INTERREG_CROSS_PROGRAMME", "PROGRAMMING_FUTURE"}
     assert REQUIRED_FAMILIES.issubset(set(row["source_families"]))
     assert "post-2027" in row["programme_family"]
     for field in FALSE_FLAGS:
