@@ -41,7 +41,7 @@ def validate(rows):
     note = s["note"].lower()
     for required in ("timeout", "not_captured", "fetched_at", "sha-256",
                      "parser_version", "run_id", "immutable handoff",
-                     "my smis" if False else "mysmis", "appeal"):
+                     "mysmis", "appeal"):
         assert required in note, required
     assert "OPEN_CALL" not in s["observation_state"]
     assert "OPEN_CALL" not in s["selection_stage_discovery"]
