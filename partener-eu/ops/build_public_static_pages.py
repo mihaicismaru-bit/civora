@@ -609,11 +609,17 @@ def compact_home_news(
 def build(
     products_path: Path = DEFAULT_PRODUCTS,
     web_root: Path = DEFAULT_WEB,
+    *,
+    as_of: dt.datetime | None = None,
 ) -> dict[str, Any]:
     payload = json.loads(products_path.read_text(encoding="utf-8"))
     dossiers = payload.get("dossiers") or []
     news = payload.get("news") or []
-    generated = parse_date(payload.get("generatedAt")) or dt.datetime.now(dt.timezone.utc)
+    # generatedAt is acquisition provenance, not the publication wall clock.
+    # An old but otherwise valid LKG snapshot must not re-open an expired call.
+    evaluation_clock = as_of or dt.datetime.now(dt.timezone.utc)
+    if evaluation_clock.tzinfo is None:
+        raise ValueError("Public static render evaluation clock must be timezone-aware")
 
     for dirname in GENERATED_DIRS:
         shutil.rmtree(web_root / dirname, ignore_errors=True)
@@ -622,10 +628,10 @@ def build(
         row for row in dossiers if row.get("publicationState") == "PUBLISHABLE"
     ]
     fail_closed_open_refresh_count = sum(
-        1 for row in source_publishable if requires_open_refresh(row, generated)
+        1 for row in source_publishable if requires_open_refresh(row, evaluation_clock)
     )
     publishable = [
-        fail_closed_render_dossier(row, generated) for row in source_publishable
+        fail_closed_render_dossier(row, evaluation_clock) for row in source_publishable
     ]
     used: set[str] = set()
     slug_by_id: dict[str, str] = {}
@@ -634,7 +640,7 @@ def build(
         slug_by_id[key] = stable_slug(dossier, used)
 
     open_rows = [
-        row for row in publishable if current_open(row, generated)
+        row for row in publishable if current_open(row, evaluation_clock)
     ]
     prepare_rows = [
         row
@@ -644,7 +650,7 @@ def build(
     consultation_rows = [
         row
         for row in publishable
-        if current_consultation(row, generated)
+        if current_consultation(row, evaluation_clock)
     ]
     closed_rows = [row for row in publishable if row.get("status") == "CLOSED"]
 
@@ -700,7 +706,7 @@ def build(
     visible_home_news: list[dict[str, Any]] = []
     for item in news:
         event_date = parse_date(item.get("date"))
-        if event_date and event_date > generated + dt.timedelta(minutes=5):
+        if event_date and event_date > evaluation_clock + dt.timedelta(minutes=5):
             continue
         if int(item.get("utilityScore") or 0) < 60:
             continue
@@ -986,7 +992,7 @@ def build(
     visible_news: list[dict[str, Any]] = []
     for item in news:
         event_date = parse_date(item.get("date"))
-        if event_date and event_date > generated + dt.timedelta(minutes=5):
+        if event_date and event_date > evaluation_clock + dt.timedelta(minutes=5):
             continue
         visible_news.append(item)
         headline = str(item.get("headline") or "Actualizare")
@@ -1117,7 +1123,7 @@ def build(
         "consultations": len(consultation_rows),
         "failClosedOpenRefresh": fail_closed_open_refresh_count,
         "failClosedConsultationRefresh": sum(
-            1 for row in source_publishable if requires_consultation_refresh(row, generated)
+            1 for row in source_publishable if requires_consultation_refresh(row, evaluation_clock)
         ),
         "sitemapUrls": len(urls),
         "homeSnapshotBytes": home_snapshot_bytes,
