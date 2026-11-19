@@ -15,6 +15,7 @@ on:
       - 'partener-eu/ops/test_prc_65_campuses_consultation_discovery.py'
       - 'partener-eu/ops/test_prc_22_digital_future_open_badge.py'
       - 'partener-eu/ops/test_mai_fami_am11h_stale_status_currency_discovery.py'
+      - 'partener-eu/ops/test_peo_schools_extension_secondary_discovery.py'
       - 'partener-eu/ops/test_erasmus_2027_annual_notice_rolling_guide.py'
       - 'partener-eu/ops/test_erasmus_eacs13_literacy_exact_call_discovery.py'
       - 'partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py'
@@ -235,6 +236,9 @@ jobs:
 
       - name: Quarantine MAI FAMI AM11H stale status and budget currency contradiction
         run: python partener-eu/ops/test_mai_fami_am11h_stale_status_currency_discovery.py
+
+      - name: Hold unverified secondary PEO Schools for Future extension until MIPE raw original
+        run: python partener-eu/ops/test_peo_schools_extension_secondary_discovery.py
 
       - name: Quarantine Erasmus 2027 annual launch and rolling 2026 guide before exact action receipts
         run: python partener-eu/ops/test_erasmus_2027_annual_notice_rolling_guide.py
