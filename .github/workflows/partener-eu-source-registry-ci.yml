@@ -9,6 +9,7 @@ on:
       - 'partener-eu/ops/test_eu4h_2027_ngo_exact_pair_discovery.py'
       - 'partener-eu/ops/test_cl4_2027_ai_data_topics_discovery.py'
       - 'partener-eu/ops/test_cl4_2027_ai_open_vs_index_conflict.py'
+      - 'partener-eu/ops/test_cl5_2027_info_day_brokerage_discovery.py'
       - 'partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py'
       - 'partener-eu/ops/test_eea_langspil_future_submission_discovery.py'
       - 'partener-eu/ops/test_imfv_bv1a10_guide_revision_discovery.py'
@@ -166,6 +167,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
           python -m py_compile partener-eu/ops/test_cl4_2027_ai_data_topics_discovery.py
           python -m py_compile partener-eu/ops/test_cl4_2027_ai_open_vs_index_conflict.py
+          python -m py_compile partener-eu/ops/test_cl5_2027_info_day_brokerage_discovery.py
           python -m py_compile partener-eu/ops/test_widera_excellence_hubs_official_pair.py
           python -m py_compile partener-eu/ops/test_eu4h_2027_ngo_exact_pair_discovery.py
           python -m py_compile partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py
@@ -202,6 +204,9 @@ jobs:
 
       - name: Reject DG CONNECT call-level OPEN vs FT indexed FORTHCOMING without exact submission evidence
         run: python partener-eu/ops/test_cl4_2027_ai_open_vs_index_conflict.py
+
+      - name: Hold Cluster 5 2027 briefing and brokerage at non-authorizing programming discovery
+        run: python partener-eu/ops/test_cl5_2027_info_day_brokerage_discovery.py
 
       - name: Reject PoIDS 912 interim ETFC list OPEN or final-award promotion
         run: python partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py
