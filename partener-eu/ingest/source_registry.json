@@ -5733,6 +5733,7 @@
         "secondary_report_only",
         "reported_order_1874_not_acquired",
         "new_2027_01_27_deadline_UNVERIFIED",
+        "secondary_reports_16_00_vs_16_10_DEADLINE_TIME_CONFLICT",
         "original_MIPE_timeout",
         "NO_OPEN_CALL",
         "NO_DISTRIBUTION"
@@ -5742,7 +5743,9 @@
       "material_fact_publication_authorized": false,
       "credentials_required": false,
       "adapter_required": "PEO_SCHOOLS_2026_MIPE_ORDER_MYSMIS_PRIMARY_RAW_RECONCILE_V1",
-      "note": "Discovery on 19 November 2026: T3 secondary publisher reports that MIPE order 1874 dated 19 November 2026 extends PEO Școli pentru viitor submission from the previously publicised 27 November 2026 to 27 January 2027 at 16:00. These are UNVERIFIED claims, not facts admissible for a public deadline, OPEN_CALL, eligibility, or another canonical change. Official mfe.gov.ro call gateway returned timeout during this observation; direct order PDF, corrigendum, and exact MySMIS call records NOT_ACQUIRED. Do not infer all regional subcalls inherit the change. SURFACEMC acquisition-only immutable official original(s), final URL, fetched_at UTC, raw_sha256, semantic_sha256, parser_version, run_id and handoff_sha256: NOT_CAPTURED. Perform per-call semantic reconcile and retain LKG until T1 confirmation. NO DISTRIBUTION, NO ALERT."
+      "note": "Discovery on 19 November 2026: T3 secondary publisher reports that MIPE order 1874 dated 19 November 2026 extends PEO Școli pentru viitor submission from the previously publicised 27 November 2026 to 27 January 2027 at 16:00. These are UNVERIFIED claims, not facts admissible for a public deadline, OPEN_CALL, eligibility, or another canonical change. Official mfe.gov.ro call gateway returned timeout during this observation; direct order PDF, corrigendum, and exact MySMIS call records NOT_ACQUIRED. Do not infer all regional subcalls inherit the change. SURFACEMC acquisition-only immutable official original(s), final URL, fetched_at UTC, raw_sha256, semantic_sha256, parser_version, run_id and handoff_sha256: NOT_CAPTURED. Perform per-call semantic reconcile and retain LKG until T1 confirmation. NO DISTRIBUTION, NO ALERT. New secondary time conflict (same discovery date): Edupedu quotes alleged article 4.3.2 text as 27 January 2027 16:10, versus Fonduri Structurale's summary 16:00. The 10-minute disagreement must remain SOURCE_CONFLICT; NO endpoint, specific clock, or deadline is authorized until the original MIPE order/corrigendum and both exact MySMIS subcalls are acquired and semantically reconciled. Secondary witness: https://www.edupedu.ro/apelul-scoli-pentru-viitor-perioada-de-depunere-a-proiectelor-se-prelungeste-cu-doua-luni-pana-la-27-ianuarie-2027/.",
+      "secondary_time_conflict_witness_url": "https://www.edupedu.ro/apelul-scoli-pentru-viitor-perioada-de-depunere-a-proiectelor-se-prelungeste-cu-doua-luni-pana-la-27-ianuarie-2027/",
+      "secondary_time_conflict_discovery": "19 Nov 2026: Fonduri Structurale reports 27 Jan 2027 16:00; Edupedu quotes purported amended section 4.3.2 as 27 Jan 2027 16:10. Neither source is a verified MIPE original; exact end time UNRESOLVED."
     }
   ]
 }
