@@ -105,7 +105,7 @@ def open_listing_semantics(raw: bytes, clock: dt.datetime) -> tuple[bool, list[s
         match_id = CARD_ID_RE.search(block)
         dossier_id = match_id.group(1) if match_id else "unknown"
         # The /deschise/ surface must carry an explicit OPEN badge per card.
-        if not re.search(r'\\bstatus-open\\b', block, re.IGNORECASE):
+        if not re.search(r'\bstatus-open\b', block, re.IGNORECASE):
             failures.append(f"{dossier_id}:non_open_badge")
             continue
         deadlines = DEADLINE_TEXT_RE.findall(block)
