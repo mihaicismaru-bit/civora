@@ -4992,6 +4992,86 @@
         "exact_topic_status_application_endpoint_submission_availability_and_document_versions_require_immutable_raw_reconciliation"
       ],
       "note": "European Commission Funding & Tenders public call list on 19 November 2026 displays Excellence Hubs HORIZON-WIDERA-2027-04-WIDENING-01 as Open For Submission; the exact topic link navigates to a JavaScript portal shell rather than a complete authoritative structured record in independent readback. REA's dated launch notice corroborates the identity and timeline, but the call list and JS shell do NOT satisfy verified exact submission endpoint + original receipt + semantic reconciliation gates. This is DISCOVERY, not permission to promote a new OPEN_CALL or overwrite an existing current status, deadline, budget or eligibility. SURFACEMC immutable acquisition-only handoff missing: final_url, fetched_at UTC, raw_sha256, semantic_sha256, parser_version, run_id, handoff_sha256 NOT_CAPTURED. Preserve LKG and require current structured Funding & Tenders exact topic plus semantic reconciliation and independent review. NO OPEN_CALL, NO MATERIAL PUBLICATION, NO DISTRIBUTION or alert."
+    },
+    {
+      "id": "SRC-EU-HADEA-EU4H-2027-SANTE-OG-EXACT-CALL",
+      "tier": "T1",
+      "programmes": [
+        "EU4Health 2027"
+      ],
+      "programme_family": "EU_DIRECT / EU4HEALTH / 2027",
+      "material_fact_use": false,
+      "credentials_required": false,
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "call_identifier_discovery": "EU4H-2027-SANTE-OG",
+      "agency_publication_date_discovery": "2026-11-04",
+      "agency_opening_date_discovery": "2026-11-04",
+      "agency_deadline_discovery": "2027-01-19 17:00 CET (HaDEA page label, NOT canonical deadline)",
+      "readback_date_discovery": "2026-11-19",
+      "adapter_required": "EU4H_2027_SANTE_OG_HADEA_AND_FT_SURFACEMC_EXACT_TOPIC_RECONCILE_V1",
+      "class": "official_eu4health_hadea_exact_call_page_discovery",
+      "owner": "European Health and Digital Executive Agency (HaDEA)",
+      "url": "https://hadea.ec.europa.eu/calls-proposals/financial-contribution-functioning-health-non-governmental-organisations-implementing-one-or-more_en",
+      "linked_funding_tenders_topic_source_id": "SRC-EU-FT-EU4H-2027-SANTE-OG-EXACT-TOPIC",
+      "authority_class": "T1_OFFICIAL_EC_EXECUTIVE_AGENCY_HADEA",
+      "authority_scope": "EXACT_CALL_AGENCY_PAGE_DISCOVERY_ONLY_NO_CURRENT_APPLICATION_RECEIPT",
+      "observation_state": "OFFICIAL_AGENCY_OPEN_LABEL_RAW_PENDING",
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "EU4HEALTH",
+        "CALL_DETAIL",
+        "DISCOVERY"
+      ],
+      "agency_status_label_discovery": "Open (HaDEA rendered/indexed page, NOT canonical current status)",
+      "extract": [
+        "agency_lists_exact_call_identifier",
+        "agency_lists_open_status_and_opening_and_deadline_as_discovery_only",
+        "agency_links_exact_funding_tenders_topic",
+        "no_current_call_scoped_submission_receipt_or_immutable_originals"
+      ],
+      "note": "HaDEA official exact call page lists reference EU4H-2027-SANTE-OG, publication/opening 4 November 2026, Open label and 19 January 2027 at 17:00 CET. This is an EXISTING early-November EU4Health operating-grants call for health NGOs, not a newly launched 19 November call. Agency page readback may be cached; not proof of current electronic submission availability. The official link to the exact Funding & Tenders topic resolves to a JS shell in the available readback. Public material facts (deadline, eligibility, budget or status) are NOT admitted into canonical funding product: final_url, fetched_at UTC, raw_sha256, semantic_sha256, parser_version, run_id, programme/source family, authority class, observation state and immutable acquisition-only SURFACEMC handoff need captured receipts before normalize/dedup/reconcile. Missing exact call-scoped live submission endpoint and independent semantic review. Preserve LKG; NO OPEN_CALL, NO MATERIAL PUBLICATION, NO DISTRIBUTION, NO ALERT."
+    },
+    {
+      "id": "SRC-EU-FT-EU4H-2027-SANTE-OG-EXACT-TOPIC",
+      "tier": "T1",
+      "programmes": [
+        "EU4Health 2027"
+      ],
+      "programme_family": "EU_DIRECT / EU4HEALTH / 2027",
+      "material_fact_use": false,
+      "credentials_required": false,
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "call_identifier_discovery": "EU4H-2027-SANTE-OG",
+      "agency_publication_date_discovery": "2026-11-04",
+      "agency_opening_date_discovery": "2026-11-04",
+      "agency_deadline_discovery": "2027-01-19 17:00 CET (HaDEA page label, NOT canonical deadline)",
+      "readback_date_discovery": "2026-11-19",
+      "adapter_required": "EU4H_2027_SANTE_OG_HADEA_AND_FT_SURFACEMC_EXACT_TOPIC_RECONCILE_V1",
+      "class": "official_eu_funding_tenders_exact_topic_shell_discovery",
+      "owner": "European Commission / Funding & Tenders Portal",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/EU4H-2027-SANTE-OG",
+      "linked_hadea_agency_source_id": "SRC-EU-HADEA-EU4H-2027-SANTE-OG-EXACT-CALL",
+      "authority_class": "T1_OFFICIAL_EC_FUNDING_TENDERS",
+      "authority_scope": "EXACT_TOPIC_LINK_ONLY_JS_SHELL_NO_CURRENT_STATUS_OR_SUBMISSION_PROOF",
+      "observation_state": "EXACT_TOPIC_JS_SHELL_RAW_PENDING",
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "EU4HEALTH",
+        "CALL_REGISTRY",
+        "DISCOVERY"
+      ],
+      "portal_readback_discovery": "JS shell / Topic List only, no verified call-scoped electronic submission",
+      "extract": [
+        "exact_topic_url_linked_from_official_hadea_agency_page",
+        "topic_identifier_syntactically_exact_but_live_portal_structured_status_not_read",
+        "no_current_exact_topic_submission_endpoint_raw_receipt",
+        "agency_public_open_label_does_not_replace_current_portal_semantic_reconciliation"
+      ],
+      "note": "Official HaDEA agency page links the exact Funding & Tenders Portal topic EU4H-2027-SANTE-OG. Available direct topic transport yields a JS shell/Topic List rather than original structured current call-specific status or submission endpoint. Historical agency Open/publication/deadline labels are discovery only. No authoritative live call-scoped OPEN proof or canonical deadline/eligibility/budget changes. Original portal bytes, final_url, fetched_at UTC, raw_sha256, semantic_sha256, parser_version, run_id and immutable SURFACEMC handoff NOT_CAPTURED. Require exact-topic structured API/current submission gateway plus source authority reconciliation and independent review before OPEN_CALL; preserve LKG, NO MATERIAL PUBLICATION, NO DISTRIBUTION, NO ALERT."
     }
   ]
 }
