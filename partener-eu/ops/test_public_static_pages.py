@@ -336,6 +336,7 @@ cluster_probe = {
     "sections": [
         {"title": "Rezumat executiv", "items": ["Stare apel: OPEN."]},
         {"title": "Decizia rapidă", "items": ["Începe screeningul și planul de depunere."]},
+        {"title": "Ce trebuie făcut acum", "items": ["Planifică depunerea pornind de la termenul confirmat: 2026-11-06T12:00:00+02:00."]},
     ],
     "sources": [{"tier": "T1", "label": "ADR Centru", "url": "https://www.regiocentru.ro/actiuni/clustere-inovative-1-2-2/"}],
 }
@@ -387,6 +388,14 @@ with tempfile.TemporaryDirectory() as td:
     assert '<span class="status status-review">ÎN VERIFICARE</span>' in detail
     assert module.FAIL_CLOSED_OPEN_ACTION in detail
     assert "Sunt confirmate: open" not in detail
+    # A review badge is insufficient if SEO-visible dossier sections still instruct
+    # submission under the already-expired source snapshot. Preserve the historical
+    # cutoff as evidence, but remove actionable text from every REVIEW section.
+    assert "Stare apel: OPEN." not in detail
+    assert "Stare apel: necesită reverificare la sursa oficială." in detail
+    assert "Începe screeningul și planul de depunere." not in detail
+    assert "Planifică depunerea pornind" not in detail
+    assert "2026-11-06T12:00:00+02:00" in detail
     home_js = (after_root / "home-public-data.js").read_text(encoding="utf-8")
     home = json.loads(home_js.removeprefix("window.PARTENER_HOME_DATA=").strip().removesuffix(";"))
     assert home["summary"]["openCount"] == 1
