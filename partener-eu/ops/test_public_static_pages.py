@@ -511,8 +511,9 @@ with tempfile.TemporaryDirectory() as td:
         assert marker not in after_list
         article_match = re.search(rf'<article class="staticCard" {re.escape(marker)}>(.*?)</article>', after_dossiers, re.S)
         assert article_match and "status-review" in article_match.group(1), probe["id"]
-        slug = module.slugify(probe["title"])
-        detail = (later / "dosare" / slug / "index.html").read_text(encoding="utf-8")
+        href_match = re.search(r'<h2><a href="([^"]+)">', article_match.group(1))
+        assert href_match, probe["id"]
+        detail = (later / href_match.group(1).strip("/") / "index.html").read_text(encoding="utf-8")
         assert '<span class="status status-review">ÎN VERIFICARE</span>' in detail
         assert module.FAIL_CLOSED_OPEN_ACTION in detail
         assert "Stare apel: OPEN." not in detail
