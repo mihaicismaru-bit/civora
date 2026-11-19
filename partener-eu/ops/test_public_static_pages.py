@@ -453,8 +453,8 @@ print("PASS public static IA / sitemap / dossier regression + P0 wall-clock repl
 # neither the crawlable list, dossier, nor Ask/home projection can treat it as
 # presently open absent a newly acquired/reconciled official extension.
 # This is not evidence of exhaustion, closure, or extension.
-energy_pre_cutoff = module.parse_date("2026-11-20T21:58:00Z")
-energy_post_cutoff = module.parse_date("2026-11-20T22:01:00Z")
+energy_pre_cutoff = module.parse_date("2026-11-20T21:58:59Z")
+energy_post_cutoff = module.parse_date("2026-11-20T21:59:01Z")
 assert energy_pre_cutoff is not None and energy_post_cutoff is not None
 assert module.parse_date("20 noiembrie 2026, ora 23:59") == module.parse_date("2026-11-20T21:59:00Z")
 energy_probes = []
@@ -486,6 +486,17 @@ for energy_id, energy_title in (
     assert not module.current_open(energy_probes[-1], energy_post_cutoff)
     assert sync_mod.current_open(energy_probes[-1], energy_pre_cutoff)
     assert not sync_mod.current_open(energy_probes[-1], energy_post_cutoff)
+    # Even before cutoff, conflicting status or competing extension date
+    # must not be accepted as a fresh, reconciled OPEN proof.
+    contradictory_status = dict(energy_probes[-1], quickFacts=[
+        {"label": "Status", "value": "REVIEW", "confidence": "CONFIRMED"},
+        {"label": "Termen", "value": "20 noiembrie 2026, 23:59", "confidence": "CONFIRMED"},
+    ])
+    conflicting_extension = dict(energy_probes[-1], closesAt="2026-12-31T23:59:00+02:00")
+    assert not module.current_open(contradictory_status, energy_pre_cutoff)
+    assert not sync_mod.current_open(contradictory_status, energy_pre_cutoff)
+    assert not module.current_open(conflicting_extension, energy_pre_cutoff)
+    assert not sync_mod.current_open(conflicting_extension, energy_pre_cutoff)
 
 with tempfile.TemporaryDirectory() as td:
     root = Path(td)
