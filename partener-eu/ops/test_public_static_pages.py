@@ -446,3 +446,89 @@ assert not sync_mod.current_open({**cluster_probe, "quickFacts": [
 ]}, before_expiry)
 
 print("PASS public static IA / sitemap / dossier regression + P0 wall-clock replay")
+
+# P0 #1407 reproducible AFIR Modernisation Fund cutoff regression (TEST ONLY).
+# The two official energy sessions share a 20 Nov 2026 23:59 Bucharest end
+# as published by AFIR. Source OPEN is historical; once the cutoff passes,
+# neither the crawlable list, dossier, nor Ask/home projection can treat it as
+# presently open absent a newly acquired/reconciled official extension.
+# This is not evidence of exhaustion, closure, or extension.
+energy_pre_cutoff = module.parse_date("2026-11-20T21:58:00Z")
+energy_post_cutoff = module.parse_date("2026-11-20T22:01:00Z")
+assert energy_pre_cutoff is not None and energy_post_cutoff is not None
+assert module.parse_date("20 noiembrie 2026, ora 23:59") == module.parse_date("2026-11-20T21:59:00Z")
+energy_probes = []
+for energy_id, energy_title in (
+    ("afir-fm-public-autoconsum-2026", "Autoconsum entități publice (fixture)"),
+    ("afir-fm-public-storage-2026", "Stocare entități publice (fixture)"),
+):
+    energy_probes.append({
+        "id": energy_id,
+        "title": energy_title,
+        "programme": "Fondul pentru Modernizare / AFIR",
+        "publicationState": "PUBLISHABLE",
+        "status": "OPEN",
+        "statusLabel": "DESCHIS",
+        "standfirst": "Sunt confirmate: open; termen 20 noiembrie 2026, 23:59.",
+        "decisionLabel": "ACȚIONEAZĂ",
+        "decisionAction": "Pregătește depunerea.",
+        "quickFacts": [
+            {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+            {"label": "Termen", "value": "20 noiembrie 2026, 23:59", "confidence": "CONFIRMED"},
+        ],
+        "sections": [
+            {"title": "Rezumat executiv", "items": ["Stare apel: OPEN."]},
+            {"title": "Ce trebuie făcut acum", "items": ["Pregătește depunerea."]},
+        ],
+        "sources": [{"tier": "T1", "label": "AFIR", "url": "https://www.afir.ro/info-la-zi/comunicat-derulare-sesiune-autoconsum-si-stocare-energie-electrica-beneficiari-publici/"}],
+    })
+    assert module.current_open(energy_probes[-1], energy_pre_cutoff)
+    assert not module.current_open(energy_probes[-1], energy_post_cutoff)
+    assert sync_mod.current_open(energy_probes[-1], energy_pre_cutoff)
+    assert not sync_mod.current_open(energy_probes[-1], energy_post_cutoff)
+
+with tempfile.TemporaryDirectory() as td:
+    root = Path(td)
+    fixture = root / "energy-fixture.json"
+    fixture.write_text(json.dumps({
+        "generatedAt": stale_source_timestamp,
+        "dossiers": energy_probes + [future_probe],
+        "news": [],
+    }, ensure_ascii=False), encoding="utf-8")
+    earlier = root / "energy-before"
+    later = root / "energy-after"
+    before_manifest = module.build(fixture, earlier, as_of=energy_pre_cutoff)
+    after_manifest = module.build(fixture, later, as_of=energy_post_cutoff)
+    assert before_manifest["currentOpen"] == 3
+    assert after_manifest["currentOpen"] == 1
+    assert after_manifest["failClosedOpenRefresh"] == 2
+    before_list = (earlier / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    after_list = (later / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    after_dossiers = (later / "dosare/index.html").read_text(encoding="utf-8")
+    for probe in energy_probes:
+        marker = f'data-dossier-id="{probe["id"]}"'
+        assert marker in before_list
+        assert marker not in after_list
+        article_match = re.search(rf'<article class="staticCard" {re.escape(marker)}>(.*?)</article>', after_dossiers, re.S)
+        assert article_match and "status-review" in article_match.group(1), probe["id"]
+        slug = module.slugify(probe["title"])
+        detail = (later / "dosare" / slug / "index.html").read_text(encoding="utf-8")
+        assert '<span class="status status-review">ÎN VERIFICARE</span>' in detail
+        assert module.FAIL_CLOSED_OPEN_ACTION in detail
+        assert "Stare apel: OPEN." not in detail
+        assert "Pregătește depunerea." not in detail
+        assert "20 noiembrie 2026, 23:59" in detail
+    assert 'data-dossier-id="synthetic-future-test-only"' in after_list
+    old_products, old_out = sync_mod.PRODUCTS, sync_mod.OUT_JS
+    try:
+        sync_mod.PRODUCTS = fixture
+        sync_mod.OUT_JS = root / "energy-projection.js"
+        assert sync_mod.main(as_of=energy_post_cutoff) == 0
+    finally:
+        sync_mod.PRODUCTS, sync_mod.OUT_JS = old_products, old_out
+    verified = json.loads(fixture.read_text(encoding="utf-8"))
+    assert verified["summary"]["openCount"] == 1
+    assert verified["home"]["openDossierIds"] == ["synthetic-future-test-only"]
+    assert all(row["status"] == "OPEN" for row in verified["dossiers"]), "Historical source observations must remain unchanged"
+
+print("PASS AFIR 20 Nov cutoff dual-dossier list/detail/home/Ask fail-closed replay")
