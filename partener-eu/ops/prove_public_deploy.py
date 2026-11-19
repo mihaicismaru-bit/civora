@@ -88,6 +88,19 @@ CARD_BLOCK_RE = re.compile(
 )
 CARD_ID_RE = re.compile(r"""\bdata-dossier-id\s*=\s*["']([^"']+)["']""", re.IGNORECASE)
 DEADLINE_TEXT_RE = re.compile(r"""<b>\s*Termen:\s*</b>\s*([^<]*?)\s*</span>""", re.IGNORECASE)
+# Three known P0 source-OPEN dossiers warrant independent live detail checks.
+# This catches a mixed Pages release where the OPEN hub is fresh but details
+# remain stale. These URLs are verification targets, not authority/proofs.
+PRIORITY_DETAIL_ROUTES = {
+    "pr-centru-clusters-122": "dosare/pr-centru-clusters-122-clustere-inovative/",
+    "afir-fm-public-autoconsum-2026": "dosare/afir-fm-public-autoconsum-2026/",
+    "afir-fm-public-storage-2026": "dosare/afir-fm-public-storage-2026/",
+}
+DETAIL_STATUS_RE = re.compile(r'<span class="status status-([a-z_-]+)">', re.IGNORECASE)
+DETAIL_DEADLINE_RE = re.compile(
+    r'<div class="detailFact">\s*<small>Termen</small>\s*<b>([^<]*)</b>',
+    re.IGNORECASE,
+)
 
 
 def open_listing_semantics(raw: bytes, clock: dt.datetime) -> tuple[bool, list[str]]:
@@ -120,6 +133,41 @@ def open_listing_semantics(raw: bytes, clock: dt.datetime) -> tuple[bool, list[s
         if deadline is None or deadline <= clock:
             failures.append(f"{dossier_id}:expired_or_invalid_deadline")
     return not failures, failures
+
+def priority_detail_semantics(raw: bytes, clock: dt.datetime) -> tuple[bool, str, list[str]]:
+    """Negative gate for P0 detail: no stale OPEN or contradictory REVIEW copy.
+
+    An exact future clock alone never constitutes new OPEN authorization; that
+    belongs to the canonical source reconciler. This function only vetoes unsafe
+    public readback and never changes the source status.
+    """
+    source = raw.decode("utf-8", "replace")
+    statuses = DETAIL_STATUS_RE.findall(source)
+    if len(statuses) != 1:
+        return False, "", ["detail_missing_or_ambiguous_status"]
+    status = statuses[0].lower()
+    failures: list[str] = []
+    if status == "open":
+        deadlines = DETAIL_DEADLINE_RE.findall(source)
+        if len(deadlines) != 1:
+            failures.append("detail_missing_or_ambiguous_deadline")
+        else:
+            deadline_text = html.unescape(deadlines[0]).strip()
+            if not has_explicit_open_deadline_clock(deadline_text):
+                failures.append("detail_unverified_deadline_clock")
+            else:
+                when = parse_date(deadline_text)
+                if when is None or when <= clock:
+                    failures.append("detail_expired_or_invalid_deadline")
+    elif status == "review":
+        # A REVIEW badge is ineffective if the crawlable decision body still
+        # tells the reader that the call is open or to submit immediately.
+        if re.search(r'<strong>\s*ACȚIONEAZĂ\s*</strong>', source, re.IGNORECASE):
+            failures.append("review_still_actionable")
+        if re.search(r'<li>\s*Stare apel:\s*(?:OPEN|DESCHIS)\s*\.?\s*</li>', source, re.IGNORECASE):
+            failures.append("review_still_claims_open")
+    return not failures, status, failures
+
 
 def compare_manifest(expected: dict[str, Any], observed: dict[str, Any]) -> tuple[bool, list[str]]:
     if expected == observed:
@@ -166,6 +214,23 @@ def self_test() -> int:
     assert not open_listing_semantics(card("wrong-badge", "2 decembrie 2026, 16:00", "review"), clock)[0]
     assert not open_listing_semantics(card("missing-deadline", ""), clock)[0]
     assert open_listing_semantics(future, dt.datetime(2026, 11, 20, 21, 59, 1, tzinfo=dt.timezone.utc))[0] is False
+    def detail(status: str, deadline: str, action: str = "VERIFICĂ STAREA", claim: str = "") -> bytes:
+        return (
+            f'<div class="detailMeta"><span class="status status-{status}">STARE</span></div>'
+            f'<div class="detailFact"><small>Termen</small><b>{deadline}</b><span>CONFIRMED</span></div>'
+            f'<div class="decisionBox"><strong>{action}</strong></div>'
+            f'<ul><li>{claim}</li></ul>'
+        ).encode("utf-8")
+    exact = detail("open", "20 noiembrie 2026, 23:59")
+    before = dt.datetime(2026, 11, 20, 21, 58, 59, tzinfo=dt.timezone.utc)
+    after = dt.datetime(2026, 11, 20, 21, 59, 1, tzinfo=dt.timezone.utc)
+    assert priority_detail_semantics(exact, before) == (True, "open", [])
+    assert not priority_detail_semantics(exact, after)[0]
+    assert not priority_detail_semantics(detail("open", "20 noiembrie 2026"), before)[0]
+    assert priority_detail_semantics(detail("review", "20 noiembrie 2026, 23:59"), after) == (True, "review", [])
+    assert not priority_detail_semantics(detail("review", "20 noiembrie 2026, 23:59", "ACȚIONEAZĂ"), after)[0]
+    assert not priority_detail_semantics(detail("review", "20 noiembrie 2026, 23:59", claim="Stare apel: OPEN."), after)[0]
+    assert not priority_detail_semantics(b"<html>missing lifecycle</html>", after)[0]
     assert not consultation_semantics_ok(b"<article><b>Termen:</b> Neconfirmat</article>")
     busted = cache_busted("https://partener.eu/consultari/?x=1", "abc")
     assert "x=1" in busted and "partener_readback=abc" in busted
@@ -205,6 +270,7 @@ def main() -> int:
     attempts_log: list[dict[str, Any]] = []
     final_observed: dict[str, Any] | None = None
     final_routes: dict[str, Any] = {}
+    final_priority_details: dict[str, Any] = {}
     final_hash: str | None = None
     final_mismatches: list[str] = []
     passed = False
@@ -232,6 +298,7 @@ def main() -> int:
 
             route_results: dict[str, Any] = {}
             routes_ok = True
+            open_listing_ids: set[str] = set()
             for route, expected_count in required_counts.items():
                 route_url = urllib.parse.urljoin(base_url, route)
                 r_code, r_raw, r_resolved = fetch_bytes(route_url, timeout=args.timeout_seconds, token=token)
@@ -244,6 +311,7 @@ def main() -> int:
                     semantic_ok, semantic_failures = open_listing_semantics(
                         r_raw, dt.datetime.now(dt.timezone.utc)
                     )
+                    open_listing_ids = set(CARD_ID_RE.findall(r_raw.decode("utf-8", "replace")))
                 route_ok = r_code == 200 and observed_count == expected_count and semantic_ok
                 route_results[route] = {
                     "http_status": r_code,
@@ -257,7 +325,35 @@ def main() -> int:
                 routes_ok = routes_ok and route_ok
             record["routes"] = route_results
             final_routes = route_results
-            passed = same and routes_ok
+            # Independent P0 dossier readback. A fresh listing and matching
+            # manifest cannot mask a stale detail, nor the reverse.
+            detail_results: dict[str, Any] = {}
+            details_ok = True
+            for dossier_id, route in PRIORITY_DETAIL_ROUTES.items():
+                detail_url = urllib.parse.urljoin(base_url, route)
+                d_code, d_raw, d_resolved = fetch_bytes(
+                    detail_url, timeout=args.timeout_seconds, token=token
+                )
+                detail_ok, detail_status, failures = priority_detail_semantics(
+                    d_raw, dt.datetime.now(dt.timezone.utc)
+                )
+                if (dossier_id in open_listing_ids) != (detail_status == "open"):
+                    failures.append("open_listing_detail_state_disagreement")
+                # Do not silently accept an unrelated page after a redirect.
+                if urllib.parse.urlsplit(d_resolved).path.rstrip("/") != urllib.parse.urlsplit(detail_url).path.rstrip("/"):
+                    failures.append("detail_redirected_to_other_route")
+                detail_ok = d_code == 200 and detail_ok and not failures
+                detail_results[dossier_id] = {
+                    "http_status": d_code,
+                    "resolved_url": d_resolved,
+                    "lifecycle": detail_status,
+                    "semantic_freshness_ok": detail_ok,
+                    "semantic_failures": failures,
+                }
+                details_ok = details_ok and detail_ok
+            record["priority_details"] = detail_results
+            final_priority_details = detail_results
+            passed = same and routes_ok and details_ok
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, ValueError, json.JSONDecodeError, OSError) as exc:
             record["errors"].append(f"{type(exc).__name__}: {exc}")
             passed = False
@@ -284,6 +380,7 @@ def main() -> int:
             route: details.get("observed_cards") for route, details in final_routes.items()
         },
         "routes": final_routes,
+        "priority_details": final_priority_details,
         "attempts_used": len(attempts_log),
         "attempts": attempts_log,
         "fail_closed": True,
