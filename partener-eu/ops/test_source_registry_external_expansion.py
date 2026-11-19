@@ -2791,6 +2791,98 @@ def main():
         else:
             fail("BMVI EES PDF negative mutation admitted: " + repr(change))
 
+
+    # ERC_POC_2027_STRICT_ENDPOINT_HOLD: official scheme page can show
+    # an "Open call" label while the exact Funding & Tenders accepting
+    # endpoint has NOT been acquired. Keep the call-level market signal
+    # without authorizing OPEN_CALL or a material funding fact.
+    erc_id = "SRC-EU-ERC-POC-2027-OPEN-LABEL-20261119"
+    erc = by_id.get(erc_id)
+    if erc is None:
+        fail("missing official ERC PoC 2027 source discovery")
+
+    def _check_erc_poc_2027(row):
+        expected = {
+            "id": erc_id,
+            "tier": "T1",
+            "url": "https://erc.europa.eu/apply-grant/proof-concept",
+            "owner": "European Research Council / European Commission",
+            "readback_date_discovery": "2026-11-19",
+            "funding_tenders_query_key_discovery": "ERC-2027-POC",
+            "authority_class": "T1_OFFICIAL_ERC_COMMISSION",
+            "authority_scope": "OFFICIAL_SCHEME_PAGE_OPEN_LABEL_NOT_EXACT_LIVE_TOPIC_SUBMISSION_ENDPOINT_PROOF",
+            "observation_state": "ERC_POC_2027_OPEN_LABEL_DISCOVERED_EXACT_ENDPOINT_RAW_PENDING",
+            "adapter_required": "ERC_POC_2027_EXACT_FT_TOPIC_SURFACEMC_RECONCILE_V1",
+            "programme_family": "Horizon Europe / ERC Proof of Concept 2027",
+        }
+        for key, value in expected.items():
+            if row.get(key) != value:
+                fail("ERC PoC 2027 identity/scope drift: " + key)
+        if not {"EU_DIRECT", "BRUSSELS", "HORIZON_EUROPE", "ERC",
+                "CALL_REGISTRY", "DISCOVERY"}.issubset(set(row.get("source_families") or [])):
+            fail("ERC PoC 2027 must remain EU_DIRECT discovery")
+        if not {"current_exact_topic_identifier_and_accepting_submission_endpoint_unverified",
+                "NO_OPEN_CALL"}.issubset(set(row.get("extract") or [])):
+            fail("ERC PoC 2027 missing strict endpoint hold")
+        for key in ("material_fact_use", "credentials_required",
+                    "open_call_authorized", "material_fact_publication_authorized"):
+            if row.get(key) is not False:
+                fail("ERC PoC 2027 unauthorized material/open promotion: " + key)
+        forbidden = {
+            "status", "call_status", "deadline", "application_deadline",
+            "budget", "budget_eur", "eligibility", "exact_call_identifier",
+            "exact_topic_identifier", "submission_endpoint", "open_at",
+            "close_at", "final_url", "fetched_at", "raw_sha256",
+            "semantic_sha256", "parser_version", "run_id", "handoff_sha256",
+            "last_verified_open",
+        }
+        if forbidden.intersection(row):
+            fail("ERC PoC 2027 fabricated call fact or raw receipt")
+        note = str(row.get("note") or "").upper()
+        for marker in ("12 NOVEMBER 2026", "10 MARCH", "16 SEPTEMBER",
+                       "NOT_CAPTURED", "SURFACEMC", "EXACT", "OPEN_CALL",
+                       "LKG", "NO DISTRIBUTION"):
+            if marker not in note:
+                fail("ERC PoC 2027 missing provenance/authority warning: " + marker)
+
+    _check_erc_poc_2027(erc)
+    for mutation in (
+        {"tier": "T3"},
+        {"url": "https://example.com/erc"},
+        {"authority_class": "T3_DISCOVERY"},
+        {"authority_scope": "CURRENT_OPEN_CALL"},
+        {"observation_state": "OPEN_CALL"},
+        {"funding_tenders_query_key_discovery": "ERC-2026-POC"},
+        {"adapter_required": "NO_ADAPTER"},
+        {"readback_date_discovery": "2026-11-12"},
+        {"source_families": ["EU_DIRECT", "CALL_REGISTRY"]},
+        {"extract": ["NO_OPEN_CALL"]},
+        {"material_fact_use": True},
+        {"credentials_required": True},
+        {"open_call_authorized": True},
+        {"material_fact_publication_authorized": True},
+        {"status": "OPEN"},
+        {"call_status": "OPEN_CALL"},
+        {"deadline": "2027-03-10"},
+        {"budget_eur": 150000},
+        {"eligibility": ["all universities"]},
+        {"exact_topic_identifier": "ERC-2027-POC"},
+        {"submission_endpoint": "https://example.com/apply"},
+        {"fetched_at": "2026-11-19T21:28:00Z"},
+        {"raw_sha256": "0" * 64},
+        {"semantic_sha256": "0" * 64},
+        {"parser_version": "unverified"},
+        {"run_id": "fabricated"},
+        {"handoff_sha256": "0" * 64},
+        {"note": "Open call, all confirmed"},
+    ):
+        try:
+            _check_erc_poc_2027(dict(erc, **mutation))
+        except SystemExit:
+            pass
+        else:
+            fail("ERC PoC 2027 negative mutation admitted " + repr(mutation))
+
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
