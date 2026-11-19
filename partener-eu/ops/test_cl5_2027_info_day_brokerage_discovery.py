@@ -50,7 +50,8 @@ def validate(rows):
         assert row.get("event_date_discovery") == "2026-11-19"
         assert row.get("readback_date_discovery") == "2026-11-19"
         assert row.get("programmes") and "Cluster 5" in row["programmes"][0]
-        assert {"EU_DIRECT","BRUSSELS","HORIZON_EUROPE","CLUSTER_5","PROGRAMMING_PIPELINE","DISCOVERY"} <= set(row["source_families"])
+        assert {"EU_DIRECT","BRUSSELS","HORIZON_EUROPE","CLUSTER_5","MARKET_INTELLIGENCE","PROGRAMMING_SIGNAL","DISCOVERY"} <= set(row["source_families"])
+        assert "PROGRAMMING_PIPELINE" not in row["source_families"], "Event signal must not masquerade as admitted future programme"
         assert not {"OPEN_CALL","EXACT_CALL_OPEN"} & set(row["source_families"])
         for flag in ("material_fact_use", "credentials_required", "open_call_authorized", "material_fact_publication_authorized"):
             assert row.get(flag) is False, (source_id, flag)
