@@ -83,11 +83,11 @@ def consultation_semantics_ok(raw: bytes) -> bool:
 
 
 CARD_BLOCK_RE = re.compile(
-    r'<article\\b[^>]*\\bdata-dossier-id\\s*=\\s*["\\\'][^"\\\']+["\\\'][^>]*>.*?</article>',
+    r'<article\b[^>]*\bdata-dossier-id\s*=\s*["\\'][^"\\']+["\\'][^>]*>.*?</article>',
     re.IGNORECASE | re.DOTALL,
 )
-CARD_ID_RE = re.compile(r'\\bdata-dossier-id\\s*=\\s*["\\\']([^"\\\']+)["\\\']', re.IGNORECASE)
-DEADLINE_TEXT_RE = re.compile(r'<b>\\s*Termen:\\s*</b>\\s*([^<]*?)\\s*</span>', re.IGNORECASE)
+CARD_ID_RE = re.compile(r'\bdata-dossier-id\s*=\s*["\\']([^"\\']+)["\\']', re.IGNORECASE)
+DEADLINE_TEXT_RE = re.compile(r'<b>\s*Termen:\s*</b>\s*([^<]*?)\s*</span>', re.IGNORECASE)
 
 
 def open_listing_semantics(raw: bytes, clock: dt.datetime) -> tuple[bool, list[str]]:
