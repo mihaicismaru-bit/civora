@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
+import sys
 import re
 import tempfile
 import xml.etree.ElementTree as ET
@@ -543,4 +545,11 @@ with tempfile.TemporaryDirectory() as td:
     assert verified["home"]["openDossierIds"] == ["synthetic-future-test-only"]
     assert all(row["status"] == "OPEN" for row in verified["dossiers"]), "Historical source observations must remain unchanged"
 
+# The Pages readback must reject matching-manifest pages with stale OPEN cards.
+# Execute the actual deployment proof's self-test, not a synthetic copy.
+readback_test = subprocess.run(
+    [sys.executable, str(ROOT / "partener-eu" / "ops" / "prove_public_deploy.py"), "--self-test"],
+    capture_output=True, text=True, check=True,
+)
+assert "PASS public deploy readback proof self-test" in readback_test.stdout
 print("PASS AFIR 20 Nov cutoff dual-dossier list/detail/home/Ask fail-closed replay")
