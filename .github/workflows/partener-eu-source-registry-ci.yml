@@ -6,6 +6,7 @@ on:
       - 'partener-eu/ingest/source_registry.json'
       - 'partener-eu/ops/test_cl4_2027_photonics_topic_identity.py'
       - 'partener-eu/ops/test_widera_excellence_hubs_official_pair.py'
+      - 'partener-eu/ops/test_eu4h_2027_ngo_exact_pair_discovery.py'
       - 'partener-eu/ops/test_cl4_2027_ai_data_topics_discovery.py'
       - 'partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py'
       - 'partener-eu/ops/test_eea_langspil_future_submission_discovery.py'
@@ -164,6 +165,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
           python -m py_compile partener-eu/ops/test_cl4_2027_ai_data_topics_discovery.py
           python -m py_compile partener-eu/ops/test_widera_excellence_hubs_official_pair.py
+          python -m py_compile partener-eu/ops/test_eu4h_2027_ngo_exact_pair_discovery.py
           python -m py_compile partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py
           python -m py_compile partener-eu/ops/test_eea_langspil_future_submission_discovery.py
           python -m py_compile partener-eu/ops/test_imfv_bv1a10_guide_revision_discovery.py
@@ -186,6 +188,9 @@ jobs:
 
       - name: REA and F&T WIDERA Excellence Hubs exact topic discovery fail-closed
         run: python partener-eu/ops/test_widera_excellence_hubs_official_pair.py
+
+      - name: Hold EU4Health 2027 NGO exact official pair at discovery until immutable submission proof
+        run: python partener-eu/ops/test_eu4h_2027_ngo_exact_pair_discovery.py
 
       - name: Validate CL4 photonics exact topic ID conflict (no OPEN promotion)
         run: python partener-eu/ops/test_cl4_2027_photonics_topic_identity.py
