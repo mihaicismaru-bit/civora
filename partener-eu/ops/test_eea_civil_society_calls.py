@@ -46,6 +46,70 @@ def main():
     if not required_domains.issubset(domains):
         fail(f"EEA CSF programme lacks data-plane domains: {sorted(required_domains - domains)}")
 
+    # EEA_CSF_863_INTAKE_DISCOVERY_FAIL_CLOSED
+    # The operator's published lists describe *validated applications*, not
+    # selected/eligible/contracted projects or a reopened funding window.
+    registry = json.loads((ROOT / "partener-eu" / "ingest" / "source_registry.json").read_text(encoding="utf-8"))
+    intake = next(row for row in registry["sources"] if row["id"] == "SRC-EEA-CSF-ROMANIA-CALLS")
+
+    def check_intake(row):
+        expected = {
+            "url": ROOT_CALLS,
+            "material_fact_use": False,
+            "authority_scope": "CALL_INDEX_DISCOVERY",
+            "observation_state": "CURRENT_CALL_REGISTRY",
+            "validated_applications_discovery": 863,
+            "validated_applications_deadline_discovery": "2026-10-08T16:00:00+03:00",
+            "evaluation_stage_discovery": "PRELIMINARY_MULTIPLE_APPLICATION_CLARIFICATION_THEN_ADMINISTRATIVE_COMPLIANCE_AND_ELIGIBILITY_CHECKS",
+            "readback_date_discovery": "2026-11-19",
+            "intake_lists_available_discovery": True,
+        }
+        for key, value in expected.items():
+            if row.get(key) != value:
+                fail("EEA CSF intake registry drift: " + key)
+        if row.get("open_call_authorized") or row.get("material_fact_publication_authorized"):
+            fail("EEA CSF index cannot admit OPEN/publication")
+        forbidden = {
+            "fetched_at", "final_url", "raw_sha256", "semantic_sha256",
+            "parser_version", "run_id", "handoff_sha256", "deadline", "budget",
+            "eligibility", "status", "award_count", "approved_projects",
+            "selected_projects", "exact_submission_endpoint",
+        }
+        if forbidden.intersection(row):
+            fail("EEA CSF intake index fabricated canonical result or original receipt")
+        note = row.get("note") or ""
+        for token in ("863 validated", "NOT an eligibility decision",
+                      "NOT_CAPTURED", "SURFACEMC", "not event/publication date",
+                      "OPEN_CALL"):
+            if token not in note:
+                fail("EEA CSF intake semantic boundary missing: " + token)
+
+    check_intake(intake)
+    for mutation in (
+        {"validated_applications_discovery": 864},
+        {"validated_applications_deadline_discovery": "2026-11-19T16:00:00+02:00"},
+        {"evaluation_stage_discovery": "GRANTS_AWARDED"},
+        {"readback_date_discovery": "2026-10-08"},
+        {"intake_lists_available_discovery": False},
+        {"observation_state": "OPEN_CALL"},
+        {"open_call_authorized": True},
+        {"material_fact_use": True},
+        {"material_fact_publication_authorized": True},
+        {"award_count": 863},
+        {"approved_projects": 863},
+        {"deadline": "2026-11-19"},
+        {"eligibility": ["all Romanian NGOs"]},
+        {"fetched_at": "2026-11-19T03:00:00Z"},
+        {"raw_sha256": "not-an-original"},
+        {"url": "https://example.org/unsupported-intake"},
+    ):
+        try:
+            check_intake(dict(intake, **mutation))
+        except SystemExit:
+            pass
+        else:
+            fail("EEA CSF intake adversarial mutation admitted: " + repr(mutation))
+
     open_row = module.normalize_record(
         base_record(),
         fetched_at=FETCHED,
