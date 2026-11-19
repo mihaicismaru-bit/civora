@@ -1620,7 +1620,12 @@
       "authority_scope": "PROGRAMME_GUIDE",
       "observation_state": "GATEWAY_ONLY",
       "adapter_required": "ERASMUS_ACTION_ROUTER_V1",
-      "note": "Official 2026 Erasmus+ Programme Guide. Centralised and decentralised actions have different authoritative application endpoints; action-level identifier, route and current deadline evidence are mandatory before OPEN/material facts."
+      "note": "Official 2026 Erasmus+ Programme Guide. Centralised and decentralised actions have different authoritative application endpoints; action-level identifier, route and current deadline evidence are mandatory before OPEN/material facts. AS-OF 19 NOVEMBER 2026: This is a ROLLING programme-guide URL; the live official page now reports 2027 Programme Guide v1 (18 November 2026), not the historical 2026 guide named in this registry ID. DO NOT extract 2026 dates, eligibility or budgets from this present URL as historical evidence, or promote any 2027 action to OPEN. Separate immutable version-specific acquisition is required.",
+      "current_gateway_rollover_observed_date_discovery": "2026-11-19",
+      "current_gateway_version_discovery": "2027 Programme Guide v1 dated 18.11.2026 (rolling URL; 2026 contents not preserved at this endpoint)",
+      "historical_2026_version_available_at_current_url": false,
+      "linked_2027_annual_call_source_id": "SRC-EU-ERASMUS-2027-OJ-ANNUAL-CALL-EACA11-2026",
+      "linked_2027_launch_source_id": "SRC-EU-ERASMUS-2027-EC-LAUNCH-20261118"
     },
     {
       "id": "SRC-EU-CREATIVE-EUROPE-CALLS",
@@ -5488,6 +5493,90 @@
       "material_fact_publication_authorized": false,
       "adapter_required": "PR_CENTRU_65_DRAFT_GUIDE_ANNEXES_TO_FINAL_MYSMIS_RAW_RECONCILE_V1",
       "note": "19 November 2026 indexed ADR Centru exact action page presents an Action 6.5 DRAFT-GUIDE public consultation (feedback 19 November–14 December 2026), not an application period. The same page also displays older 30 July–30 October 2026 submission and 28 April–20 May 2026 consultation fields, which are discordant/stale page metadata and MUST NOT be attributed to an open 6.5 call or silently resolved. Budget/eligibility and any application deadline are NOT admitted; even a page-wide budget figure cannot be treated as a live call budget. Direct ADR page/index original readback returned HTTP 403/disabled in this environment; indexed text is discovery, not immutable T1 raw evidence. SURFACEMC acquisition-only original HTML and draft guide/annex bytes, exact final_url, fetched_at UTC, raw_sha256, semantic_sha256, parser_version, run_id, handoff_sha256 are NOT_CAPTURED. No exact current MySMIS call identifier or active submission endpoint, no semantic reconciliation, and no independent review. Preserve LKG, do not promote OPEN_CALL, do not publish material facts, NO DISTRIBUTION, NO ALERT."
+    },
+    {
+      "id": "SRC-EU-ERASMUS-2027-OJ-ANNUAL-CALL-EACA11-2026",
+      "tier": "T1",
+      "class": "official_eu_journal_2027_erasmus_annual_call_notice_reference",
+      "owner": "European Union Official Journal / European Commission DG EAC",
+      "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ:C_202606148",
+      "official_programme_guide_linking_notice": "https://erasmus-plus.ec.europa.eu/erasmus-programme-guide",
+      "official_programme_news_url": "https://erasmus-plus.ec.europa.eu/whats-new/news/over-eur53-billion-for-wider-opportunities-under-erasmus-2027-call",
+      "programmes": [
+        "Erasmus+ 2027"
+      ],
+      "programme_family": "Erasmus+ / annual call / 2027",
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "ERASMUS_PLUS",
+        "CALL_REGISTRY",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_OFFICIAL_JOURNAL_ANNUAL_NOTICE_LINKED_FROM_DG_EAC",
+      "authority_scope": "ANNUAL_2027_CALL_NOTICE_NOT_AN_EXACT_ACTION_SUBMISSION_RECEIPT",
+      "observation_state": "2027_ANNUAL_OJ_NOTICE_LINKED_BOT_BLOCKED_RAW_PENDING",
+      "notice_reference_discovery": "C/2026/6148",
+      "annual_call_identifier_discovery": "EAC/A11/2026",
+      "notice_publication_date_discovery": "2026-11-18",
+      "readback_date_discovery": "2026-11-19",
+      "guide_version_discovery": "2027 v1 / 18.11.2026",
+      "linked_2027_launch_source_id": "SRC-EU-ERASMUS-2027-EC-LAUNCH-20261118",
+      "material_fact_use": false,
+      "credentials_required": false,
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "adapter_required": "ERASMUS_2027_OJ_ACTION_ROUTES_NA_EACEA_EXACT_RECEIPT_RECONCILE_V1",
+      "extract": [
+        "2027_annual_notice_identity_not_exact_application_action",
+        "programme_wide_call_not_all_actions_verified_open",
+        "national_agency_vs_eacea_action_route_requires_separate_reconciliation",
+        "official_programme_guide_links_oj_reference",
+        "eurlex_direct_html_access_anti_bot_not_immutable_raw"
+      ],
+      "note": "European Commission Erasmus+ Programme Guide current 2027 v1 dated 18 November 2026 links Official Journal annual call notice EAC/A11/2026 / C/2026/6148. Direct EUR-Lex text readback returned JavaScript/robot challenge, not immutable Official Journal raw: recorded as linked official discovery, not as source acquired. The annual call notice/reference does NOT prove a specific Erasmus+ KA1/KA2/Jean Monnet action currently accepts applications, and does not authorize any action-level deadline, budget, eligibility or OPEN_CALL. National Agency versus EACEA application routes differ. SURFACEMC acquisition-only must obtain immutable originals including final_url, fetched_at UTC, raw_sha256, semantic_sha256, parser_version, run_id, handoff_sha256; all are NOT_CAPTURED and no placeholder values may be forged. Preserve LKG. No material fact publication, no direct action status promotion, NO DISTRIBUTION, NO ALERT."
+    },
+    {
+      "id": "SRC-EU-ERASMUS-2027-EC-LAUNCH-20261118",
+      "tier": "T1",
+      "class": "official_european_commission_erasmus_2027_annual_call_launch_programme_intelligence",
+      "owner": "European Commission / DG Education, Youth, Sport and Culture — Erasmus+",
+      "url": "https://erasmus-plus.ec.europa.eu/whats-new/news/over-eur53-billion-for-wider-opportunities-under-erasmus-2027-call",
+      "official_2027_guide_url": "https://erasmus-plus.ec.europa.eu/erasmus-programme-guide",
+      "programmes": [
+        "Erasmus+ 2027"
+      ],
+      "programme_family": "Erasmus+ / 2027",
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "ERASMUS_PLUS",
+        "MARKET_INTELLIGENCE",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_OFFICIAL_COMMISSION_ERASMUS_PROGRAMME_NEWS",
+      "authority_scope": "PROGRAMME_LEVEL_2027_ANNUAL_OPEN_ANNOUNCEMENT_NOT_PER_ACTION_OPEN",
+      "observation_state": "2027_PROGRAMME_LAUNCH_OFFICIAL_LABEL_RAW_PENDING",
+      "source_publication_date_discovery": "2026-11-18",
+      "readback_date_discovery": "2026-11-19",
+      "annual_programme_call_label_discovery": "2027 call now open (programme-wide official wording only)",
+      "annual_programme_budget_label_discovery": "over EUR 5.3 billion (programme-level, NOT per-action or per-topic allocation)",
+      "guide_version_discovery": "2027 v1 / 18.11.2026",
+      "linked_official_journal_source_id": "SRC-EU-ERASMUS-2027-OJ-ANNUAL-CALL-EACA11-2026",
+      "application_route_discovery": "National Agencies for most actions; EACEA for selected centrally managed actions",
+      "material_fact_use": false,
+      "credentials_required": false,
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "adapter_required": "ERASMUS_2027_GUIDE_ANNUAL_NOTICE_NA_EACEA_EXACT_ACTION_RECONCILE_V1",
+      "extract": [
+        "2027_programme_annual_call_officially_announced_2026_11_18",
+        "over_eur_5_3b_programme_total_not_specific_call_budget",
+        "individual_actions_require_exact_application_endpoint_and_current_status",
+        "guide_rolling_url_version_changed_from_2026_to_2027",
+        "national_agency_or_eacea_application_route_depends_on_action"
+      ],
+      "note": "DG EAC official Erasmus+ news published 18 November 2026 says 2027 ANNUAL call is open and programme budget is over EUR 5.3 billion. This programme-level label and aggregate figure are NOT proofs of any specific current OPEN_CALL, topic budget, deadline, national eligibility or submission endpoint. Guide URL now serves 2027 v1 (18 Nov 2026), despite pre-existing 2026 registry gateway pointing to same rolling URL. The notice link on the official guide is C/2026/6148 (EAC/A11/2026), separately recorded at discovery. For actionable calls, resolve exact KA1/KA2/other action identifier, National Agency/EACEA accepting official endpoint, current guide/action provisions, and semantics. SURFACEMC acquisition-only immutable originals, final_url, fetched_at UTC, raw_sha256, semantic_sha256, parser_version, run_id, handoff_sha256 NOT_CAPTURED. No promotion to OPEN_CALL, no material fact publication, LKG retained, NO DISTRIBUTION, NO ALERT."
     }
   ]
 }
