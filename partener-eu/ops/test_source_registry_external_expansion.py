@@ -2673,6 +2673,124 @@ def main():
         else:
             fail("Erasmus 2027 adversarial mutation admitted " + repr(change))
 
+
+    # BMVI_EES_2026_47_MEMBER_STATE_ONLY_NEGATIVE
+    # MAI hosts a signed DG HOME Member State-only invitation, NOT a
+    # Romanian public beneficiary call; discover both sources without
+    # inventing a current status, deadline, budget or live submission.
+    bmvi_47_index_id = "SRC-MAI-IMFV-BMVI-EES-2026-47-INDEX"
+    bmvi_47_pdf_id = "SRC-EC-DG-HOME-BMVI-EES-2026-47-PRIMARY"
+
+    def _check_bmvi_47(row, source_id):
+        index = source_id == bmvi_47_index_id
+        expected = {
+            "id": source_id,
+            "tier": "T1",
+            "url": (
+                "https://fed.mai.gov.ro/fed-2021-2027/documentatii-as-2021-2027/actiuni-specifice-imfv-2021-2027/"
+                if index else
+                "https://fed.mai.gov.ro/wp-content/uploads/2026/11/Call-for-interest_BMVI_2026_SA_1.5.3_EES.pdf"
+            ),
+            "commission_note_identifier": "HOME-Funds/2026/47",
+            "call_identifier_discovery": "BMVI/2026/SA/1.5.3",
+            "programme_family": "BMVI 2021-2027 / specific actions / automated EES registration at land and sea borders",
+            "programmes": ["IMFV"],
+            "readback_date_discovery": "2026-11-19",
+            "adapter_required": "BMVI_EES_2026_47_MEMBER_STATE_PRIMARY_AND_MAI_RAW_RECONCILE_V1",
+            "observation_state": (
+                "MAI_DG_HOME_EES_PRIMARY_LINK_DISCOVERED_RAW_PENDING" if index
+                else "EC_DG_HOME_SIGNED_EES_2026_47_PDF_READBACK_RAW_PENDING"
+            ),
+            "authority_scope": (
+                "EC_SPECIFIC_ACTION_DOCUMENT_INDEX_DISCOVERY_NOT_ROMANIAN_PUBLIC_APPLICANT_CALL"
+                if index else
+                "PRIMARY_SIGNED_MEMBER_STATE_SPECIFIC_ACTION_NOTE_DISCOVERY_NOT_PUBLIC_BENEFICIARY_CALL"
+            ),
+            "authority_class": (
+                "T1_MANAGING_AUTHORITY_AFACERI_INTERNE"
+                if index else
+                "T1_OFFICIAL_EC_DG_HOME_SIGNED_PRIMARY_NOTE_HOSTED_MAI"
+            ),
+            ("linked_primary_source_id" if index else "paired_official_source_id"):
+                bmvi_47_pdf_id if index else bmvi_47_index_id,
+        }
+        for field, expected_value in expected.items():
+            if row.get(field) != expected_value:
+                fail(f"BMVI EES source identity/authority drift: {source_id} / {field}")
+        if not {"ROMANIA", "MAI", "IMFV", "CALL_REGISTRY", "DISCOVERY"}.issubset(
+                set(row.get("source_families") or [])):
+            fail("BMVI EES discovery missing exact source family")
+        if not index and not {"EU_DIRECT", "BRUSSELS"}.issubset(
+                set(row.get("source_families") or [])):
+            fail("DG HOME signed primary must be EU DIRECT primary discovery")
+        if not index and row.get("document_signed_date_discovery") != "2026-10-28":
+            fail("DG HOME primary signature must not be mistaken for MAI readback date")
+        for field in ("material_fact_use", "credentials_required",
+                      "open_call_authorized", "material_fact_publication_authorized"):
+            if row.get(field) is not False:
+                fail("BMVI EES member-state document authorized a call: " + field)
+        forbidden = {
+            "status", "call_status", "open_at", "close_at", "deadline",
+            "application_deadline", "budget", "budget_eur", "eligibility",
+            "exact_topic_identifier", "submission_endpoint",
+            "fetched_at", "final_url", "raw_sha256", "semantic_sha256",
+            "parser_version", "run_id", "handoff_sha256",
+        }
+        if forbidden.intersection(row):
+            fail("BMVI EES doc fabricated canonical facts/provenance")
+        note = (row.get("note") or "").upper()
+        for marker in ("MEMBER STATE", "NOT_CAPTURED", "OPEN_CALL",
+                       "SURFACEMC", "NO", "DISTRIBUTION"):
+            if marker not in note:
+                fail("BMVI EES non-promotion warning missing: " + marker)
+
+    for row_id in (bmvi_47_index_id, bmvi_47_pdf_id):
+        row = by_id.get(row_id)
+        if row is None:
+            fail("missing exact BMVI EES national+Commission source pair: " + row_id)
+        _check_bmvi_47(row, row_id)
+
+    for mutated_field in (
+        {"open_call_authorized": True},
+        {"material_fact_use": True},
+        {"material_fact_publication_authorized": True},
+        {"call_status": "OPEN_CALL"},
+        {"observation_state": "OPEN_CALL"},
+        {"deadline": "2027-01-15"},
+        {"budget_eur": 37000000},
+        {"eligibility": ["Romanian companies"]},
+        {"submission_endpoint": "https://example.com/submit"},
+        {"raw_sha256": "0" * 64},
+        {"fetched_at": "2026-11-19T04:26:00Z"},
+        {"parser_version": "unknown"},
+        {"call_identifier_discovery": "BMVI/2026/SA/1.5.2"},
+        {"linked_primary_source_id": "SRC-UNVERIFIED"},
+    ):
+        row = dict(by_id[bmvi_47_index_id], **mutated_field)
+        try:
+            _check_bmvi_47(row, bmvi_47_index_id)
+        except SystemExit:
+            pass
+        else:
+            fail("BMVI EES index negative mutation admitted: " + repr(mutated_field))
+    for change in (
+        {"open_call_authorized": True},
+        {"material_fact_use": True},
+        {"deadline": "2027-01-15"},
+        {"budget_eur": 37000000},
+        {"submission_endpoint": "mailto:assumed@example.com"},
+        {"raw_sha256": "0" * 64},
+        {"document_signed_date_discovery": "2026-11-19"},
+        {"paired_official_source_id": "SRC-UNVERIFIED"},
+    ):
+        row = dict(by_id[bmvi_47_pdf_id], **change)
+        try:
+            _check_bmvi_47(row, bmvi_47_pdf_id)
+        except SystemExit:
+            pass
+        else:
+            fail("BMVI EES PDF negative mutation admitted: " + repr(change))
+
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
