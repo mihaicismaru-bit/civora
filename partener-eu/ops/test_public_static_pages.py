@@ -549,7 +549,8 @@ with tempfile.TemporaryDirectory() as td:
 # Execute the actual deployment proof's self-test, not a synthetic copy.
 readback_test = subprocess.run(
     [sys.executable, str(ROOT / "partener-eu" / "ops" / "prove_public_deploy.py"), "--self-test"],
-    capture_output=True, text=True, check=True,
+    capture_output=True, text=True, check=False,
 )
+assert readback_test.returncode == 0, (readback_test.stdout, readback_test.stderr)
 assert "PASS public deploy readback proof self-test" in readback_test.stdout
 print("PASS AFIR 20 Nov cutoff dual-dossier list/detail/home/Ask fail-closed replay")
