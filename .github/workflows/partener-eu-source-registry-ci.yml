@@ -15,6 +15,7 @@ on:
       - 'partener-eu/ops/test_prc_65_campuses_consultation_discovery.py'
       - 'partener-eu/ops/test_mai_fami_am11h_stale_status_currency_discovery.py'
       - 'partener-eu/ops/test_erasmus_2027_annual_notice_rolling_guide.py'
+      - 'partener-eu/ops/test_erasmus_eacs13_literacy_exact_call_discovery.py'
       - 'partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py'
       - 'partener-eu/ops/test_eea_langspil_future_submission_discovery.py'
       - 'partener-eu/ops/test_imfv_bv1a10_guide_revision_discovery.py'
@@ -177,6 +178,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_prc_65_campuses_consultation_discovery.py
           python -m py_compile partener-eu/ops/test_mai_fami_am11h_stale_status_currency_discovery.py
           python -m py_compile partener-eu/ops/test_erasmus_2027_annual_notice_rolling_guide.py
+          python -m py_compile partener-eu/ops/test_erasmus_eacs13_literacy_exact_call_discovery.py
           python -m py_compile partener-eu/ops/test_widera_excellence_hubs_official_pair.py
           python -m py_compile partener-eu/ops/test_eu4h_2027_ngo_exact_pair_discovery.py
           python -m py_compile partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py
@@ -231,6 +233,9 @@ jobs:
 
       - name: Quarantine Erasmus 2027 annual launch and rolling 2026 guide before exact action receipts
         run: python partener-eu/ops/test_erasmus_2027_annual_notice_rolling_guide.py
+
+      - name: Quarantine EAC S13 literacy open label pending exact submission evidence
+        run: python partener-eu/ops/test_erasmus_eacs13_literacy_exact_call_discovery.py
 
       - name: Reject PoIDS 912 interim ETFC list OPEN or final-award promotion
         run: python partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py
