@@ -18,7 +18,7 @@ FORBIDDEN = {
     "application_endpoint", "submission_endpoint", "exact_submission_endpoint",
 }
 REQUIRED = {"EU_DIRECT", "BRUSSELS", "EU4HEALTH", "FUTURE_PROCUREMENT",
-            "MARKET_INTELLIGENCE", "PROGRAMMING_PIPELINE", "DISCOVERY"}
+            "MARKET_INTELLIGENCE", "DISCOVERY"}
 
 
 def verify(sources):
@@ -43,6 +43,8 @@ def verify(sources):
         assert "NOT_CAPTURED" in row["note"] and "LKG" in row["note"]
         assert "NO DISTRIBUTION" in row["note"]
     assert survey["authority_class"] == "T1_OFFICIAL_HADEA_MARKET_SURVEY"
+    assert "PROGRAMMING_PIPELINE" not in survey["source_families"]
+    assert survey["programmes"] == calendar["programmes"] == ["EU4Health — future procurement (biotech medicinal products)"]
     assert survey["authority_scope"] == "MARKET_SURVEY_FOR_POTENTIAL_FUTURE_TENDER_NOT_CALL_NOTICE"
     assert survey["observation_state"] == "FUTURE_TENDER_MARKET_SURVEY_DISCOVERED_RAW_PENDING"
     assert survey["source_publication_date_discovery"] == "2026-11-19"
@@ -51,7 +53,8 @@ def verify(sources):
     assert survey["survey_access_note_discovery"] == "EU Login required for survey"
     assert "CONSULTATION" in survey["source_families"]
     assert calendar["authority_class"] == "T1_OFFICIAL_HADEA_PROGRAMMING_CALENDAR"
-    assert calendar["authority_scope"] == "TENTATIVE_PROCUREMENT_CALENDAR_NOT_EXACT_CURRENT_TENDER"
+    assert calendar["authority_scope"] == "PROGRAMMING_FRAMEWORK"
+    assert "PROGRAMMING_PIPELINE" in calendar["source_families"]
     assert calendar["observation_state"] == "PROGRAMMING_PIPELINE"
     assert calendar["tentative_awp_action_code_discovery"] == "HS-p-26-52"
     assert calendar["tentative_publication_period_discovery"] == "Q1 2027 (indicative, subject to change)"
