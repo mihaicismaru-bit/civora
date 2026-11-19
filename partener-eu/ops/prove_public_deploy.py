@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import hashlib
+import html
 import json
 import pathlib
 import re
@@ -20,6 +21,10 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Any
+
+# Independent public readback check: reuse only the strict clock parser, not
+# the renderer's OPEN decision. Manifest parity cannot prove current validity.
+from build_public_static_pages import has_explicit_open_deadline_clock, parse_date
 
 DEFAULT_BASE_URL = "https://partener.eu/"
 DEFAULT_MANIFEST = "partener-eu/web/static-public-manifest.json"
@@ -76,6 +81,46 @@ def consultation_semantics_ok(raw: bytes) -> bool:
     )
 
 
+
+CARD_BLOCK_RE = re.compile(
+    r'<article\\b[^>]*\\bdata-dossier-id\\s*=\\s*["\\\'][^"\\\']+["\\\'][^>]*>.*?</article>',
+    re.IGNORECASE | re.DOTALL,
+)
+CARD_ID_RE = re.compile(r'\\bdata-dossier-id\\s*=\\s*["\\\']([^"\\\']+)["\\\']', re.IGNORECASE)
+DEADLINE_TEXT_RE = re.compile(r'<b>\\s*Termen:\\s*</b>\\s*([^<]*?)\\s*</span>', re.IGNORECASE)
+
+
+def open_listing_semantics(raw: bytes, clock: dt.datetime) -> tuple[bool, list[str]]:
+    """Do not accept a matching-but-stale OPEN listing as a successful release.
+
+    This is a negative publication gate only. It never promotes a call to OPEN,
+    infers CLOSED, changes source evidence, or uses a source label as proof.
+    """
+    source = raw.decode("utf-8", "replace")
+    blocks = CARD_BLOCK_RE.findall(source)
+    if len(blocks) != count_cards(raw):
+        return False, ["unparseable_dossier_card_markup"]
+    failures: list[str] = []
+    for block in blocks:
+        match_id = CARD_ID_RE.search(block)
+        dossier_id = match_id.group(1) if match_id else "unknown"
+        # The /deschise/ surface must carry an explicit OPEN badge per card.
+        if not re.search(r'\\bstatus-open\\b', block, re.IGNORECASE):
+            failures.append(f"{dossier_id}:non_open_badge")
+            continue
+        deadlines = DEADLINE_TEXT_RE.findall(block)
+        if len(deadlines) != 1:
+            failures.append(f"{dossier_id}:missing_or_conflicting_exact_deadline")
+            continue
+        deadline_text = html.unescape(deadlines[0]).strip()
+        if not has_explicit_open_deadline_clock(deadline_text):
+            failures.append(f"{dossier_id}:unverified_deadline_clock")
+            continue
+        deadline = parse_date(deadline_text)
+        if deadline is None or deadline <= clock:
+            failures.append(f"{dossier_id}:expired_or_invalid_deadline")
+    return not failures, failures
+
 def compare_manifest(expected: dict[str, Any], observed: dict[str, Any]) -> tuple[bool, list[str]]:
     if expected == observed:
         return True, []
@@ -103,6 +148,24 @@ def self_test() -> int:
     assert count_cards(b'<article data-dossier-id="a"></article><div data-dossier-id=\'b\'></div>') == 2
     assert count_cards(b"<article></article>") == 0
     assert consultation_semantics_ok(b"<article><b>Termen:</b> 29 septembrie 2026</article>")
+    clock = dt.datetime(2026, 11, 19, 22, 30, tzinfo=dt.timezone.utc)
+    def card(dossier_id: str, deadline: str, status: str = "open") -> bytes:
+        return (
+            f'<article class="staticCard" data-dossier-id="{dossier_id}">'
+            f'<span class="status status-{status}">DESCHIS</span>'
+            f'<span><b>Termen:</b> {deadline}</span></article>'
+        ).encode("utf-8")
+    future = card("afir-autoconsum", "20 noiembrie 2026, 23:59")
+    expired = card("pr-centru-clusters-122", "2026-11-06T12:00:00+02:00")
+    assert open_listing_semantics(future, clock) == (True, [])
+    assert not open_listing_semantics(expired, clock)[0]
+    assert not open_listing_semantics(future + expired, clock)[0]
+    assert not open_listing_semantics(card("no-clock", "2 decembrie 2026"), clock)[0]
+    assert not open_listing_semantics(card("no-offset", "2026-12-02T16:00"), clock)[0]
+    assert not open_listing_semantics(card("dst-ambiguous", "25 octombrie 2026, 03:30"), clock)[0]
+    assert not open_listing_semantics(card("wrong-badge", "2 decembrie 2026, 16:00", "review"), clock)[0]
+    assert not open_listing_semantics(card("missing-deadline", ""), clock)[0]
+    assert open_listing_semantics(future, dt.datetime(2026, 11, 20, 21, 59, 1, tzinfo=dt.timezone.utc))[0] is False
     assert not consultation_semantics_ok(b"<article><b>Termen:</b> Neconfirmat</article>")
     busted = cache_busted("https://partener.eu/consultari/?x=1", "abc")
     assert "x=1" in busted and "partener_readback=abc" in busted
@@ -174,8 +237,13 @@ def main() -> int:
                 r_code, r_raw, r_resolved = fetch_bytes(route_url, timeout=args.timeout_seconds, token=token)
                 observed_count = count_cards(r_raw)
                 semantic_ok = True
+                semantic_failures: list[str] = []
                 if route == "consultari/":
                     semantic_ok = consultation_semantics_ok(r_raw)
+                elif route == "finantari/deschise/":
+                    semantic_ok, semantic_failures = open_listing_semantics(
+                        r_raw, dt.datetime.now(dt.timezone.utc)
+                    )
                 route_ok = r_code == 200 and observed_count == expected_count and semantic_ok
                 route_results[route] = {
                     "http_status": r_code,
@@ -184,6 +252,7 @@ def main() -> int:
                     "observed_cards": observed_count,
                     "matches": route_ok,
                     "semantic_freshness_ok": semantic_ok,
+                    "semantic_failures": semantic_failures,
                 }
                 routes_ok = routes_ok and route_ok
             record["routes"] = route_results
