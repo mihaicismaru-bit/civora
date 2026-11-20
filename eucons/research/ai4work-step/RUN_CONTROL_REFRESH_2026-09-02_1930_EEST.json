@@ -1,0 +1,75 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.2",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-02T19:30:56+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "observed_pr_head_before_persist": "b1b0601abce557ea6d4c700c81c0fb1d4cf738d0",
+  "secondary_research_refresh": {
+    "regions_checked": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+    "source_register_high_water_mark": "S39",
+    "new_source_promoted": true,
+    "new_source_id": "S39",
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "daily_refresh_artifact_reconciled": true,
+    "daily_refresh_artifact": "SECONDARY_EVIDENCE_REFRESH_2026-09-02.json",
+    "screening_notes": [
+      "Centru: actual AJOFM Covasna eSPOR report content was read back. It documents 737 employers approached and 406 respondents, explicit branch-level representation thresholds and staged contact. It is promoted as S39 historical direct-complementary evidence only.",
+      "Centru: S39 contains a material source-internal discrepancy: 2,029 estimated hires in the introduction and employer-size table versus 1,371 in the results paragraph and ownership table. No reconciled total is inferred and no hire-total value enters H1-H5.",
+      "Centru: current ADR Centru AI/Digital Twin/e-government implementation communications remain funding/implementation context, not need-prevalence evidence.",
+      "Sud-Muntenia: current AJOFM Prahova GREEN JOBS/project and training-offer materials remain supply/implementation context; S38 remains historical direct-complementary only.",
+      "Sud-Vest Oltenia: current AJOFM Dolj transition-project information remains implementation context and is rejected from need evidence."
+    ]
+  },
+  "evidence_registry_refresh": {
+    "drive_fact_added": "F-367944-611",
+    "source_register_row_added": "S39",
+    "source_register_dashboard_updated": true,
+    "classification": "DIRECT_COMPLEMENTARY_HISTORICAL_EMPLOYER_SURVEY_INTERNAL_NUMERIC_DISCREPANCY_ZERO_H1_H5"
+  },
+  "call_requirements_refresh": {
+    "gmail_query": "after:2026/09/02 (OMIPE OR MIPE OR PEO OR 1302 OR Anexa 4 OR AI4WORK) -from:notifications@github.com -in:spam -in:trash",
+    "matching_new_authority_messages": 0,
+    "matched_non_authority_messages": "none after excluding GitHub notifications",
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "drive_queries": ["AI4WORK_ADULTS_V1", "AI4WORK_EMPLOYERS_V1", "source_export_sha256 PROD_REAL_EVIDENCE"],
+    "eligible_combined_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "repository_implementation_state": {
+    "forms_schema": "eucons.research_forms.v0.5",
+    "direct_identifier_fields_allowed_in_research_forms": false,
+    "analytical_free_text_allowed": false,
+    "commercial_tracking_allowed": false,
+    "crm_linkage_allowed": false,
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE",
+    "need_analysis_plan_status": "DRAFT_NOT_APPROVED_FOR_PROD",
+    "collection_frame_status": "DRAFT_NOT_APPROVED_FOR_PROD",
+    "precollection_method_lock_status": "OPEN_NOT_LOCKED",
+    "precollection_plan_sha256_bound": false,
+    "precollection_frame_sha256_bound": false
+  },
+  "remaining_precollection_boundary": [
+    "Approve exact NEED_ANALYSIS_PLAN and COLLECTION_FRAME and bind both SHA-256 values",
+    "Controller approval of Art. 6(1)(f) LIA/lawful basis and acceptance of the DPIA screening outcome or completion of a DPIA if required",
+    "Final dedicated AI4WORK Article 13 notice with an operational EUROCONSULT privacy contact",
+    "Approved requester-authentication and data-subject-rights procedure",
+    "Account-specific eucons.ro/cPanel/Cloudflare logging-retention-access-security readback proving Raw Access <= 7 days",
+    "Provider-bound proof that live research storage is separate from CRM/webroot and residual backups meet the <= 92-day ceiling",
+    "Active processor/subprocessor, rights-hold and incident-response bindings",
+    "Real CH-* channel entries created only after dissemination authorization",
+    "Fresh explicit human collection-only v0.2 approval"
+  ],
+  "downstream_state": "FAIL_CLOSED_UNTIL_SUFFICIENT_IMMUTABLE_REAL_ADULT_AND_EMPLOYER_BATCH",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_dissemination_authorized": false,
+  "real_collection_authorized": false
+}

@@ -1,0 +1,104 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.2",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-02T11:35:38+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "secondary_evidence": {
+    "source_register_high_water_mark": "S37",
+    "new_source_id_created": false,
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "fresh_official_institutional_screen": [
+      {
+        "region": "Centru",
+        "publisher": "ADR Centru",
+        "title": "Lansare în consultare publică a Ghidului specific aferent Acțiunii 2.2 Întreprinderi digitale pentru o economie avansată – Apel 2",
+        "publication_date": "2026-04-28",
+        "url": "https://www.adrcentru.ro/comunicare/lansare-in-consultare-publica-a-ghidului-specific-aferent-actiunii-2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
+        "screening_result": "REJECT_FROM_NEED_EVIDENCE",
+        "reason": "Official programme/funding consultation demonstrates policy and supply context only. It contains no sampled AI4WORK adult/employer stated-needs result, prevalence estimate or H1-H5 direct measure."
+      },
+      {
+        "region": "Sud-Muntenia",
+        "publisher": "ADR Sud-Muntenia",
+        "title": "ADR Sud-Muntenia a organizat cea de-a doua întâlnire a stakeholderilor proiectului Skills4Life",
+        "publication_date": "2026-02-27",
+        "url": "https://www.adrmuntenia.ro/adr-sudmuntenia-a-organizat-cea-dea-doua-intalnire-a-stakeholderilor-proiectului/article/2211",
+        "screening_result": "REJECT_FROM_NEED_EVIDENCE",
+        "reason": "Institutional stakeholder/project event with a different target population (young people leaving child-protection systems); it is neither an AI4WORK eligible-adult/employer frame nor a published H1-H5 skills-needs prevalence instrument."
+      },
+      {
+        "region": "Sud-Vest Oltenia",
+        "publisher": "ADR Sud-Vest Oltenia",
+        "title": "Lansare apel 2 – Stimularea cererii întreprinderilor pentru inovare",
+        "publication_date": "2026",
+        "url": "https://www.adroltenia.ro/lansare-apel-2-stimularea-cererii-intreprinderilor-pentru-inovare/",
+        "screening_result": "REJECT_FROM_NEED_EVIDENCE",
+        "reason": "The official SME innovation call, with application window beginning 23 February 2026, is funding/innovation-supply evidence and cannot establish AI4WORK skill-need prevalence or ranking."
+      },
+      {
+        "scope": "national labour-market service context",
+        "publisher": "ANOFM",
+        "title": "De la servicii standard la sprijin personalizat: SMART SPO modernizează relația dintre ANOFM, cetățeni și angajatori",
+        "publication_date": "2026-07-15",
+        "url": "https://www.anofm.ro/de-la-servicii-standard-la-sprijin-personalizat-smart-spo-modernizeaza-relatia-dintre-anofm-cetateni-si-angajatori/",
+        "screening_result": "REJECT_FROM_REGIONAL_NEED_EVIDENCE",
+        "reason": "Useful institutional context on labour-market modernisation and changing employer/jobseeker needs, but the page is national programme activity and provides no region-specific H1-H5 AI4WORK respondent evidence."
+      }
+    ],
+    "decision": "NO_S38_PROMOTION_THIS_REFRESH"
+  },
+  "call_requirements": {
+    "checked_at": "2026-09-02T11:35:38+03:00",
+    "connected_mail_query_scope": "after:2026/09/02 (OMIPE OR MIPE OR PEO OR 1302 OR Anexa 4 OR AI4WORK), excluding GitHub notifications/spam/trash",
+    "matching_new_authority_messages": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence": {
+    "checked_at": "2026-09-02T11:35:38+03:00",
+    "drive_queries": [
+      "AI4WORK_ADULTS_V1",
+      "AI4WORK_EMPLOYERS_V1 source_export_sha256 PROD_REAL_EVIDENCE"
+    ],
+    "eligible_combined_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "forms_and_privacy_candidate": {
+    "analytical_forms_frozen_preproduction": true,
+    "direct_identifier_fields": false,
+    "analytical_free_text": false,
+    "commercial_tracking": false,
+    "crm_linkage": "FORBIDDEN",
+    "storage_policy": "DEDICATED_RESEARCH_STORE_SEPARATE_FROM_WEBROOT_AND_CRM",
+    "raw_access_retention_policy_max_days": 7,
+    "residual_backup_policy_max_days": 92,
+    "policy_is_live_compliance_evidence": false,
+    "status": "CANDIDATE_CONTROLS_COMPLETE_LIVE_ACCOUNT_PROVIDER_BINDING_OPEN"
+  },
+  "governance": {
+    "controller_identity_determined": true,
+    "controller_method_sha256_approval_closed": false,
+    "lawful_basis_lia_approved": false,
+    "dpia_outcome_accepted": false,
+    "article13_notice_final_live": false,
+    "research_privacy_contact_operational": false,
+    "rights_authentication_procedure_approved": false,
+    "account_specific_logging_retention_access_security_readback_closed": false,
+    "provider_bound_research_store_isolation_closed": false,
+    "processor_subprocessor_chain_active_bound": false,
+    "rights_hold_incident_response_live_bound": false,
+    "real_channel_entries_created": false,
+    "fresh_collection_only_v0_2_approval_received": false
+  },
+  "blocker": "Human/live pre-collection boundary remains open. Repository-side form, minimisation, retention-policy, TEST TWIN and fail-closed NF06 mechanics are prepared, but real collection remains unauthorized until exact method/frame approval with SHA-256 bindings, final controller LIA/lawful-basis approval and DPIA outcome acceptance, an operational EUROCONSULT privacy contact and final Article 13 notice, approved rights-authentication procedure, account-specific eucons.ro/cPanel/Cloudflare logging-retention-access-security proof, provider-bound live research-store isolation and <=92-day residual-backup proof, active processor/subprocessor + rights-hold + incident-response bindings, real CH-* dissemination entries, and then a fresh explicit collection-only v0.2 approval.",
+  "repository_precommit_head": "cc2f5ba93a5633560d24f25d4c324974333a8435",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_dissemination_authorized": false,
+  "real_collection_authorized": false
+}

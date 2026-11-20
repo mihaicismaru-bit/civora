@@ -1,16 +1,16 @@
 # Informare privind protecția datelor — cercetarea AI4WORK STEP
 
-**Stare:** DRAFT / NU SE PUBLICĂ ȘI NU SE ACTIVEAZĂ COLECTAREA până la stabilirea și documentarea operatorului, completarea contactului de confidențialitate, aprobarea temeiului juridic, verificarea procesatorilor/logurilor și legarea retenției/ștergerii.
+**Stare:** DRAFT / NU SE PUBLICĂ ȘI NU SE ACTIVEAZĂ COLECTAREA până la completarea contactului de confidențialitate, aprobarea temeiului juridic, verificarea procesatorilor/logurilor, legarea retenției/ștergerii, acceptarea screening-ului DPIA și aprobarea procedurii de exercitare a drepturilor.
 
 ## Cine prelucrează datele
 
-Operator: **[OPERATORUL LEGAL TREBUIE STABILIT ȘI APROBAT ÎNAINTE DE GO-LIVE]**.
+Operator: **EUROCONSULT SRL, CUI 14250864**. Determinarea operatorului pentru această cercetare și faptul că EUROCONSULT SRL deține `eucons.ro` sunt consemnate first-party în `CONTROLLER_DETERMINATION_DRAFT.json`. Această determinare închide identitatea operatorului, dar nu autorizează colectarea și nu dovedește configurația efectivă a contului de găzduire, accesul la loguri, retenția tehnică, ștergerea din backup sau rolurile operaționale ale furnizorilor.
 
-În această etapă nu presupunem că solicitantul/liderul proiectului, operatorul site-ului `eucons.ro`, consultantul și titularul contului de găzduire sunt aceeași entitate juridică sau au același rol GDPR. Operatorul final va fi entitatea care stabilește în fapt scopurile și mijloacele esențiale ale cercetării; celelalte roluri vor fi documentate ca operator asociat, persoană împuternicită sau subîmputernicită, după caz și numai pe baza documentelor aplicabile.
+Calitatea de solicitant/lider al proiectului, titular de facturare a unui serviciu de hosting sau implementator tehnic nu este tratată automat ca rol de operator GDPR. Orice persoană împuternicită/subîmputernicită și orice entitate cu acces la date la nivel de respondent trebuie legate separat prin documentele și configurația aplicabile înainte de go-live.
 
 Contact pentru întrebări și exercitarea drepturilor privind protecția datelor: **[PRIVACY_CONTACT_REQUIRED_BEFORE_GO_LIVE]**.
 
-Dacă operatorul stabilit are desemnat un responsabil cu protecția datelor (DPO), datele acestuia vor fi publicate aici înainte de colectare. Existența unui DPO nu este presupusă prin acest document.
+Dacă EUROCONSULT SRL are desemnat un responsabil cu protecția datelor (DPO) sau desemnează un canal dedicat pentru această prelucrare, datele aplicabile vor fi publicate aici înainte de colectare. Existența unui DPO nu este presupusă prin acest document.
 
 ## De ce facem cercetarea
 
@@ -24,41 +24,51 @@ Sunt colectate numai categorii prestabilite și largi necesare analizei, precum 
 
 În designul pre-producție curent **nu există câmpuri de text liber în formularele analitice**. Răspunsurile sunt limitate la opțiuni prestabilite, scale, booleene și matrici. Aceasta reduce riscul introducerii accidentale a numelor, angajatorilor, datelor de contact sau altor identificatori prin text liber. Celulele statistice foarte mici sunt suprimate sau agregate în raportare.
 
+Absența identificatorilor direcți nu înseamnă că răspunsurile brute sau normalizate sunt declarate anonime. Până la ștergerea datelor la nivel de respondent, EUROCONSULT le tratează conservator ca date cu caracter personal sau potențial identificabile pentru aplicarea controalelor GDPR, deoarece combinații de atribute ori informații tehnice accesibile entităților relevante pot permite distingerea sau legarea unui respondent. Cadrul metodologic este documentat în `GDPR_ANONYMISATION_CLASSIFICATION_CONTROL.json`, pe baza versiunii 1.0 a **EDPB Guidelines 02/2026 on Anonymisation**, adoptată la 7 iulie 2026 pentru consultare publică; documentul nu este prezentat ca versiune finală post-consultare.
+
+Numai rezultate agregate și controlate pentru divulgare pot fi ulterior considerate anonime, după o evaluare documentată care verifică pentru destinatarii relevanți criteriile **No Record Isolation**, **No Linkage** și **No Inference**, inclusiv riscul creat de granularitatea combinațiilor de regiune, vârstă/statut, ocupație, sector și dimensiune. Dacă această verificare nu trece, rezultatul rămâne tratat ca personal/potențial identificabil și nu este eliberat ca ieșire anonimă.
+
 ## Temeiul juridic
 
-**Propunere supusă aprobării operatorului stabilit înainte de colectare:** art. 6 alin. (1) lit. (f) GDPR — interes legitim pentru realizarea unei analize de nevoi documentate și proporționale. Evaluarea interesului legitim este păstrată separat în `GDPR_LIA_DRAFT.json` și nu poate fi aprobată înainte de stabilirea operatorului și confirmarea faptului că toate măsurile de minimizare și separare sunt menținute.
+**Propunere supusă aprobării EUROCONSULT SRL înainte de colectare:** art. 6 alin. (1) lit. (f) GDPR — interes legitim pentru realizarea unei analize de nevoi documentate și proporționale. Evaluarea interesului legitim este păstrată separat în `GDPR_LIA_DRAFT.json`; determinarea operatorului este închisă, însă LIA și temeiul juridic final rămân neaprobate până la confirmarea faptului că toate măsurile de minimizare, separare, transparență, drepturi și retenție sunt menținute și operaționale.
 
 Bifarea faptului că ați citit informarea confirmă că informarea a fost afișată și participarea este voluntară; această bifă **nu este tratată automat ca temei de consimțământ GDPR**.
 
-Dacă operatorul nu este stabilit, nu aprobă temeiul propus sau dacă designul se schimbă material, colectarea rămâne oprită până la stabilirea și documentarea unui temei juridic adecvat.
+Dacă EUROCONSULT SRL nu aprobă temeiul propus sau dacă designul se schimbă material, colectarea rămâne oprită până la stabilirea și documentarea unui temei juridic adecvat și revalidarea controalelor afectate.
 
 ## Cine poate avea acces
 
 Accesul la răspunsurile la nivel de respondent trebuie limitat la personalul desemnat pentru cercetare și la furnizorii tehnici strict necesari, în baza rolurilor și contractelor verificate înainte de activare. Baza de cercetare trebuie să fie separată fizic/logic și prin credențiale de CRM și de infrastructura comercială.
 
-Rolurile dintre solicitantul/liderul proiectului, operatorul site-ului `eucons.ro`, titularul contului de găzduire și furnizorul tehnic trebuie documentate înainte de lansare. Nici proprietatea domeniului, nici brandingul site-ului, nici facturarea hostingului nu sunt folosite singure pentru a deduce calitatea de operator.
+EUROCONSULT SRL este operatorul cercetării. Rolurile titularului/administratorului tehnic al contului de găzduire, furnizorului Claus Web și ale oricărui alt furnizor activ în calea reală de procesare trebuie documentate separat înainte de lansare. Nici facturarea hostingului, nici accesul tehnic la cPanel nu sunt folosite singure pentru a deduce un rol GDPR mai larg decât cel demonstrat.
 
 Lista procesatorilor/subprocesatorilor și orice transfer în afara SEE trebuie verificată și documentată înainte de lansare. Dacă această verificare nu este închisă, colectarea nu se activează.
 
-Răspunsurile la nivel de respondent nu trebuie trimise către servicii externe de AI generativ/LLM. Orice utilizare AI în analiză se limitează la material suficient de de-identificat/agregat și necesită re-evaluare dacă această condiție se schimbă.
+Răspunsurile la nivel de respondent nu trebuie trimise către servicii externe de AI generativ/LLM. Orice utilizare AI în analiză se limitează la material suficient de de-identificat/agregat și necesită re-evaluare dacă această condiție se schimbă; un material nu este numit „anonim” pentru transfer sau publicare decât după evaluarea de anonimizare aplicabilă ieșirii respective.
 
 ## Date tehnice și tracking
 
-Formularele nu folosesc advertising pixels, fingerprinting, cross-site tracking, identificatori CRM sau analytics comerciale. Adresa IP și user-agent-ul nu intră în setul analitic sau în exportul NF06. Înainte de activare trebuie verificată însă politica reală de logare a hostingului/reverse-proxy-ului, astfel încât corpurile cererilor, răspunsurile și cheia brută de idempotency să nu fie logate, iar metadatele tehnice să aibă retenție minimă.
+Formularele nu folosesc advertising pixels, fingerprinting, cross-site tracking, identificatori CRM sau analytics comerciale. Adresa IP și user-agent-ul nu intră în setul analitic sau în exportul NF06. Profilul generic de Raw Access furnizat first-party de Claus Web este documentat separat și poate include IP-ul vizitatorului, timestamp, metoda HTTP, URL-ul complet inclusiv query string, Referer și User-Agent; de aceea răspunsurile și identificatorii direcți sunt interziși în query string. Înainte de activare trebuie citită și legată configurația efectivă a contului `eucons.ro` pentru arhivare/retenție/acces și demonstrată o retenție Raw Access de **maximum 7 zile**; corpurile cererilor, răspunsurile și cheia brută de idempotency nu trebuie logate de aplicație.
 
-Pentru evitarea dublării unui răspuns în cazul unui retry de rețea se folosește o cheie aleatoare UUIDv4 pentru o singură tentativă de trimitere. Cheia brută nu este stocată în setul analitic și nu este derivată din identitatea, IP-ul, dispozitivul sau conturile respondentului.
+Pentru evitarea dublării unui răspuns în cazul unui retry de rețea se folosește o cheie aleatoare UUIDv4 pentru o singură tentativă de trimitere. Cheia brută nu este stocată în setul analitic și nu este derivată din identitatea, IP-ul, dispozitivul sau conturile respondentului. Adaptorul de referință întoarce după trimitere un `response_id` opac, distinct de cheia brută, care poate fi păstrat de respondent ca receipt tehnic. Binding-ul live trebuie să păstreze această proprietate fără să creeze un registru identitate–răspuns.
 
 ## Cât timp păstrăm datele
 
 Propunerea de retenție este documentată în `GDPR_RETENTION_SCHEDULE_DRAFT.json`. În designul curent, răspunsurile brute și normalizate la nivel de respondent se șterg după validarea analizei și înghețarea pachetului de dovezi, dar nu mai târziu de 180 de zile de la închiderea colectării și, în lipsa unui hold juridic documentat, nu mai târziu de **31 martie 2027**.
 
-După ștergere pot fi păstrate pe termenul necesar proiectului numai rezultate agregate cu control de divulgare, registrul surselor/provenienței și hash-uri de integritate care nu permit reconstruirea răspunsurilor individuale. Datele opționale de contact, dacă vor exista într-un formular complet separat, nu pot fi legate de răspuns și au o retenție mai scurtă.
+După ștergerea din stocarea live, orice copie reziduală din backupul furnizorului poate persista numai în ciclul tehnic preexistent, nereînnoit, care trebuie validat pe contul real înainte de PROD, și **cel mult 92 de zile de la ștergerea live**. O astfel de copie reziduală nu poate fi readusă în procesarea curentă prin restaurări obișnuite, iar rotația backupului nu poate reporni termenul de retenție.
+
+Markerul tehnic anti-replay creat după o ștergere aprobată este limitat la maximum 24 de ore și nu conține răspunsuri. După ștergere pot fi păstrate pe termenul necesar proiectului numai rezultate agregate cu control de divulgare care au trecut evaluarea documentată de anonimizare a ieșirii, registrul surselor/provenienței și hash-uri de integritate care nu permit reconstruirea răspunsurilor individuale. Datele opționale de contact, dacă vor exista într-un formular complet separat, nu pot fi legate de răspuns și au o retenție mai scurtă.
 
 ## Drepturile dumneavoastră
 
-În condițiile GDPR, puteți solicita acces, rectificare, ștergere sau restricționare, după caz, și vă puteți opune prelucrării bazate pe interes legitim. Solicitările se trimit la contactul de confidențialitate al operatorului care trebuie completat înainte de lansare.
+În condițiile GDPR, puteți solicita acces, rectificare, ștergere sau restricționare, după caz. Dacă temeiul juridic final este interesul legitim, vă puteți opune prelucrării în condițiile art. 21 GDPR. Aplicabilitatea dreptului la portabilitatea datelor depinde de temeiul juridic final: potrivit art. 20 GDPR, acest drept se aplică atunci când prelucrarea este bazată pe consimțământ sau contract, este efectuată prin mijloace automate și privește date furnizate de persoana vizată. Prin urmare, dacă EUROCONSULT SRL aprobă interesul legitim ca temei final, portabilitatea nu este dreptul aplicabil pentru această prelucrare; dacă temeiul se schimbă la consimțământ sau contract și sunt îndeplinite condițiile art. 20, înainte de colectare trebuie implementată și validată o cale separată de export într-un format structurat și prelucrabil automat. Dacă se ajunge la folosirea consimțământului ca temei, informarea și procedura vor include și mecanismul de retragere a consimțământului înainte de lansare.
 
-Deoarece formularul este proiectat să nu colecteze identitatea, operatorul poate să nu poată identifica un anumit răspuns numai după numele persoanei. Dacă implementarea finală oferă un cod/receipt tehnic al răspunsului, păstrarea acelui cod de către respondent poate permite localizarea răspunsului fără introducerea unui registru de identitate.
+Solicitările se trimit la contactul de confidențialitate al EUROCONSULT SRL care trebuie completat și verificat înainte de lansare. Procedura operațională este menținută separat în `GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json` și rămâne neaprobată până la stabilirea temeiului juridic final și a binding-ului live.
+
+Pentru dreptul de acces, implementarea de referință poate genera pe baza receipt-ului opac o copie numai a propriului răspuns analitic și a metadatelor de proveniență aprobate. Copia nu include hash-uri interne de stocare, digesturi de idempotency/transport, cheia brută de idempotency, starea internă a unui hold de restricționare/obiecție, markerul anti-replay după ștergere sau datele altor respondenți. Orice câmp nou introdus ulterior în stocare trebuie revizuit înainte de a putea fi inclus în această copie. Aceasta reprezintă numai componenta de copie a datelor: operatorul trebuie să aplice procedura aprobată de autentificare a solicitantului și să furnizeze separat confirmarea și informațiile despre prelucrare cerute de art. 15 GDPR.
+
+Deoarece formularul este proiectat să nu colecteze identitatea, operatorul poate să nu poată identifica un anumit răspuns numai după numele persoanei. Nu vom colecta și păstra date suplimentare exclusiv pentru a construi un registru identitate–răspuns. Dacă păstrați receipt-ul tehnic `response_id` primit la trimitere, implementarea live aprobată trebuie să permită localizarea răspunsului în baza de cercetare și, pentru ștergere, eliminarea atomică a rândului analitic și a receipt-ului intern de idempotency, fără consultarea CRM, a contactelor opționale, a IP-ului sau a dispozitivului. Dacă receipt-ul nu mai este disponibil și operatorul poate demonstra că nu poate identifica răspunsul, solicitarea va fi tratată conform procedurii aprobate și regulilor GDPR aplicabile, fără a introduce identificare disproporționată.
 
 Aveți dreptul de a depune o plângere la autoritatea competentă de protecție a datelor. Pentru România, autoritatea de supraveghere este Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP).
 
@@ -68,4 +78,4 @@ Puteți decide să nu completați sau să nu trimiteți formularul fără nicio 
 
 ---
 
-**GO-LIVE gate:** operator legal și roluri controller/processor stabilite; contact confidențialitate completat; LIA/temei juridic aprobat; informare finală publicată înainte de întrebări; procesatori/subprocesatori și transferuri verificate; logging verificat; retenție/ștergere executabilă; DPIA screening semnat; endpoint și research-only store validate; smoke TEST TWIN complet; producția rămâne `false` până la închiderea tuturor acestor condiții.
+**GO-LIVE gate:** determinarea operatorului este închisă (`EUROCONSULT SRL`, CUI 14250864), dar activarea rămâne blocată până la: contact de confidențialitate verificat; LIA/temei juridic aprobat; matricea de aplicabilitate a drepturilor reconciliată cu temeiul final, inclusiv portabilitate/retragere consimțământ dacă devin aplicabile; informare finală publicată înainte de întrebări; procedură de exercitare a drepturilor aprobată și operațională; procesatori/subprocesatori și transferuri verificate; configurația efectivă `eucons.ro` pentru logging verificată și Raw Access ≤7 zile; retenție/ștergere executabilă cu backup rezidual ≤92 zile; screening DPIA acceptat; endpoint și research-only store validate; smoke TEST TWIN provider-bound complet; producția rămâne `false` până la închiderea tuturor acestor condiții.
