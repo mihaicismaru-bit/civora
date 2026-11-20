@@ -190,6 +190,32 @@ def priority_detail_semantics(raw: bytes, clock: dt.datetime) -> tuple[bool, str
             failures.append("review_still_actionable")
         if re.search(r'<li>\s*Stare apel:\s*(?:OPEN|DESCHIS)\s*\.?\s*</li>', source, re.IGNORECASE):
             failures.append("review_still_claims_open")
+        # A mixed/cached release can carry a REVIEW badge but keep an old
+        # standfirst or decision action. Only check decision-bearing surfaces,
+        # not historical provenance or the official source transcript.
+        if re.search(
+            r"""<p\s+class=["']standfirst["'][^>]*>[^<]*Sunt\s+confirmate:\s*(?:OPEN|DESCHIS)\b""",
+            source, re.IGNORECASE,
+        ):
+            failures.append("review_stale_open_standfirst")
+        for decision in re.findall(
+            r"""<div\s+class=["']decisionBox["'][^>]*>(.*?)</div>""",
+            source, re.IGNORECASE | re.DOTALL,
+        ):
+            visible = html.unescape(re.sub(r"<[^>]+>", " ", decision))
+            import unicodedata
+            plain = "".join(
+                ch for ch in unicodedata.normalize("NFKD", visible.casefold())
+                if not unicodedata.combining(ch)
+            )
+            if re.search(
+                r"\b(?:depunerea\s+(?:este|ramane)\s+deschisa"
+                r"|depune\s+(?:acum|inainte|cererea)"
+                r"|incepe\s+screeningul\s+si\s+planul\s+de\s+depunere)\b",
+                plain,
+            ):
+                failures.append("review_still_invites_submission")
+                break
     return not failures, status, failures
 
 
@@ -260,6 +286,21 @@ def self_test() -> int:
     assert priority_detail_semantics(detail("review", "20 noiembrie 2026, 23:59"), after) == (True, "review", [])
     assert not priority_detail_semantics(detail("review", "20 noiembrie 2026, 23:59", "ACȚIONEAZĂ"), after)[0]
     assert not priority_detail_semantics(detail("review", "20 noiembrie 2026, 23:59", claim="Stare apel: OPEN."), after)[0]
+    # Regression: badge-only REVIEW does not authorize positive OPEN copy.
+    review = detail("review", "20 noiembrie 2026, 23:59")
+    stale_standfirst = b'<p class="standfirst">Sunt confirmate: open; termen expirat.</p>'
+    assert "review_stale_open_standfirst" in priority_detail_semantics(
+        review + stale_standfirst, after
+    )[2]
+    assert "review_still_invites_submission" in priority_detail_semantics(
+        detail("review", "20 noiembrie 2026, 23:59", "Depunerea este deschisă. Depune acum."), after
+    )[2]
+    assert "review_still_invites_submission" in priority_detail_semantics(
+        detail("review", "20 noiembrie 2026, 23:59", "Începe screeningul și planul de depunere."), after
+    )[2]
+    assert priority_detail_semantics(
+        detail("review", "20 noiembrie 2026, 23:59", "Nu depune înainte de reconcilierea oficială."), after
+    )[0]
     assert not priority_detail_semantics(b"<html>missing lifecycle</html>", after)[0]
     assert not consultation_semantics_ok(b"<article><b>Termen:</b> Neconfirmat</article>")
     assert same_public_route(
