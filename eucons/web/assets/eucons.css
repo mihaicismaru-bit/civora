@@ -73,9 +73,26 @@ a:hover { text-decoration-thickness: .14em; }
   border-bottom: 1px solid var(--eu-border);
 }
 .eu-header__inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; width: 100%; }
-.eu-wordmark { color: var(--eu-navy); font-size: 1.125rem; font-weight: 800; letter-spacing: -.02em; text-decoration: none; }
+.eu-wordmark {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--eu-navy);
+  font-size: 1.125rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  text-decoration: none;
+}
 .eu-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
-.eu-nav a { color: var(--eu-ink-soft); font-weight: 650; text-decoration: none; }
+.eu-nav a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 2px;
+  color: var(--eu-ink-soft);
+  font-weight: 650;
+  text-decoration: none;
+}
 .eu-nav a:hover { color: var(--eu-brand-strong); text-decoration: underline; }
 
 .eu-eyebrow { margin: 0; color: var(--eu-brand-strong); font-size: .78rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
@@ -170,7 +187,6 @@ textarea.eu-control { min-height: 128px; resize: vertical; }
 .eu-metric__value { color: var(--eu-navy); font-size: clamp(1.9rem, 4vw, 3rem); font-weight: 850; letter-spacing: -.04em; }
 .eu-metric__label { color: var(--eu-muted); }
 
-
 .eu-stack--tight { gap: 10px; }
 .eu-hero { overflow: hidden; }
 .eu-hero-grid { display: grid; gap: clamp(32px, 6vw, 72px); align-items: start; }
@@ -222,13 +238,18 @@ textarea.eu-control { min-height: 128px; resize: vertical; }
 }
 
 .eu-footer { padding-block: 48px; border-top: 1px solid var(--eu-border); background: var(--eu-surface); }
-.eu-footer__links { display: flex; flex-wrap: wrap; gap: 12px 20px; }
-.eu-footer__links a { color: var(--eu-muted); }
+.eu-footer__links { display: flex; flex-wrap: wrap; gap: 4px 20px; }
+.eu-footer__links a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--eu-muted);
+}
 
 @media (max-width: 767px) {
   .eu-shell { width: min(100% - 40px, var(--eu-content-max)); }
   .eu-header__inner { min-height: 72px; flex-wrap: wrap; padding-block: 12px; }
-  .eu-nav { width: 100%; gap: 12px 16px; }
+  .eu-nav { width: 100%; gap: 4px 16px; }
   .eu-actions .eu-button { flex: 1 1 100%; }
 }
 
