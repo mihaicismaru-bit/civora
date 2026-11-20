@@ -23,6 +23,7 @@ on:
       - 'partener-eu/ops/test_eea_langspil_future_submission_discovery.py'
       - 'partener-eu/ops/test_imfv_bv1a10_guide_revision_discovery.py'
       - 'partener-eu/ops/test_prnv_114_final_guide_discovery.py'
+      - 'partener-eu/ops/test_prsm_am_call_index_discovery.py'
       - 'partener-eu/ops/test_afir_gal_somes_nadas_selection_discovery.py'
       - 'partener-eu/ops/test_afir_dr36_guide_revision_discovery.py'
       - 'partener-eu/ops/test_eea_norway_gbi_programme_launch_discovery.py'
@@ -192,6 +193,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_eea_langspil_future_submission_discovery.py
           python -m py_compile partener-eu/ops/test_imfv_bv1a10_guide_revision_discovery.py
           python -m py_compile partener-eu/ops/test_prnv_114_final_guide_discovery.py
+          python -m py_compile partener-eu/ops/test_prsm_am_call_index_discovery.py
           python -m py_compile partener-eu/ops/test_afir_gal_somes_nadas_selection_discovery.py
           python -m py_compile partener-eu/ops/test_afir_dr36_guide_revision_discovery.py
           python -m py_compile partener-eu/ops/test_eea_norway_gbi_programme_launch_discovery.py
@@ -266,6 +268,9 @@ jobs:
 
       - name: Reject PRNV 114 final guide as OPEN without exact MySMIS original
         run: python partener-eu/ops/test_prnv_114_final_guide_discovery.py
+
+      - name: Guard PR Sud-Muntenia official call index against invented OPEN and raw provenance
+        run: python partener-eu/ops/test_prsm_am_call_index_discovery.py
 
       - name: Keep official GAL 107 selection discovery separate from national DR36 OPEN calls
         run: python partener-eu/ops/test_afir_gal_somes_nadas_selection_discovery.py
