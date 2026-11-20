@@ -113,6 +113,8 @@ jobs:
           python partener-eu/ops/test_web_hygiene.py
           python partener-eu/ops/test_public_boot_performance.py
           python partener-eu/ops/check_deployment_freshness.py --self-test
+          # Negative readback contract (no HTTP and no deployment in --self-test).
+          python partener-eu/ops/prove_public_deploy.py --self-test
           python partener-eu/ops/test_frontend_regression.py
           python partener-eu/ops/test_brand_civic_intelligence_v1.py
           python partener-eu/ops/test_public_static_pages.py
