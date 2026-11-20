@@ -210,7 +210,7 @@ def priority_detail_semantics(raw: bytes, clock: dt.datetime) -> tuple[bool, str
             )
             if re.search(
                 r"\b(?:depunerea\s+(?:este|ramane)\s+deschisa"
-                r"|depune\s+(?:acum|inainte|cererea)"
+                r"|(?<!nu\s)(?<!nu mai\s)depune\s+(?:acum|inainte|cererea)"
                 r"|incepe\s+screeningul\s+si\s+planul\s+de\s+depunere)\b",
                 plain,
             ):
