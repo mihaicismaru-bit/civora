@@ -30,6 +30,9 @@ REQUIRED_TRUE_RULES = {
     "fake_urgency_forbidden",
     "unavailable_submission_state_must_be_explicit",
 }
+HOMEPAGE_PRIMARY_ACTION = '<a class="eu-button eu-button--primary" href="#trasee-home">Alege traseul potrivit</a>'
+HOMEPAGE_SECONDARY_ACTION = '<a class="eu-button eu-button--secondary" href="/servicii/">Vezi soluțiile</a>'
+HOMEPAGE_LEGACY_OFFER_ACTION = '<a class="eu-button eu-button--secondary" href="/solicita-oferta/">Solicită ofertă</a>'
 
 
 class ValidationError(ValueError):
@@ -57,6 +60,28 @@ def load_builder():
 def nonempty_strings(value, label):
     require(isinstance(value, list) and value, f"{label} must be a non-empty list")
     require(all(isinstance(item, str) and item.strip() for item in value), f"{label} contains an invalid value")
+
+
+def validate_homepage_render(rendered, journeys):
+    require(rendered.count("<h1") == 1, "homepage must render exactly one H1")
+    require('id="trasee-home"' in rendered, "homepage four-journey chooser anchor is missing")
+    require(
+        rendered.count(HOMEPAGE_PRIMARY_ACTION) == 2,
+        "homepage hero and final primary actions must route to the four-journey chooser",
+    )
+    require(
+        rendered.count(HOMEPAGE_SECONDARY_ACTION) == 2,
+        "homepage hero and final secondary actions must keep services as secondary discovery",
+    )
+    require(
+        HOMEPAGE_LEGACY_OFFER_ACTION not in rendered,
+        "homepage must not bypass JTBD selection with a generic offer action",
+    )
+    for journey in journeys:
+        require(
+            f'href="{journey["path"]}"' in rendered,
+            f"homepage does not expose primary journey {journey['id']}",
+        )
 
 
 def validate(contract_path=DEFAULT_CONTRACT):
@@ -153,6 +178,10 @@ def validate(contract_path=DEFAULT_CONTRACT):
     require(home.get("primary_journey_ids") == [item["id"] for item in journeys], "homepage journey order drifted")
     require(home.get("service_catalog_role") == "SECONDARY_DISCOVERY", "service catalogue must remain secondary")
     require(isinstance(home.get("proof_section_title"), str) and home["proof_section_title"].strip(), "homepage proof title is missing")
+
+    rendered_home = builder.render_home(render_data)
+    validate_homepage_render(rendered_home, journeys)
+    validate_homepage_render((WEB / "index.html").read_text(encoding="utf-8"), journeys)
 
     accessibility = contract.get("accessibility_acceptance") or {}
     for flag in ("single_h1_per_page", "semantic_ordered_steps", "skip_link_required", "mobile_single_column_actions", "no_color_only_meaning", "reduced_motion_supported"):
