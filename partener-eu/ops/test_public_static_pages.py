@@ -456,8 +456,9 @@ print("PASS public static IA / sitemap / dossier regression + P0 wall-clock repl
 # presently open absent a newly acquired/reconciled official extension.
 # This is not evidence of exhaustion, closure, or extension.
 energy_pre_cutoff = module.parse_date("2026-11-20T21:58:59Z")
+energy_exact_cutoff = module.parse_date("2026-11-20T21:59:00Z")
 energy_post_cutoff = module.parse_date("2026-11-20T21:59:01Z")
-assert energy_pre_cutoff is not None and energy_post_cutoff is not None
+assert all(clock is not None for clock in (energy_pre_cutoff, energy_exact_cutoff, energy_post_cutoff))
 assert module.parse_date("20 noiembrie 2026, ora 23:59") == module.parse_date("2026-11-20T21:59:00Z")
 energy_probes = []
 for energy_id, energy_title in (
@@ -485,8 +486,10 @@ for energy_id, energy_title in (
         "sources": [{"tier": "T1", "label": "AFIR", "url": "https://www.afir.ro/info-la-zi/comunicat-derulare-sesiune-autoconsum-si-stocare-energie-electrica-beneficiari-publici/"}],
     })
     assert module.current_open(energy_probes[-1], energy_pre_cutoff)
+    assert not module.current_open(energy_probes[-1], energy_exact_cutoff)
     assert not module.current_open(energy_probes[-1], energy_post_cutoff)
     assert sync_mod.current_open(energy_probes[-1], energy_pre_cutoff)
+    assert not sync_mod.current_open(energy_probes[-1], energy_exact_cutoff)
     assert not sync_mod.current_open(energy_probes[-1], energy_post_cutoff)
     # Even before cutoff, conflicting status or competing extension date
     # must not be accepted as a fresh, reconciled OPEN proof.
@@ -509,18 +512,24 @@ with tempfile.TemporaryDirectory() as td:
         "news": [],
     }, ensure_ascii=False), encoding="utf-8")
     earlier = root / "energy-before"
+    exactly = root / "energy-exact-cutoff"
     later = root / "energy-after"
     before_manifest = module.build(fixture, earlier, as_of=energy_pre_cutoff)
+    exact_manifest = module.build(fixture, exactly, as_of=energy_exact_cutoff)
     after_manifest = module.build(fixture, later, as_of=energy_post_cutoff)
     assert before_manifest["currentOpen"] == 3
+    assert exact_manifest["currentOpen"] == 1
+    assert exact_manifest["failClosedOpenRefresh"] == 2
     assert after_manifest["currentOpen"] == 1
     assert after_manifest["failClosedOpenRefresh"] == 2
     before_list = (earlier / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    exact_list = (exactly / "finantari/deschise/index.html").read_text(encoding="utf-8")
     after_list = (later / "finantari/deschise/index.html").read_text(encoding="utf-8")
     after_dossiers = (later / "dosare/index.html").read_text(encoding="utf-8")
     for probe in energy_probes:
         marker = f'data-dossier-id="{probe["id"]}"'
         assert marker in before_list
+        assert marker not in exact_list
         assert marker not in after_list
         article_match = re.search(rf'<article class="staticCard" {re.escape(marker)}>(.*?)</article>', after_dossiers, re.S)
         assert article_match and "status-review" in article_match.group(1), probe["id"]
