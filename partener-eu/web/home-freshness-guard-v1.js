@@ -184,6 +184,10 @@ function openingWindowOk(d){
 
 function currentOpenState(d){
   if(!d||String(d.status||'').toUpperCase()!=='OPEN')return null;
+  // DR-12 is a multi-component umbrella, never an exact accepting call.
+  // "Alte sectoare" exhausted 11 Nov; zootehnic needs its own live proof.
+  // Keep canonical source history; hold the current badge at REVIEW.
+  if(String(d.id||'')==='afir-dr12-2026')return 'REVIEW';
   if(!PUBLICATION_OPEN_STATES.has(String(d.publicationState||'').toUpperCase()))return 'REVIEW';
   const status=confirmedFact(d,'status');
   if(String(status?.value||'').trim().toUpperCase()!=='OPEN'||!confirmedFact(d,'termen'))return 'REVIEW';

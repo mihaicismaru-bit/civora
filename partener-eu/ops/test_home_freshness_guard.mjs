@@ -260,4 +260,19 @@ fakeNow=Date.parse('2026-08-26T04:00:00Z');
 
 fakeNow=Date.parse('2026-08-26T04:00:00Z');
 
+
+// P0 #1402: DR-12 umbrella is not an exact accepting component. Its
+// original aggregate clock is not sufficient after AFIR confirmed exhaustion
+// of "alte sectoare"; zootehnic needs a separately reconciled endpoint.
+fakeNow=Date.parse('2026-11-21T00:00:00Z');
+const dr12Umbrella=timedOpen('afir-dr12-2026','2 decembrie 2026, 16:00');
+const dr12Control=timedOpen('independent-valid','2 decembrie 2026, 16:00');
+const dr12Held=run(timedPayload([dr12Umbrella,dr12Control]));
+assert.deepEqual(Array.from(dr12Held.home.openDossierIds),['independent-valid']);
+assert.equal(dr12Held.freshnessGuard.dossierStatusOverrides['afir-dr12-2026'],'REVIEW');
+assert.equal(dr12Held.summary.openCount,1);
+assert.equal(dr12Held.dossiers.find(d=>d.id==='afir-dr12-2026').status,'OPEN',
+  'Source history remains immutable; only current-facing state is held');
+fakeNow=Date.parse('2026-08-26T04:00:00Z');
+
 console.log('PASS home-freshness-guard-v1.3: wall clock vs historic LKG, expired/provisional/undated OPEN held REVIEW; static boot remains guarded; replay deterministic.');

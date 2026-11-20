@@ -563,3 +563,71 @@ readback_test = subprocess.run(
 assert readback_test.returncode == 0, (readback_test.stdout, readback_test.stderr)
 assert "PASS public deploy readback proof self-test" in readback_test.stdout
 print("PASS AFIR 20 Nov cutoff dual-dossier list/detail/home/Ask fail-closed replay")
+
+
+# P0 #1402: the generic DR-12 dossier is NOT a component-specific accepting
+# endpoint. AFIR confirmed "alte sectoare" exhausted on 11 Nov; zootehnic
+# remains a distinct independently monitored component. Even an exact future
+# global deadline is insufficient to present umbrella DR-12 as OPEN.
+# This regression is a render-only hold, not an official CLOSED statement.
+dr12_aggregate_probe = {
+    **future_probe,
+    "id": "afir-dr12-2026",
+    "title": "DR-12 agregat fara identitate componenta",
+    "status": "OPEN",
+    "statusLabel": "DESCHIS",
+    "standfirst": "Sesiunea DR-12 este deschisă pentru depunere.",
+    "decisionLabel": "ACȚIONEAZĂ",
+    "decisionAction": "Depunerea este deschisă.",
+    "quickFacts": [
+        {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+        {"label": "Termen", "value": "2 decembrie 2026, 16:00", "confidence": "CONFIRMED"},
+    ],
+    "sections": [
+        {"title": "Rezumat executiv", "items": ["Stare apel: OPEN."]},
+        {"title": "Ce trebuie făcut acum", "items": ["Depunerea este deschisă."]},
+    ],
+}
+dr12_clock = module.parse_date("2026-11-21T00:00:00Z")
+assert dr12_clock is not None
+assert not module.current_open(dr12_aggregate_probe, dr12_clock)
+assert not sync_mod.current_open(dr12_aggregate_probe, dr12_clock)
+with tempfile.TemporaryDirectory() as td:
+    root = Path(td)
+    fixture = root / "dr12-aggregate-only.json"
+    fixture.write_text(json.dumps({
+        "generatedAt": "2026-11-01T00:00:00Z",
+        "dossiers": [dr12_aggregate_probe, future_probe],
+        "news": [],
+    }, ensure_ascii=False), encoding="utf-8")
+    out = root / "site"
+    result = module.build(fixture, out, as_of=dr12_clock)
+    assert result["currentOpen"] == 1
+    assert result["failClosedOpenRefresh"] == 1
+    open_html = (out / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    assert 'data-dossier-id="afir-dr12-2026"' not in open_html
+    dossier_html = (out / "dosare/index.html").read_text(encoding="utf-8")
+    dr12_card = re.search(
+        r'<article class="staticCard" data-dossier-id="afir-dr12-2026">(.*?)</article>',
+        dossier_html, re.S,
+    )
+    assert dr12_card and "status-review" in dr12_card.group(1)
+    href = re.search(r'<h2><a href="([^"]+)">', dr12_card.group(1))
+    assert href
+    detail = (out / href.group(1).strip("/") / "index.html").read_text(encoding="utf-8")
+    assert '<span class="status status-review">ÎN VERIFICARE</span>' in detail
+    assert "Stare apel: OPEN." not in detail
+    assert "Depunerea este deschisă." not in detail
+    assert module.FAIL_CLOSED_OPEN_ACTION in detail
+    old_products, old_out = sync_mod.PRODUCTS, sync_mod.OUT_JS
+    try:
+        sync_mod.PRODUCTS = fixture
+        sync_mod.OUT_JS = root / "derived-projection.js"
+        assert sync_mod.main(as_of=dr12_clock) == 0
+    finally:
+        sync_mod.PRODUCTS, sync_mod.OUT_JS = old_products, old_out
+    source_preserved = json.loads(fixture.read_text(encoding="utf-8"))
+    assert source_preserved["summary"]["openCount"] == 1
+    assert source_preserved["home"]["openDossierIds"] == ["synthetic-future-test-only"]
+    assert next(d for d in source_preserved["dossiers"] if d["id"] == "afir-dr12-2026")["status"] == "OPEN"
+print("PASS DR-12 generic umbrella render/derived projection quarantine; canonical history unchanged")

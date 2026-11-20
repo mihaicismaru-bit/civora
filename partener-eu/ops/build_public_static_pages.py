@@ -240,6 +240,12 @@ def has_explicit_open_deadline_clock(value: Any) -> bool:
 def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
     if dossier.get("status") != "OPEN" or dossier.get("publicationState") != "PUBLISHABLE":
         return False
+    # DR-12 is an umbrella with independently accepting components. AFIR
+    # confirmed "alte sectoare" exhausted on 11 Nov while zootehnic has
+    # its own counter. Never present the generic dossier as an exact OPEN.
+    # This is a render/projection REVIEW hold, not an official CLOSED claim.
+    if str(dossier.get("id") or "") == "afir-dr12-2026":
+        return False
     # Duplicate source claims cannot be reconciled by selecting the first row.
     for label in ("status", "termen"):
         rows = [r for r in dossier.get("quickFacts") or [] if fold(r.get("label")) == label]

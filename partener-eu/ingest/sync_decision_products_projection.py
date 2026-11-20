@@ -91,6 +91,12 @@ def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
     """Fail closed at the derived-home projection, not merely at render time."""
     if dossier.get("status") != "OPEN" or dossier.get("publicationState") != "PUBLISHABLE":
         return False
+    # DR-12 is an umbrella with independently accepting components. AFIR
+    # confirmed "alte sectoare" exhausted on 11 Nov while zootehnic has
+    # its own counter. Never present the generic dossier as an exact OPEN.
+    # This is a render/projection REVIEW hold, not an official CLOSED claim.
+    if str(dossier.get("id") or "") == "afir-dr12-2026":
+        return False
     rows = dossier.get("quickFacts") or []
     status_rows = [r for r in rows if fold(r.get("label")) == "status"]
     deadline_rows = [r for r in rows if fold(r.get("label")) == "termen"]
