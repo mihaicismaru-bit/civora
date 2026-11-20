@@ -198,6 +198,40 @@ const heldNumeric=run(timedPayload([malformedClock,malformedCompeting,wrongSlash
 assert.deepEqual(Array.from(heldNumeric.home.openDossierIds),['wrong-us-order']);
 assert.equal(heldNumeric.freshnessGuard.dossierStatusOverrides['malformed-competing'],'REVIEW');
 
+// AFIR's two public-entity energy calls share a dated 20 November 2026
+// 23:59 Europe/Bucharest cutoff, but they are separate identities. This
+// tests the wall-clock projection *only*: an already published source-bound
+// fixture is not evidence of a currently accepting exact endpoint.
+const afirPublicSolar=timedOpen('afir-fm-public-autoconsum-2026','20 noiembrie 2026, 23:59');
+const afirPublicStorage=timedOpen('afir-fm-public-storage-2026','20 noiembrie 2026, 23:59');
+const afirEnergyWindow=timedPayload([afirPublicSolar,afirPublicStorage]);
+fakeNow=Date.parse('2026-11-20T21:58:59Z'); // 23:58:59 Bucharest
+assert.deepEqual(Array.from(run(afirEnergyWindow).home.openDossierIds),
+  ['afir-fm-public-autoconsum-2026','afir-fm-public-storage-2026'],
+  'The wall-clock guard cannot preempt a previously verified source-bound window');
+fakeNow=Date.parse('2026-11-20T21:59:01Z'); // 23:59:01 Bucharest
+const afirEnergyExpired=run(afirEnergyWindow);
+assert.deepEqual(Array.from(afirEnergyExpired.home.openDossierIds),[],
+  'Neither public energy call can outlive its exact source cutoff');
+assert.equal(afirEnergyExpired.summary.openCount,0);
+assert.deepEqual(Array.from(afirEnergyExpired.freshnessGuard.removedOpenDossierIds),
+  ['afir-fm-public-autoconsum-2026','afir-fm-public-storage-2026']);
+for(const id of ['afir-fm-public-autoconsum-2026','afir-fm-public-storage-2026']){
+  assert.equal(afirEnergyExpired.freshnessGuard.dossierStatusOverrides[id],'REVIEW',
+    'Expiry alone cannot assert official CLOSED');
+}
+// A newer, unsupported deadline or unavailable current submission proof
+// must never be used to keep an old OPEN badge alive before the cutoff.
+fakeNow=Date.parse('2026-11-20T12:00:00Z');
+const unsupportedExtension=timedOpen('afir-energy-conflicting','20 noiembrie 2026, 23:59',
+  {closesAt:'2026-12-20T23:59:00+02:00'});
+const unavailableGateway=timedOpen('afir-energy-gateway-403','20 noiembrie 2026, 23:59',
+  {publicationState:'PROVISIONAL_FAIL_CLOSED'});
+const energyHeld=run(timedPayload([unsupportedExtension,unavailableGateway]));
+assert.deepEqual(Array.from(energyHeld.home.openDossierIds),[]);
+assert.equal(energyHeld.freshnessGuard.dossierStatusOverrides['afir-energy-conflicting'],'REVIEW');
+assert.equal(energyHeld.freshnessGuard.dossierStatusOverrides['afir-energy-gateway-403'],'REVIEW');
+
 // Unsupported/ambiguous time around the Bucharest DST transition also holds.
 const ambiguous=timedOpen('ambiguous','25 octombrie 2026, ora 03:30');
 fakeNow=Date.parse('2026-10-24T08:00:00Z');
