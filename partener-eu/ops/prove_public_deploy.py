@@ -108,13 +108,14 @@ STATIC_CARD_RE = re.compile(
     re.IGNORECASE,
 )
 DEADLINE_TEXT_RE = re.compile(r"""<b>\s*Termen:\s*</b>\s*([^<]*?)\s*</span>""", re.IGNORECASE)
-# Three known P0 source-OPEN dossiers warrant independent live detail checks.
+# Four known P0 source-OPEN dossiers warrant independent live detail checks.
 # This catches a mixed Pages release where the OPEN hub is fresh but details
 # remain stale. These URLs are verification targets, not authority/proofs.
 PRIORITY_DETAIL_ROUTES = {
     "pr-centru-clusters-122": "dosare/pr-centru-clusters-122-clustere-inovative/",
     "afir-fm-public-autoconsum-2026": "dosare/afir-fm-public-autoconsum-2026/",
     "afir-fm-public-storage-2026": "dosare/afir-fm-public-storage-2026/",
+    "afir-dr12-2026": "dosare/afir-dr12-2026/",
 }
 DETAIL_STATUS_RE = re.compile(r'<span class="status status-([a-z_-]+)">', re.IGNORECASE)
 DETAIL_DEADLINE_RE = re.compile(
@@ -140,6 +141,11 @@ def open_listing_semantics(raw: bytes, clock: dt.datetime) -> tuple[bool, list[s
         dossier_id = match_id.group(1) if match_id else "unknown"
         if dossier_id in seen_ids:
             failures.append(f"{dossier_id}:duplicate_dossier_card_id")
+        # The DR-12 aggregate is not an independently accepting component.
+        # AFIR's 11 Nov official notice closes 'alte sectoare'; zootehnic is
+        # separately assessed. This is a *negative* release gate, not CLOSED.
+        if dossier_id == "afir-dr12-2026":
+            failures.append("afir-dr12-2026:aggregate_open_without_component_reconciliation")
         seen_ids.add(dossier_id)
         # The /deschise/ surface must carry an explicit OPEN badge per card.
         if not re.search(r'\bstatus-open\b', block, re.IGNORECASE):
@@ -293,6 +299,12 @@ def self_test() -> int:
     assert not open_listing_semantics(future + expired, clock)[0]
     # Duplicate or unidentified cards must not bypass priority list/detail parity.
     assert not open_listing_semantics(future + future, clock)[0]
+    # The global DR-12 2 Dec deadline cannot reopen the exhausted component.
+    # An exact component identity and current official endpoint are prerequisites.
+    dr12_aggregate = card("afir-dr12-2026", "2 decembrie 2026, 16:00")
+    assert "afir-dr12-2026:aggregate_open_without_component_reconciliation" in open_listing_semantics(
+        dr12_aggregate, clock
+    )[1]
     assert not open_listing_semantics(
         b'<article class="staticCard"><span class="status status-open">DESCHIS</span>'
         b'<span><b>Termen:</b> 20 noiembrie 2026, 23:59</span></article>', clock
@@ -479,6 +491,11 @@ def main() -> int:
                 )
                 if (dossier_id in open_listing_ids) != (detail_status == "open"):
                     failures.append("open_listing_detail_state_disagreement")
+                if dossier_id == "afir-dr12-2026" and detail_status == "open":
+                    # Until source-scoped, per-component acceptance is verified,
+                    # a generic DR-12 OPEN dossier is misleading even if its
+                    # aggregate 2 December calendar clock is in the future.
+                    failures.append("dr12_aggregate_open_without_component_reconciliation")
                 # Matching path alone is insufficient: identical HTML from
                 # an unrelated origin is not proof of our actual deployment.
                 if not same_public_route(detail_url, d_resolved):
