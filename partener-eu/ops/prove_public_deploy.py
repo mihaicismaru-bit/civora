@@ -216,6 +216,39 @@ def priority_detail_semantics(raw: bytes, clock: dt.datetime) -> tuple[bool, str
             ):
                 failures.append("review_still_invites_submission")
                 break
+        # REVIEW must also neutralize the actionable "Ce trebuie făcut acum"
+        # and "Decizia rapidă" section lists. A mixed deployment can preserve
+        # old <li> advice even after the badge, standfirst and decisionBox
+        # were replaced. Restrict checks to advice sections, not provenance.
+        for section_title, section_body in re.findall(
+            r"""<section\\b[^>]*\\bclass=["'][^"']*\\bdetailSection\\b[^"']*["'][^>]*>\\s*<h2>(.*?)</h2>(.*?)</section>""",
+            source, re.IGNORECASE | re.DOTALL,
+        ):
+            import unicodedata
+            title_text = html.unescape(re.sub(r"<[^>]+>", " ", section_title))
+            title_plain = "".join(
+                ch for ch in unicodedata.normalize("NFKD", title_text.casefold())
+                if not unicodedata.combining(ch)
+            ).strip()
+            if title_plain not in {"ce trebuie facut acum", "decizia rapida"}:
+                continue
+            for advice in re.findall(r"<li\\b[^>]*>(.*?)</li>", section_body, re.IGNORECASE | re.DOTALL):
+                visible = html.unescape(re.sub(r"<[^>]+>", " ", advice))
+                plain = "".join(
+                    ch for ch in unicodedata.normalize("NFKD", visible.casefold())
+                    if not unicodedata.combining(ch)
+                ).strip()
+                if re.search(
+                    r"\\b(?:incepe\\s+screeningul\\s+si\\s+planul\\s+de\\s+depunere"
+                    r"|planifica\\s+depunerea\\s+pornind\\s+de\\s+la\\s+termenul\\s+confirmat"
+                    r"|depunerea\\s+este\\s+deschisa"
+                    r"|(?<!nu\\s)(?<!nu mai\\s)depune\\s+acum)\\b",
+                    plain,
+                ):
+                    failures.append("review_still_invites_submission_in_advice_section")
+                    break
+            if "review_still_invites_submission_in_advice_section" in failures:
+                break
     return not failures, status, failures
 
 
@@ -301,6 +334,21 @@ def self_test() -> int:
     assert priority_detail_semantics(
         detail("review", "20 noiembrie 2026, 23:59", "Nu depune înainte de reconcilierea oficială."), after
     )[0]
+    # Badge-only REVIEW cannot mask old actionable checklist copy in a mixed deployment.
+    stale_advice = (
+        '<section class="detailSection"><h2>Ce trebuie făcut acum</h2><ul>'
+        '<li>Planifică depunerea pornind de la termenul confirmat: 6 noiembrie 2026.</li>'
+        '</ul></section>'
+    ).encode("utf-8")
+    assert "review_still_invites_submission_in_advice_section" in priority_detail_semantics(
+        review + stale_advice, after
+    )[2]
+    protective_advice = (
+        '<section class="detailSection"><h2>Ce trebuie făcut acum</h2><ul>'
+        '<li>Nu depune înainte de reconcilierea oficială.</li>'
+        '</ul></section>'
+    ).encode("utf-8")
+    assert priority_detail_semantics(review + protective_advice, after)[0]
     assert not priority_detail_semantics(b"<html>missing lifecycle</html>", after)[0]
     assert not consultation_semantics_ok(b"<article><b>Termen:</b> Neconfirmat</article>")
     assert same_public_route(
