@@ -76,12 +76,8 @@ def validate(rows, domains):
         "eismea.ec.europa.eu", "rea.ec.europa.eu",
         "cybersecurity-centre.europa.eu", "hadea.ec.europa.eu"
     }
-    assert {
-        "eccc_eoi_natch_and_cbch_are_not_grant_proposal_topic_identifiers",
-        "horizon_hlth_family_is_not_exact_topic",
-    } - set(s["extract"]) == {"horizon_hlth_family_is_not_exact_topic"} or (
-        "horizon_hlth_family_is_not_exact_topic" in s["note"].lower()
-    ), "ECCC EOI / health family boundary missing"
+    assert "eccc_eoi_natch_and_cbch_are_not_grant_proposal_topic_identifiers" in s["extract"]
+    assert "horizon_hlth_family_is_not_exact_topic" in s["cross_programme_identity_guard"].lower()
     note = s["note"]
     for token in ("20 November 2026", "T2", "Funding & Tenders", "ECCC",
                   "HORIZON-HLTH-2027", "NOT_CAPTURED", "SURFACEMC",
