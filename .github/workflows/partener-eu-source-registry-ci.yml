@@ -5,6 +5,7 @@ on:
     paths:
       - 'partener-eu/ingest/source_registry.json'
       - 'partener-eu/ops/test_cl4_2027_photonics_topic_identity.py'
+      - 'partener-eu/ops/test_een_20261120_eu_six_opportunities_discovery.py'
       - 'partener-eu/ops/test_widera_excellence_hubs_official_pair.py'
       - 'partener-eu/ops/test_eu4h_2027_ngo_exact_pair_discovery.py'
       - 'partener-eu/ops/test_cl4_2027_ai_data_topics_discovery.py'
@@ -174,6 +175,7 @@ jobs:
           python -m py_compile partener-eu/ops/p10_validate.py
           python -m py_compile partener-eu/ops/test_p10_policy_regression.py
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
+          python -m py_compile partener-eu/ops/test_een_20261120_eu_six_opportunities_discovery.py
           python -m py_compile partener-eu/ops/test_cl4_2027_ai_data_topics_discovery.py
           python -m py_compile partener-eu/ops/test_cl4_2027_ai_open_vs_index_conflict.py
           python -m py_compile partener-eu/ops/test_cl5_2027_info_day_brokerage_discovery.py
@@ -211,6 +213,9 @@ jobs:
 
       - name: Hold EU4Health 2027 NGO exact official pair at discovery until immutable submission proof
         run: python partener-eu/ops/test_eu4h_2027_ngo_exact_pair_discovery.py
+
+      - name: Hold ADR Centru EEN multi-topic digest and ECCC EOI versus grant proposal at discovery
+        run: python partener-eu/ops/test_een_20261120_eu_six_opportunities_discovery.py
 
       - name: Validate CL4 photonics exact topic ID conflict (no OPEN promotion)
         run: python partener-eu/ops/test_cl4_2027_photonics_topic_identity.py
