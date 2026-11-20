@@ -53,7 +53,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout exact source head for UX proof
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Prove exact-head checkout before UX proof
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          ACTUAL_HEAD="$(git rev-parse HEAD)"
+          printf 'PARTENER_UX_QA_EXACT_HEAD=%s expected=%s\n' "$ACTUAL_HEAD" "$EXPECTED_HEAD"
+          test "$ACTUAL_HEAD" = "$EXPECTED_HEAD"
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
