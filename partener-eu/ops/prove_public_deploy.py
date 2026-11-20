@@ -63,6 +63,22 @@ def fetch_bytes(url: str, *, timeout: float, token: str) -> tuple[int, bytes, st
         return int(getattr(response, "status", 200)), response.read(), response.geturl()
 
 
+def same_public_route(requested: str, resolved: str) -> bool:
+    """Reject redirects off the exact public HTTPS origin or route.
+
+    A matching manifest/card payload served from another host or route is not
+    evidence that the intended public deployment is live. Query parameters
+    (including the readback cache buster) do not change route identity.
+    """
+    expected, actual = urllib.parse.urlsplit(requested), urllib.parse.urlsplit(resolved)
+    return (
+        expected.scheme.lower() == actual.scheme.lower() == "https"
+        and bool(expected.hostname)
+        and expected.netloc.lower() == actual.netloc.lower()
+        and (expected.path.rstrip("/") or "/") == (actual.path.rstrip("/") or "/")
+    )
+
+
 def parse_json_bytes(raw: bytes) -> Any:
     return json.loads(raw.decode("utf-8"))
 
@@ -87,6 +103,10 @@ CARD_BLOCK_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 CARD_ID_RE = re.compile(r"""\bdata-dossier-id\s*=\s*["']([^"']+)["']""", re.IGNORECASE)
+STATIC_CARD_RE = re.compile(
+    r"""<article\b[^>]*\bclass\s*=\s*["'][^"']*\bstaticCard\b[^"']*["'][^>]*>""",
+    re.IGNORECASE,
+)
 DEADLINE_TEXT_RE = re.compile(r"""<b>\s*Termen:\s*</b>\s*([^<]*?)\s*</span>""", re.IGNORECASE)
 # Three known P0 source-OPEN dossiers warrant independent live detail checks.
 # This catches a mixed Pages release where the OPEN hub is fresh but details
@@ -111,12 +131,16 @@ def open_listing_semantics(raw: bytes, clock: dt.datetime) -> tuple[bool, list[s
     """
     source = raw.decode("utf-8", "replace")
     blocks = CARD_BLOCK_RE.findall(source)
-    if len(blocks) != count_cards(raw):
-        return False, ["unparseable_dossier_card_markup"]
+    if len(blocks) != count_cards(raw) or len(STATIC_CARD_RE.findall(source)) != len(blocks):
+        return False, ["unparseable_or_unidentified_dossier_card_markup"]
     failures: list[str] = []
+    seen_ids: set[str] = set()
     for block in blocks:
         match_id = CARD_ID_RE.search(block)
         dossier_id = match_id.group(1) if match_id else "unknown"
+        if dossier_id in seen_ids:
+            failures.append(f"{dossier_id}:duplicate_dossier_card_id")
+        seen_ids.add(dossier_id)
         # The /deschise/ surface must carry an explicit OPEN badge per card.
         if not re.search(r'\bstatus-open\b', block, re.IGNORECASE):
             failures.append(f"{dossier_id}:non_open_badge")
@@ -208,6 +232,12 @@ def self_test() -> int:
     assert open_listing_semantics(future, clock) == (True, [])
     assert not open_listing_semantics(expired, clock)[0]
     assert not open_listing_semantics(future + expired, clock)[0]
+    # Duplicate or unidentified cards must not bypass priority list/detail parity.
+    assert not open_listing_semantics(future + future, clock)[0]
+    assert not open_listing_semantics(
+        b'<article class="staticCard"><span class="status status-open">DESCHIS</span>'
+        b'<span><b>Termen:</b> 20 noiembrie 2026, 23:59</span></article>', clock
+    )[0]
     assert not open_listing_semantics(card("no-clock", "2 decembrie 2026"), clock)[0]
     assert not open_listing_semantics(card("no-offset", "2026-12-02T16:00"), clock)[0]
     assert not open_listing_semantics(card("dst-ambiguous", "25 octombrie 2026, 03:30"), clock)[0]
@@ -232,6 +262,22 @@ def self_test() -> int:
     assert not priority_detail_semantics(detail("review", "20 noiembrie 2026, 23:59", claim="Stare apel: OPEN."), after)[0]
     assert not priority_detail_semantics(b"<html>missing lifecycle</html>", after)[0]
     assert not consultation_semantics_ok(b"<article><b>Termen:</b> Neconfirmat</article>")
+    assert same_public_route(
+        "https://partener.eu/finantari/deschise/",
+        "https://partener.eu/finantari/deschise/?partener_readback=x",
+    )
+    assert not same_public_route(
+        "https://partener.eu/finantari/deschise/",
+        "https://partener.eu/finantari/in-pregatire/",
+    )
+    assert not same_public_route(
+        "https://partener.eu/finantari/deschise/",
+        "https://offsite.example/finantari/deschise/",
+    )
+    assert not same_public_route(
+        "https://partener.eu/finantari/deschise/",
+        "http://partener.eu/finantari/deschise/",
+    )
     busted = cache_busted("https://partener.eu/consultari/?x=1", "abc")
     assert "x=1" in busted and "partener_readback=abc" in busted
     print("PASS public deploy readback proof self-test")
@@ -280,6 +326,8 @@ def main() -> int:
         record: dict[str, Any] = {"attempt": attempt, "errors": []}
         try:
             code, raw, resolved = fetch_bytes(manifest_url, timeout=args.timeout_seconds, token=token)
+            if not same_public_route(manifest_url, resolved):
+                raise ValueError("manifest_redirected_off_canonical_origin_or_route")
             observed = parse_json_bytes(raw)
             if not isinstance(observed, dict):
                 raise ValueError("public manifest is not a JSON object")
@@ -312,6 +360,9 @@ def main() -> int:
                         r_raw, dt.datetime.now(dt.timezone.utc)
                     )
                     open_listing_ids = set(CARD_ID_RE.findall(r_raw.decode("utf-8", "replace")))
+                if not same_public_route(route_url, r_resolved):
+                    semantic_failures.append("route_redirected_off_canonical_origin_or_path")
+                    semantic_ok = False
                 route_ok = r_code == 200 and observed_count == expected_count and semantic_ok
                 route_results[route] = {
                     "http_status": r_code,
@@ -339,9 +390,10 @@ def main() -> int:
                 )
                 if (dossier_id in open_listing_ids) != (detail_status == "open"):
                     failures.append("open_listing_detail_state_disagreement")
-                # Do not silently accept an unrelated page after a redirect.
-                if urllib.parse.urlsplit(d_resolved).path.rstrip("/") != urllib.parse.urlsplit(detail_url).path.rstrip("/"):
-                    failures.append("detail_redirected_to_other_route")
+                # Matching path alone is insufficient: identical HTML from
+                # an unrelated origin is not proof of our actual deployment.
+                if not same_public_route(detail_url, d_resolved):
+                    failures.append("detail_redirected_off_canonical_origin_or_path")
                 detail_ok = d_code == 200 and detail_ok and not failures
                 detail_results[dossier_id] = {
                     "http_status": d_code,
