@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MySMIS Connector — bounded runtime configuration</title>
+</head>
+<body>
+  <main>
+    <h1>Bounded runtime configuration</h1>
+    <p>Paste only the exact-build extensionConfig object from the verified MCLENOVO handoff plan.</p>
+    <label for="config">Attested configuration JSON</label>
+    <textarea id="config" rows="16" cols="88" spellcheck="false"></textarea>
+    <p><button id="apply" type="button">Validate and enable loopback</button></p>
+    <output id="status" aria-live="polite">Disabled until a valid configuration is applied.</output>
+  </main>
+  <script type="module" src="options.js"></script>
+</body>
+</html>
+
