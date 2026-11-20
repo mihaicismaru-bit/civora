@@ -29,7 +29,48 @@ MISSING_RECEIPT_OR_MATERIAL = {
 }
 
 
+HUMAN_ID = "SRC-EU-HORIZON-CL4-2027-HUMAN-07-DISCOVERY"
+HUMAN_TOPIC = "HORIZON-CL4-2027-04-HUMAN-07"
+HUMAN_TITLE = "Facilitate the engagement of European stakeholders in international digital standardisation"
+HUMAN_OVERVIEW = "https://interoperable-europe.ec.europa.eu/eu-digital-funding-opportunities"
+
+
+def validate_human(rows):
+    candidates = [r for r in rows if r.get("id") == HUMAN_ID]
+    assert len(candidates) == 1, "missing or duplicated HUMAN-07 source"
+    row = candidates[0]
+    assert row["tier"] == "T1"
+    assert row["class"] == "official_ec_eu_digital_opportunities_exact_topic_link_discovery"
+    assert row["topic_identifier_discovery"] == HUMAN_TOPIC
+    assert row["topic_title_discovery"] == HUMAN_TITLE
+    assert row["market_intelligence_theme_discovery"] == "international_digital_standardisation"
+    p = urlparse(row["url"])
+    assert p.scheme == "https" and p.hostname == "ec.europa.eu"
+    assert p.path.endswith("/topic-details/" + HUMAN_TOPIC)
+    assert not (p.username or p.password or p.port)
+    assert row["listing_url"] == HUMAN_OVERVIEW
+    assert row["authority_class"] == "T1_OFFICIAL_EC_FUNDING_TENDERS"
+    assert row["authority_scope"] == "EXACT_TOPIC_LINKED_AGGREGATOR_DISCOVERY_ONLY_NO_CURRENT_SUBMISSION_PROOF"
+    assert row["observation_state"] == "OFFICIAL_AGGREGATOR_EXACT_TOPIC_DISCOVERY_RAW_PENDING"
+    assert row["aggregator_listed_opening_discovery"].startswith("2026-11-17 (")
+    assert row["aggregator_listed_deadline_discovery"].startswith("18 March 2027, 17:00 Brussels time (")
+    assert row["adapter_required"] == "EC_FT_EXACT_TOPIC_CURRENT_STATUS_AND_ENDPOINT_RECONCILE_V1"
+    assert {"EU_DIRECT", "BRUSSELS", "HORIZON_EUROPE", "CALL_REGISTRY", "OFFICIAL_AGGREGATOR_DISCOVERY", "DISCOVERY"} <= set(row["source_families"])
+    assert "OPEN_CALL" not in row["source_families"]
+    for flag in ("material_fact_use", "open_call_authorized", "material_fact_publication_authorized", "credentials_required"):
+        assert row[flag] is False, (HUMAN_ID, flag)
+    assert not MISSING_RECEIPT_OR_MATERIAL.intersection(row)
+    assert {"aggregator_open_and_deadline_dates_are_discovery_only",
+            "exact_topic_url_returns_js_shell_not_verified_live_call_bytes",
+            "source_and_current_submission_endpoint_raw_receipts_missing"} <= set(row["extract"])
+    for witness in ("20 November 2026", "SURFACEMC", "final_url", "fetched_at UTC",
+                    "raw_sha256", "semantic_sha256", "parser_version", "run_id",
+                    "NOT_CAPTURED", "OPEN_CALL", "LKG", "semantic reconciliation"):
+        assert witness in row["note"], (HUMAN_ID, witness)
+
+
 def validate(rows):
+    validate_human(rows)
     ids = [x["id"] for x in rows]
     assert len(ids) == len(set(ids)), "duplicate source identity"
     by_id = {x["id"]: x for x in rows}
@@ -113,7 +154,41 @@ def main():
             rejected += 1
         else:
             raise AssertionError("duplicate accepted: " + key)
-    assert rejected == 30
+    human_mutations = [
+        ("observation_state", "OPEN_CALL"),
+        ("open_call_authorized", True),
+        ("material_fact_use", True),
+        ("material_fact_publication_authorized", True),
+        ("status", "OPEN"),
+        ("deadline", "2027-03-18T17:00:00+01:00"),
+        ("budget_eur", 1),
+        ("eligibility", ["everyone"]),
+        ("application_endpoint", "https://example.invalid/submit"),
+        ("raw_sha256", "0" * 64),
+        ("final_url", "https://example.invalid/topic"),
+        ("authority_scope", "EXACT_OPEN"),
+        ("topic_identifier_discovery", "FAKE"),
+        ("aggregator_listed_deadline_discovery", "18 March 2027; confirmed OPEN"),
+    ]
+    for field, value in human_mutations:
+        mutation = copy.deepcopy(rows)
+        next(x for x in mutation if x["id"] == HUMAN_ID)[field] = value
+        try:
+            validate(mutation)
+        except AssertionError:
+            rejected += 1
+        else:
+            raise AssertionError("unsafe HUMAN-07 material mutation admitted: " + field)
+    duplicated = copy.deepcopy(rows)
+    duplicated.append(copy.deepcopy(next(x for x in rows if x["id"] == HUMAN_ID)))
+    try:
+        validate(duplicated)
+    except AssertionError:
+        rejected += 1
+    else:
+        raise AssertionError("duplicate HUMAN-07 source accepted")
+    assert rejected == 45
+
     print(json.dumps({"result": "PASS", "topics": sorted(TOPICS),
                       "negative_mutations_rejected": rejected,
                       "open_call_authorized": False,
