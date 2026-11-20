@@ -24,6 +24,7 @@ on:
       - 'partener-eu/ops/test_prnv_114_final_guide_discovery.py'
       - 'partener-eu/ops/test_afir_dr36_guide_revision_discovery.py'
       - 'partener-eu/ops/test_eea_norway_gbi_programme_launch_discovery.py'
+      - 'partener-eu/ops/test_afm_battery_2026_source_split.py'
       - 'partener-eu/ops/test_mpf_maiedit_non_authorizing.py'
       - 'partener-eu/ops/test_mpf_2026_official_operator_discovery.py'
       - 'partener-eu/ops/test_cinea_if26_planned_component_envelopes.py'
@@ -190,6 +191,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_prnv_114_final_guide_discovery.py
           python -m py_compile partener-eu/ops/test_afir_dr36_guide_revision_discovery.py
           python -m py_compile partener-eu/ops/test_eea_norway_gbi_programme_launch_discovery.py
+          python -m py_compile partener-eu/ops/test_afm_battery_2026_source_split.py
           python -m py_compile partener-eu/ops/test_mpf_maiedit_non_authorizing.py
           python -m py_compile partener-eu/ops/test_mpf_2026_official_operator_discovery.py
           python -m py_compile partener-eu/ops/test_cinea_if26_planned_component_envelopes.py
@@ -263,6 +265,9 @@ jobs:
 
       - name: Reject Norway Grants Romania GBI programme-launch event as OPEN call
         run: python partener-eu/ops/test_eea_norway_gbi_programme_launch_discovery.py
+
+      - name: Guard AFM prosumer batteries against AFIR public energy cross-programme aliases
+        run: python partener-eu/ops/test_afm_battery_2026_source_split.py
 
       - name: Guard MAI MPF publish-edit provenance and event-only authority
         run: python partener-eu/ops/test_mpf_maiedit_non_authorizing.py
