@@ -221,7 +221,7 @@ def priority_detail_semantics(raw: bytes, clock: dt.datetime) -> tuple[bool, str
         # old <li> advice even after the badge, standfirst and decisionBox
         # were replaced. Restrict checks to advice sections, not provenance.
         for section_title, section_body in re.findall(
-            r"""<section\\b[^>]*\\bclass=["'][^"']*\\bdetailSection\\b[^"']*["'][^>]*>\\s*<h2>(.*?)</h2>(.*?)</section>""",
+            r"""<section\b[^>]*\bclass=["'][^"']*\bdetailSection\b[^"']*["'][^>]*>\s*<h2>(.*?)</h2>(.*?)</section>""",
             source, re.IGNORECASE | re.DOTALL,
         ):
             import unicodedata
@@ -232,17 +232,17 @@ def priority_detail_semantics(raw: bytes, clock: dt.datetime) -> tuple[bool, str
             ).strip()
             if title_plain not in {"ce trebuie facut acum", "decizia rapida"}:
                 continue
-            for advice in re.findall(r"<li\\b[^>]*>(.*?)</li>", section_body, re.IGNORECASE | re.DOTALL):
+            for advice in re.findall(r"<li\b[^>]*>(.*?)</li>", section_body, re.IGNORECASE | re.DOTALL):
                 visible = html.unescape(re.sub(r"<[^>]+>", " ", advice))
                 plain = "".join(
                     ch for ch in unicodedata.normalize("NFKD", visible.casefold())
                     if not unicodedata.combining(ch)
                 ).strip()
                 if re.search(
-                    r"\\b(?:incepe\\s+screeningul\\s+si\\s+planul\\s+de\\s+depunere"
-                    r"|planifica\\s+depunerea\\s+pornind\\s+de\\s+la\\s+termenul\\s+confirmat"
-                    r"|depunerea\\s+este\\s+deschisa"
-                    r"|(?<!nu\\s)(?<!nu mai\\s)depune\\s+acum)\\b",
+                    r"\b(?:incepe\s+screeningul\s+si\s+planul\s+de\s+depunere"
+                    r"|planifica\s+depunerea\s+pornind\s+de\s+la\s+termenul\s+confirmat"
+                    r"|depunerea\s+este\s+deschisa"
+                    r"|(?<!nu\s)(?<!nu mai\s)depune\s+acum)\b",
                     plain,
                 ):
                     failures.append("review_still_invites_submission_in_advice_section")
