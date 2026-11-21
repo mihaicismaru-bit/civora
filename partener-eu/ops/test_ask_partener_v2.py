@@ -165,11 +165,62 @@ for dossier in dossiers:
     if any(url and url in by_url for url in urls):
         resolved['url'] += 1
 
-assert sum(resolved.values()) > 0, 'No deterministic Ask↔MIPE correlation exists in the checked-in corpus'
-assert resolved['code'] + resolved['url'] > 0, f'Only exact IDs correlate; stable cross-product join is still unproven: {resolved}'
+# Check the current corpus separately from the *capability* of deterministic
+# secondary matching. A shared canonical ID correctly takes precedence, so
+# healthy cross-product ID alignment can leave zero code/URL fallbacks exercised.
+# That absence must remain visible as a coverage gap, not be "fixed" with fuzzy
+# titles, unverified URLs, or weakening the one-candidate-only runtime rule.
+assert resolved['id'] > 0, 'No real exact-ID Ask↔MIPE correlation exists'
+
+def test_secondary_join_contract() -> None:
+    official_a = {
+        'id': 'mipe-a', 'code': 'PEO/76/OP4/ESO4.5/PEO_A3',
+        'verificationEvidence': [
+            {'sourceTier': 'T1', 'sourceUrl': 'https://mfe.gov.ro/ghid/call-a/'},
+            {'sourceTier': 'T2', 'sourceUrl': 'https://example.com/discovery-only'},
+        ],
+    }
+    official_b = {
+        'id': 'mipe-b', 'code': 'PEO/77/OP4/ESO4.5/PEO_A3',
+        'verificationEvidence': [
+            {'sourceTier': 'T1B', 'sourceUrl': 'https://mfe.gov.ro/ghid/call-b/'},
+        ],
+    }
+    sample = [official_a, official_b]
+    by_code_sample = unique_index(sample, lambda row: [code_key(row.get('code'))])
+    by_url_sample = unique_index(sample, lambda row: [
+        url_key(ev.get('sourceUrl'))
+        for ev in row.get('verificationEvidence') or []
+        if official_tier(ev.get('sourceTier'))
+    ])
+    assert by_code_sample[code_key('PEO / 76 / OP4 / ESO4.5 / PEO_A3')] is official_a
+    assert by_url_sample[url_key('https://mfe.gov.ro/ghid/call-a/#fragment')] is official_a
+    assert by_url_sample[url_key('https://mfe.gov.ro/ghid/call-b/')] is official_b
+    assert url_key('https://example.com/discovery-only') not in by_url_sample
+    assert not url_key('javascript:alert(1)')
+    # Even authoritative evidence must not produce a unique join when two
+    # canonical records claim the same code or official endpoint.
+    duplicates = [official_a, {
+        **official_b, 'code': official_a['code'],
+        'verificationEvidence': [{'sourceTier': 'T1', 'sourceUrl': 'https://mfe.gov.ro/ghid/call-a/'}],
+    }]
+    assert code_key(official_a['code']) not in unique_index(
+        duplicates, lambda row: [code_key(row.get('code'))]
+    )
+    assert url_key('https://mfe.gov.ro/ghid/call-a') not in unique_index(
+        duplicates, lambda row: [
+            url_key(ev.get('sourceUrl'))
+            for ev in row.get('verificationEvidence') or []
+            if official_tier(ev.get('sourceTier'))
+        ]
+    )
+
+test_secondary_join_contract()
 print(json.dumps({
     'status': 'PASS',
     'dossiers': len(dossiers),
     'canonicalCalls': len(canonical),
     'resolved': resolved,
+    'secondaryKeyRealCorpusEvidence': 'OBSERVED' if resolved['code'] + resolved['url'] else 'NOT_YET_OBSERVED',
+    'secondaryKeySyntheticFailClosedReplay': 'PASS',
 }, ensure_ascii=False))

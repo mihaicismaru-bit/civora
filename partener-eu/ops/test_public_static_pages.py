@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
+import sys
 import re
 import tempfile
 import xml.etree.ElementTree as ET
@@ -118,9 +120,12 @@ provisional_ids = {
     if row.get("publicationState") != "PUBLISHABLE"
 }
 
+# The public render must evaluate against present time, never the historic
+# decision-products generatedAt. Capture the same clock for all assertions.
+test_clock = module.dt.datetime.now(module.dt.timezone.utc)
 with tempfile.TemporaryDirectory() as td:
     out = Path(td)
-    manifest = module.build(PRODUCTS, out)
+    manifest = module.build(PRODUCTS, out, as_of=test_clock)
 
     required = [
         "robots.txt",
@@ -247,9 +252,7 @@ with tempfile.TemporaryDirectory() as td:
 
     # OPEN static hub must contain only rows that pass the same current-open gate
     # used by the canonical decision projection.
-    clock = module.parse_date(payload.get("generatedAt"))
-    if clock is None:
-        raise AssertionError("decision products generatedAt is not parseable")
+    clock = test_clock
     expected_open = {
         str(row.get("id") or "")
         for row in publishable
@@ -312,4 +315,319 @@ with tempfile.TemporaryDirectory() as td:
             assert marker in prepare_index
             assert marker not in open_index
 
-print("PASS public static IA / sitemap / dossier regression")
+
+# P0 #1404 replay: a stale source-generatedAt must not keep a 6 November
+# Clustere inovative dossier OPEN on 18 November in the crawler-visible site.
+# The second dossier is deliberately synthetic: it proves that this is a
+# time-scoped hold, not a blanket suppression of every future valid deadline.
+cluster_probe = {
+    "id": "pr-centru-clusters-122",
+    "code": "PRC/1056/PRC_P1/OP1/RSO1.1/PRC_A4",
+    "title": "Clustere inovative",
+    "programme": "Programul Regiunea Centru",
+    "publicationState": "PUBLISHABLE",
+    "status": "OPEN",
+    "statusLabel": "DESCHIS",
+    "standfirst": "Sunt confirmate: open; termen 6 noiembrie 2026.",
+    "decisionLabel": "ACȚIONEAZĂ",
+    "decisionAction": "Începe screeningul și planul de depunere.",
+    "quickFacts": [
+        {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+        {"label": "Termen", "value": "2026-11-06T12:00:00+02:00", "confidence": "CONFIRMED"},
+    ],
+    "sections": [
+        {"title": "Rezumat executiv", "items": ["Stare apel: OPEN."]},
+        {"title": "Decizia rapidă", "items": ["Începe screeningul și planul de depunere."]},
+        {"title": "Ce trebuie făcut acum", "items": ["Planifică depunerea pornind de la termenul confirmat: 2026-11-06T12:00:00+02:00."]},
+    ],
+    "sources": [{"tier": "T1", "label": "ADR Centru", "url": "https://www.regiocentru.ro/actiuni/clustere-inovative-1-2-2/"}],
+}
+future_probe = {
+    "id": "synthetic-future-test-only",
+    "title": "Synthetic clock control",
+    "programme": "TEST ONLY",
+    "publicationState": "PUBLISHABLE",
+    "status": "OPEN",
+    "quickFacts": [
+        {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+        {"label": "Termen", "value": "2026-12-01T16:00:00+02:00", "confidence": "CONFIRMED"},
+    ],
+}
+stale_source_timestamp = "2026-08-26T04:00:00Z"
+replay_payload = {"generatedAt": stale_source_timestamp, "dossiers": [cluster_probe, future_probe], "news": []}
+before_expiry = module.parse_date("2026-11-06T09:59:59Z")
+after_expiry = module.parse_date("2026-11-18T11:25:00Z")
+assert before_expiry and after_expiry
+assert module.current_open(cluster_probe, before_expiry) is True
+assert module.current_open(cluster_probe, after_expiry) is False
+
+with tempfile.TemporaryDirectory() as td:
+    root = Path(td)
+    fixture = root / "decision_products.json"
+    fixture.write_text(json.dumps(replay_payload, ensure_ascii=False), encoding="utf-8")
+    before_root = root / "before"
+    after_root = root / "after"
+    before_manifest = module.build(fixture, before_root, as_of=before_expiry)
+    after_manifest = module.build(fixture, after_root, as_of=after_expiry)
+    assert before_manifest["currentOpen"] == 2
+    assert after_manifest["currentOpen"] == 1
+    assert before_manifest["generatedAt"] == after_manifest["generatedAt"] == stale_source_timestamp
+    before_list = (before_root / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    after_list = (after_root / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    assert 'data-dossier-id="pr-centru-clusters-122"' in before_list
+    assert 'data-dossier-id="pr-centru-clusters-122"' not in after_list
+    assert 'data-dossier-id="synthetic-future-test-only"' in after_list
+    after_dossiers = (after_root / "dosare/index.html").read_text(encoding="utf-8")
+    match = re.search(r'<article class="staticCard" data-dossier-id="pr-centru-clusters-122">(.*?)</article>', after_dossiers, re.S)
+    assert match and "status-review" in match.group(1)
+    cluster_pages = [
+        p.read_text(encoding="utf-8")
+        for p in (after_root / "dosare").glob("*/index.html")
+        if "<h1>Clustere inovative</h1>" in p.read_text(encoding="utf-8")
+    ]
+    assert len(cluster_pages) == 1
+    detail = cluster_pages[0]
+    assert '<span class="status status-review">ÎN VERIFICARE</span>' in detail
+    assert module.FAIL_CLOSED_OPEN_ACTION in detail
+    assert "Sunt confirmate: open" not in detail
+    # A review badge is insufficient if SEO-visible dossier sections still instruct
+    # submission under the already-expired source snapshot. Preserve the historical
+    # cutoff as evidence, but remove actionable text from every REVIEW section.
+    assert "Stare apel: OPEN." not in detail
+    assert "Stare apel: necesită reverificare la sursa oficială." in detail
+    assert "Începe screeningul și planul de depunere." not in detail
+    assert "Planifică depunerea pornind" not in detail
+    assert "2026-11-06T12:00:00+02:00" in detail
+    home_js = (after_root / "home-public-data.js").read_text(encoding="utf-8")
+    home = json.loads(home_js.removeprefix("window.PARTENER_HOME_DATA=").strip().removesuffix(";"))
+    assert home["summary"]["openCount"] == 1
+    assert all(row["id"] != "pr-centru-clusters-122" or row["status"] != "OPEN" for row in home["dossiers"])
+
+    # The derived Ask/home projection uses exactly the same wall-clock
+    # discipline; write to temp paths only, never to canonical LKG.
+    sync_path = ROOT / "partener-eu" / "ingest" / "sync_decision_products_projection.py"
+    sync_spec = importlib.util.spec_from_file_location("partener_sync_projection_test", sync_path)
+    sync_mod = importlib.util.module_from_spec(sync_spec)
+    assert sync_spec and sync_spec.loader
+    sync_spec.loader.exec_module(sync_mod)
+    old_products, old_out = sync_mod.PRODUCTS, sync_mod.OUT_JS
+    try:
+        sync_mod.PRODUCTS = fixture
+        sync_mod.OUT_JS = root / "decision-products.js"
+        assert sync_mod.main(as_of=after_expiry) == 0
+    finally:
+        sync_mod.PRODUCTS, sync_mod.OUT_JS = old_products, old_out
+    synced = json.loads(fixture.read_text(encoding="utf-8"))
+    assert synced["generatedAt"] == stale_source_timestamp
+    assert synced["summary"]["openCount"] == 1
+    assert synced["home"]["openDossierIds"] == ["synthetic-future-test-only"]
+    assert next(row for row in synced["dossiers"] if row["id"] == cluster_probe["id"])["status"] == "OPEN", "Historical source status is preserved; current-facing projection is held only"
+
+# Cross-language/clock truth: no fictitious end-of-day or UTC default may
+# stretch an exact 12:00 Bucharest cutoff into the afternoon.
+assert module.parse_date("6 noiembrie 2026, ora 12:00") == module.parse_date("2026-11-06T10:00:00Z")
+assert module.parse_date("1 iulie 2026, ora 12:00") == module.parse_date("2026-07-01T09:00:00Z")
+assert module.parse_date("25 octombrie 2026, ora 03:30") is None
+assert module.parse_date("29 martie 2026, ora 03:30") is None
+assert module.parse_date("2026-11-11T00:00:00") is None
+assert module.parse_date("31 februarie 2026, ora 12:00") is None
+assert module.current_open({**cluster_probe, "quickFacts": [
+    {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+    {"label": "Termen", "value": "6 noiembrie 2026, ora 12:00", "confidence": "CONFIRMED"},
+]}, before_expiry)
+assert not module.current_open({**cluster_probe, "quickFacts": [
+    {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+    {"label": "Termen", "value": "6 noiembrie 2026", "confidence": "CONFIRMED"},
+]}, before_expiry)
+assert not module.current_open({**cluster_probe, "closesAt": "2026-11-30T16:00:00+02:00"}, before_expiry)
+assert not sync_mod.current_open({**cluster_probe, "closesAt": "2026-11-30T16:00:00+02:00"}, before_expiry)
+assert sync_mod.parse_date("6 noiembrie 2026, ora 12:00") == module.parse_date("2026-11-06T10:00:00Z")
+assert not sync_mod.current_open({**cluster_probe, "quickFacts": [
+    {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+    {"label": "Termen", "value": "6 noiembrie 2026", "confidence": "CONFIRMED"},
+]}, before_expiry)
+
+print("PASS public static IA / sitemap / dossier regression + P0 wall-clock replay")
+
+# P0 #1407 reproducible AFIR Modernisation Fund cutoff regression (TEST ONLY).
+# The two official energy sessions share a 20 Nov 2026 23:59 Bucharest end
+# as published by AFIR. Source OPEN is historical; once the cutoff passes,
+# neither the crawlable list, dossier, nor Ask/home projection can treat it as
+# presently open absent a newly acquired/reconciled official extension.
+# This is not evidence of exhaustion, closure, or extension.
+energy_pre_cutoff = module.parse_date("2026-11-20T21:58:59Z")
+energy_exact_cutoff = module.parse_date("2026-11-20T21:59:00Z")
+energy_post_cutoff = module.parse_date("2026-11-20T21:59:01Z")
+assert all(clock is not None for clock in (energy_pre_cutoff, energy_exact_cutoff, energy_post_cutoff))
+assert module.parse_date("20 noiembrie 2026, ora 23:59") == module.parse_date("2026-11-20T21:59:00Z")
+energy_probes = []
+for energy_id, energy_title in (
+    ("afir-fm-public-autoconsum-2026", "Autoconsum entități publice (fixture)"),
+    ("afir-fm-public-storage-2026", "Stocare entități publice (fixture)"),
+):
+    energy_probes.append({
+        "id": energy_id,
+        "title": energy_title,
+        "programme": "Fondul pentru Modernizare / AFIR",
+        "publicationState": "PUBLISHABLE",
+        "status": "OPEN",
+        "statusLabel": "DESCHIS",
+        "standfirst": "Sunt confirmate: open; termen 20 noiembrie 2026, 23:59.",
+        "decisionLabel": "ACȚIONEAZĂ",
+        "decisionAction": "Pregătește depunerea.",
+        "quickFacts": [
+            {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+            {"label": "Termen", "value": "20 noiembrie 2026, 23:59", "confidence": "CONFIRMED"},
+        ],
+        "sections": [
+            {"title": "Rezumat executiv", "items": ["Stare apel: OPEN."]},
+            {"title": "Ce trebuie făcut acum", "items": ["Pregătește depunerea."]},
+        ],
+        "sources": [{"tier": "T1", "label": "AFIR", "url": "https://www.afir.ro/info-la-zi/comunicat-derulare-sesiune-autoconsum-si-stocare-energie-electrica-beneficiari-publici/"}],
+    })
+    assert module.current_open(energy_probes[-1], energy_pre_cutoff)
+    assert not module.current_open(energy_probes[-1], energy_exact_cutoff)
+    assert not module.current_open(energy_probes[-1], energy_post_cutoff)
+    assert sync_mod.current_open(energy_probes[-1], energy_pre_cutoff)
+    assert not sync_mod.current_open(energy_probes[-1], energy_exact_cutoff)
+    assert not sync_mod.current_open(energy_probes[-1], energy_post_cutoff)
+    # Even before cutoff, conflicting status or competing extension date
+    # must not be accepted as a fresh, reconciled OPEN proof.
+    contradictory_status = dict(energy_probes[-1], quickFacts=[
+        {"label": "Status", "value": "REVIEW", "confidence": "CONFIRMED"},
+        {"label": "Termen", "value": "20 noiembrie 2026, 23:59", "confidence": "CONFIRMED"},
+    ])
+    conflicting_extension = dict(energy_probes[-1], closesAt="2026-12-31T23:59:00+02:00")
+    assert not module.current_open(contradictory_status, energy_pre_cutoff)
+    assert not sync_mod.current_open(contradictory_status, energy_pre_cutoff)
+    assert not module.current_open(conflicting_extension, energy_pre_cutoff)
+    assert not sync_mod.current_open(conflicting_extension, energy_pre_cutoff)
+
+with tempfile.TemporaryDirectory() as td:
+    root = Path(td)
+    fixture = root / "energy-fixture.json"
+    fixture.write_text(json.dumps({
+        "generatedAt": stale_source_timestamp,
+        "dossiers": energy_probes + [future_probe],
+        "news": [],
+    }, ensure_ascii=False), encoding="utf-8")
+    earlier = root / "energy-before"
+    exactly = root / "energy-exact-cutoff"
+    later = root / "energy-after"
+    before_manifest = module.build(fixture, earlier, as_of=energy_pre_cutoff)
+    exact_manifest = module.build(fixture, exactly, as_of=energy_exact_cutoff)
+    after_manifest = module.build(fixture, later, as_of=energy_post_cutoff)
+    assert before_manifest["currentOpen"] == 3
+    assert exact_manifest["currentOpen"] == 1
+    assert exact_manifest["failClosedOpenRefresh"] == 2
+    assert after_manifest["currentOpen"] == 1
+    assert after_manifest["failClosedOpenRefresh"] == 2
+    before_list = (earlier / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    exact_list = (exactly / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    after_list = (later / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    after_dossiers = (later / "dosare/index.html").read_text(encoding="utf-8")
+    for probe in energy_probes:
+        marker = f'data-dossier-id="{probe["id"]}"'
+        assert marker in before_list
+        assert marker not in exact_list
+        assert marker not in after_list
+        article_match = re.search(rf'<article class="staticCard" {re.escape(marker)}>(.*?)</article>', after_dossiers, re.S)
+        assert article_match and "status-review" in article_match.group(1), probe["id"]
+        href_match = re.search(r'<h2><a href="([^"]+)">', article_match.group(1))
+        assert href_match, probe["id"]
+        detail = (later / href_match.group(1).strip("/") / "index.html").read_text(encoding="utf-8")
+        assert '<span class="status status-review">ÎN VERIFICARE</span>' in detail
+        assert module.FAIL_CLOSED_OPEN_ACTION in detail
+        assert "Stare apel: OPEN." not in detail
+        assert "Pregătește depunerea." not in detail
+        assert "20 noiembrie 2026, 23:59" in detail
+    assert 'data-dossier-id="synthetic-future-test-only"' in after_list
+    old_products, old_out = sync_mod.PRODUCTS, sync_mod.OUT_JS
+    try:
+        sync_mod.PRODUCTS = fixture
+        sync_mod.OUT_JS = root / "energy-projection.js"
+        assert sync_mod.main(as_of=energy_post_cutoff) == 0
+    finally:
+        sync_mod.PRODUCTS, sync_mod.OUT_JS = old_products, old_out
+    verified = json.loads(fixture.read_text(encoding="utf-8"))
+    assert verified["summary"]["openCount"] == 1
+    assert verified["home"]["openDossierIds"] == ["synthetic-future-test-only"]
+    assert all(row["status"] == "OPEN" for row in verified["dossiers"]), "Historical source observations must remain unchanged"
+
+# The Pages readback must reject matching-manifest pages with stale OPEN cards.
+# Execute the actual deployment proof's self-test, not a synthetic copy.
+readback_test = subprocess.run(
+    [sys.executable, str(ROOT / "partener-eu" / "ops" / "prove_public_deploy.py"), "--self-test"],
+    capture_output=True, text=True, check=False,
+)
+assert readback_test.returncode == 0, (readback_test.stdout, readback_test.stderr)
+assert "PASS public deploy readback proof self-test" in readback_test.stdout
+print("PASS AFIR 20 Nov cutoff dual-dossier list/detail/home/Ask fail-closed replay")
+
+
+# P0 #1402: the generic DR-12 dossier is NOT a component-specific accepting
+# endpoint. AFIR confirmed "alte sectoare" exhausted on 11 Nov; zootehnic
+# remains a distinct independently monitored component. Even an exact future
+# global deadline is insufficient to present umbrella DR-12 as OPEN.
+# This regression is a render-only hold, not an official CLOSED statement.
+dr12_aggregate_probe = {
+    **future_probe,
+    "id": "afir-dr12-2026",
+    "title": "DR-12 agregat fara identitate componenta",
+    "status": "OPEN",
+    "statusLabel": "DESCHIS",
+    "standfirst": "Sesiunea DR-12 este deschisă pentru depunere.",
+    "decisionLabel": "ACȚIONEAZĂ",
+    "decisionAction": "Depunerea este deschisă.",
+    "quickFacts": [
+        {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+        {"label": "Termen", "value": "2 decembrie 2026, 16:00", "confidence": "CONFIRMED"},
+    ],
+    "sections": [
+        {"title": "Rezumat executiv", "items": ["Stare apel: OPEN."]},
+        {"title": "Ce trebuie făcut acum", "items": ["Depunerea este deschisă."]},
+    ],
+}
+dr12_clock = module.parse_date("2026-11-21T00:00:00Z")
+assert dr12_clock is not None
+assert not module.current_open(dr12_aggregate_probe, dr12_clock)
+assert not sync_mod.current_open(dr12_aggregate_probe, dr12_clock)
+with tempfile.TemporaryDirectory() as td:
+    root = Path(td)
+    fixture = root / "dr12-aggregate-only.json"
+    fixture.write_text(json.dumps({
+        "generatedAt": "2026-11-01T00:00:00Z",
+        "dossiers": [dr12_aggregate_probe, future_probe],
+        "news": [],
+    }, ensure_ascii=False), encoding="utf-8")
+    out = root / "site"
+    result = module.build(fixture, out, as_of=dr12_clock)
+    assert result["currentOpen"] == 1
+    assert result["failClosedOpenRefresh"] == 1
+    open_html = (out / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    assert 'data-dossier-id="afir-dr12-2026"' not in open_html
+    dossier_html = (out / "dosare/index.html").read_text(encoding="utf-8")
+    dr12_card = re.search(
+        r'<article class="staticCard" data-dossier-id="afir-dr12-2026">(.*?)</article>',
+        dossier_html, re.S,
+    )
+    assert dr12_card and "status-review" in dr12_card.group(1)
+    href = re.search(r'<h2><a href="([^"]+)">', dr12_card.group(1))
+    assert href
+    detail = (out / href.group(1).strip("/") / "index.html").read_text(encoding="utf-8")
+    assert '<span class="status status-review">ÎN VERIFICARE</span>' in detail
+    assert "Stare apel: OPEN." not in detail
+    assert "Depunerea este deschisă." not in detail
+    assert module.FAIL_CLOSED_OPEN_ACTION in detail
+    old_products, old_out = sync_mod.PRODUCTS, sync_mod.OUT_JS
+    try:
+        sync_mod.PRODUCTS = fixture
+        sync_mod.OUT_JS = root / "derived-projection.js"
+        assert sync_mod.main(as_of=dr12_clock) == 0
+    finally:
+        sync_mod.PRODUCTS, sync_mod.OUT_JS = old_products, old_out
+    source_preserved = json.loads(fixture.read_text(encoding="utf-8"))
+    assert source_preserved["summary"]["openCount"] == 1
+    assert source_preserved["home"]["openDossierIds"] == ["synthetic-future-test-only"]
+    assert next(d for d in source_preserved["dossiers"] if d["id"] == "afir-dr12-2026")["status"] == "OPEN"
+print("PASS DR-12 generic umbrella render/derived projection quarantine; canonical history unchanged")

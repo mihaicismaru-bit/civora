@@ -61,10 +61,24 @@ concurrency:
 jobs:
   preflight:
     if: github.event_name == 'pull_request'
+    # Never give PR-head code the write permission used by production ingest.
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout exact PR source head (read-only)
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Prove exact PR head before AFIR preflight
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          ACTUAL_HEAD="$(git rev-parse HEAD)"
+          printf 'PARTENER_AFIR_PREFLIGHT_EXACT_HEAD=%s expected=%s\n' "$ACTUAL_HEAD" "$EXPECTED_HEAD"
+          test "$ACTUAL_HEAD" = "$EXPECTED_HEAD"
       - name: Validate AFIR live-funds parser and material-change queue fail-closed
         run: |
           python partener-eu/ops/test_afir_live_funds.py
