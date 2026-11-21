@@ -19,6 +19,7 @@ on:
       - 'partener-eu/ops/test_prc_22_digital_faq_20261120_discovery.py'
       - 'partener-eu/ops/test_mai_fami_am11h_stale_status_currency_discovery.py'
       - 'partener-eu/ops/test_peo_schools_extension_secondary_discovery.py'
+      - 'partener-eu/ops/test_peo_restart_20261120_secondary_launch.py'
       - 'partener-eu/ops/test_erasmus_2027_annual_notice_rolling_guide.py'
       - 'partener-eu/ops/test_erasmus_eacs13_literacy_exact_call_discovery.py'
       - 'partener-eu/ops/test_poids_912_intermediate_etfc_discovery.py'
@@ -266,6 +267,9 @@ jobs:
 
       - name: Hold unverified secondary PEO Schools for Future extension until MIPE raw original
         run: python partener-eu/ops/test_peo_schools_extension_secondary_discovery.py
+
+      - name: Quarantine PEO ReSTART secondary launch until exact MIPE and MySMIS source receipts
+        run: python partener-eu/ops/test_peo_restart_20261120_secondary_launch.py
 
       - name: Quarantine Erasmus 2027 annual launch and rolling 2026 guide before exact action receipts
         run: python partener-eu/ops/test_erasmus_2027_annual_notice_rolling_guide.py
