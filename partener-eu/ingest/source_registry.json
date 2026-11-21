@@ -3166,6 +3166,50 @@
       "note": "Official AFIR live funds counter separately lists DR-12 ALTE SECTOARE as FONDURI EPUIZATE and DR-12 SECTOR ZOOTEHNIC with a distinct submission window. Counter rows are mutable and a browser readback is NOT immutable raw acquisition. Pair with the 11-November original notice; require current endpoint, fetched_at, SHA-256, parser_version, run_id and component-specific semantic reconciliation before any lifecycle, budget, deadline or distribution change. NO OPEN_CALL or CLOSED_CALL authorization."
     },
     {
+      "id": "SRC-RO-AFIR-DR12-INTAKE-SESSION-LIST-20261121",
+      "tier": "T1",
+      "class": "official_afir_application_gateway_live_component_session_index_discovery",
+      "owner": "AFIR — Agenția pentru Finanțarea Investițiilor Rurale / PS PAC application system",
+      "url": "https://depunerepspac.afir.ro/Sesiune/Lista",
+      "programmes": [
+        "DR-12 / PS PAC 2023-2027"
+      ],
+      "programme_family": "PS_PAC_2023_2027/DR12",
+      "source_families": [
+        "ROMANIA",
+        "AFIR",
+        "CALL_REGISTRY",
+        "MARKET_INTELLIGENCE",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_OFFICIAL_AFIR_APPLICATION_SYSTEM",
+      "authority_scope": "COMPONENT_SESSION_INDEX_DISCOVERY_ONLY_NOT_EXACT_LIVE_ACCEPTANCE",
+      "observation_state": "ZOOTEHNIC_AND_OTHER_SECTORS_SEPARATELY_LISTED_RAW_PENDING",
+      "readback_date_discovery": "2026-11-21",
+      "source_snapshot_is_volatile": true,
+      "component_identities_discovery": [
+        "DR-12 / SECTOR ZOOTEHNIC",
+        "DR-12 / ALTE SECTOARE"
+      ],
+      "paired_official_source_id": "SRC-RO-AFIR-DR12-OTHER-EXHAUSTED-20261111",
+      "corroborating_source_id": "SRC-RO-AFIR-DR12-COMPONENT-COUNTER",
+      "extract": [
+        "official_public_component_specific_session_listing",
+        "component_specific_funds_and_submission_counters_volatile_discovery_only",
+        "other_sectors_exhausted_not_zootechnic",
+        "current_exact_component_live_acceptance_unverified",
+        "NO_OPEN_CALL"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "exact_call_identifier_verified": false,
+      "exact_application_endpoint_verified": false,
+      "adapter_required": "AFIR_DR12_COMPONENT_SESSION_LIST_SURFACEMC_IMMUTABLE_RECONCILE_V1",
+      "note": "Official AFIR public application-system session list readback on 21 November 2026 separately displayed DR-12 SECTOR ZOOTEHNIC with a future listed cutoff and positive remaining funds, and ALTE SECTOARE with FONDURI EPUIZATE and 11 November closure. Source values are volatile and a browser readback is NOT an immutable SURFACEMC raw receipt. The old generic DR-12 public OPEN card remains REVIEW, not proof that either component is currently accepting applications. This page is a session index, NOT an exact verified application submission endpoint or a resolved individual call/topic ID. Acquire requested/final URL, fetched_at, raw_sha256, semantic_sha256, parser_version, run_id, programme/source family, authority class and observation state with immutable handoff, reconcile each component with the official 11-Nov notice and current individual application endpoint, and preserve LKG/health fail-closed on transport failure. NO OPEN_CALL, CLOSED_CALL, material budget/deadline/eligibility mutation, public promotion, deployment or distribution from this discovery."
+    },
+    {
       "id": "SRC-RO-AFIR-EMAIL-INCIDENT-20261113",
       "tier": "T1",
       "owner": "AFIR — Agenția pentru Finanțarea Investițiilor Rurale",

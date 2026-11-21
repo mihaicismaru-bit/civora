@@ -1421,6 +1421,95 @@ def main():
         if not all(x in note for x in ("ZOOTEHNIC", "RAW", "RECONCIL", "NO OPEN_CALL")):
             fail(f"{source_id}: cannot separate DR-12 components or raw boundary")
 
+    # AFIR's public application-system list is a distinct volatile witness,
+    # not the immutable receipt or per-component application endpoint.
+    dr12_live_id = "SRC-RO-AFIR-DR12-INTAKE-SESSION-LIST-20261121"
+    dr12_live = by_id.get(dr12_live_id)
+    if not dr12_live:
+        fail("missing AFIR DR-12 official live-session discovery witness")
+
+    def _check_dr12_live(row):
+        expected = {
+            "id": dr12_live_id,
+            "tier": "T1",
+            "url": "https://depunerepspac.afir.ro/Sesiune/Lista",
+            "programme_family": "PS_PAC_2023_2027/DR12",
+            "authority_class": "T1_OFFICIAL_AFIR_APPLICATION_SYSTEM",
+            "authority_scope": "COMPONENT_SESSION_INDEX_DISCOVERY_ONLY_NOT_EXACT_LIVE_ACCEPTANCE",
+            "observation_state": "ZOOTEHNIC_AND_OTHER_SECTORS_SEPARATELY_LISTED_RAW_PENDING",
+            "readback_date_discovery": "2026-11-21",
+            "source_snapshot_is_volatile": True,
+            "component_identities_discovery": [
+                "DR-12 / SECTOR ZOOTEHNIC", "DR-12 / ALTE SECTOARE"],
+            "paired_official_source_id": "SRC-RO-AFIR-DR12-OTHER-EXHAUSTED-20261111",
+            "corroborating_source_id": "SRC-RO-AFIR-DR12-COMPONENT-COUNTER",
+            "adapter_required": "AFIR_DR12_COMPONENT_SESSION_LIST_SURFACEMC_IMMUTABLE_RECONCILE_V1",
+            "material_fact_use": False,
+            "credentials_required": False,
+            "open_call_authorized": False,
+            "material_fact_publication_authorized": False,
+            "exact_call_identifier_verified": False,
+            "exact_application_endpoint_verified": False,
+        }
+        for key, value in expected.items():
+            if row.get(key) != value:
+                fail("AFIR DR-12 session witness unsafe identity/gate: " + key)
+        if not {"ROMANIA", "AFIR", "CALL_REGISTRY",
+                "MARKET_INTELLIGENCE", "DISCOVERY"}.issubset(
+                set(row.get("source_families") or [])):
+            fail("AFIR DR-12 session witness lost official source family")
+        if not {"other_sectors_exhausted_not_zootechnic",
+                "current_exact_component_live_acceptance_unverified",
+                "NO_OPEN_CALL"}.issubset(set(row.get("extract") or [])):
+            fail("AFIR DR-12 live session list lost independent components/hold")
+        forbidden = {
+            "status", "call_status", "deadline", "budget", "budget_eur",
+            "eligibility", "open_at", "close_at", "submission_endpoint",
+            "exact_call_identifier", "final_url", "fetched_at",
+            "raw_sha256", "semantic_sha256", "parser_version",
+            "run_id", "handoff_sha256", "last_verified_open",
+        }
+        if forbidden.intersection(row):
+            fail("AFIR DR-12 session discovery fabricated receipt/material fact")
+        note = str(row.get("note") or "").upper()
+        for key in ("SURFACEMC", "IMMUTABLE", "ZOOTEHNIC", "ALTE SECTOARE",
+                    "VOLATILE", "RAW_SHA256", "PARSER_VERSION",
+                    "RUN_ID", "LKG", "NO OPEN_CALL"):
+            if key not in note:
+                fail("AFIR DR-12 session witness missing provenance hold: " + key)
+
+    _check_dr12_live(dr12_live)
+    for mutation in (
+        {"url": "https://example.com/afirmirror"},
+        {"authority_scope": "LIVE_OPEN_CALL"},
+        {"observation_state": "OPEN_CALL"},
+        {"component_identities_discovery": ["DR-12"]},
+        {"paired_official_source_id": "SRC-AFIR-OTHER"},
+        {"source_families": ["ROMANIA", "AFIR"]},
+        {"readback_date_discovery": "2026-11-11"},
+        {"source_snapshot_is_volatile": False},
+        {"open_call_authorized": True},
+        {"material_fact_publication_authorized": True},
+        {"exact_call_identifier_verified": True},
+        {"exact_application_endpoint_verified": True},
+        {"status": "OPEN"},
+        {"deadline": "2026-12-02"},
+        {"budget_eur": 84794823.5},
+        {"eligibility": ["all farmers"]},
+        {"fetched_at": "2026-11-21T09:00:00Z"},
+        {"raw_sha256": "0" * 64},
+        {"parser_version": "fabricated"},
+        {"run_id": "fabricated"},
+        {"submission_endpoint": "https://example.com/apply"},
+        {"note": "Both calls confirmed OPEN"},
+    ):
+        try:
+            _check_dr12_live(dict(dr12_live, **mutation))
+        except SystemExit:
+            pass
+        else:
+            fail("AFIR DR-12 volatile session witness mutation admitted: " + repr(mutation))
+
     # The exact IMREG-2026-INFOME topic and its dated official call fiche are
     # independent discovery inputs. An old indexed FORTHCOMING label or a
     # fiche's indicative opening date must never authorize OPEN_CALL.
