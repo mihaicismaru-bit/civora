@@ -6135,6 +6135,40 @@
       ],
       "adapter_required": "PRSV_AM_CALENDAR_SURFACEMC_HANDOFF_AND_MYSMIS_RECONCILE",
       "note": "Official ADR Sud-Vest Oltenia planning calendar index surfaced through indexed official-domain search on 21 November 2026. The visible index lists dated 2026 calendar versions, including 5 August 2026. Those are historical indexed versions, NOT evidence of the latest published calendar as of today, a confirmed future launch, or an active application. Direct origin retrieval did NOT succeed (HTTP 502/transport failure); this is PROGRAMMING_PIPELINE discovery, not official current OPEN_CALL status. Source original bytes, final_url, fetched_at UTC, raw_sha256, semantic_sha256, parser_version, run_id, immutable SURFACEMC acquisition-only handoff and source health are NOT_CAPTURED. Require exact current official version, semantic change detection and handoff, per-call MySMIS identifiers and accepting endpoints with independent review. Preserve LKG; NO OPEN_CALL / NO MATERIAL PUBLICATION / NO DISTRIBUTION / NO ALERT."
+    },
+    {
+      "id": "SRC-RO-ADRVEST-OI-PS-GUIDE-INDEX",
+      "tier": "T1B",
+      "owner": "ADR Vest / OI Programul Sanatate (MIPE is AM)",
+      "programmes": [
+        "Programul Sanatate"
+      ],
+      "programme_family": "Programul Sanatate",
+      "authority_class": "T1B_OFFICIAL_INTERMEDIATE_BODY_INDEX",
+      "material_fact_use": false,
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "credentials_required": false,
+      "freshness_hours": 24,
+      "class": "official_intermediate_body_health_guide_index",
+      "url": "https://adrvest.ro/programul-sanatate-ghiduri-active/",
+      "source_families": [
+        "ROMANIA",
+        "OI",
+        "HEALTH",
+        "DISCOVERY"
+      ],
+      "authority_scope": "GUIDE_INDEX_DISCOVERY_ONLY",
+      "observation_state": "OFFICIAL_OI_GUIDE_INDEX_DISCOVERED_RAW_PENDING",
+      "discovery_date": "2026-11-21",
+      "extract": [
+        "guide_link_discovery",
+        "corrigendum_link_discovery",
+        "apparent_active_label_conflict_discovery",
+        "guide_revision_signal_discovery"
+      ],
+      "adapter_required": "ADR_VEST_PS_OI_SURFACEMC_HANDOFF_AND_MIPE_MYSMIS_EXACT_RECONCILE",
+      "note": "Official ADR Vest intermediate-body Programul Sanatate guide index independently read as discovery on 2026-11-21, NOT an AM or a SURFACEMC acquisition. The page labels guides active while listing a 2026-11-16 deadline for a genetic-centres guide and later dates for other guide families: a document listing is not current evidence that an exact call still accepts submissions. MIPE is the managing authority and MySMIS exact call identity, current official per-call submission endpoint, amendments and local/national eligibility must be reconciled before any material decision. The source web readback is NOT_CAPTURED as immutable SURFACEMC original; actual requested/final_url, fetched_at UTC, raw_sha256, semantic_sha256, parser_version, run_id, handoff_sha256, current source health and exact application identity are missing. Require SURFACEMC acquisition-only to immutable handoff, normalized/deduped official original, semantic MIPE/MySMIS cross-check, version/conflict review, and independent admission. Preserve LKG on failure; no inference of OPEN_CALL or officially CLOSED from expired index date or guide label. NO MATERIAL PUBLICATION / NO DISTRIBUTION / NO ALERT."
     }
   ]
 }
