@@ -23,7 +23,7 @@ CASES = {
         "class": "official_regional_managing_authority_programming_calendar_index",
         "scope": "CALENDAR_DISCOVERY_ONLY",
         "state": "PROGRAMMING_PIPELINE",
-        "families": {"ROMANIA", "ADR", "CALENDARS", "PROGRAMMING_PIPELINE", "DISCOVERY"},
+        "families": {"ROMANIA", "ADR", "CALENDARS", "DISCOVERY"},
         "adapter": "PRSV_AM_CALENDAR_SURFACEMC_HANDOFF_AND_MYSMIS_RECONCILE",
     },
 }
