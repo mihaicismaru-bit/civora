@@ -6299,6 +6299,46 @@
       "adapter_required": "PRC_22_FAQ_SURFACEMC_RAW_AND_MYSMIS_SEMANTIC_RECONCILE",
       "freshness_hours": 24,
       "note": "20 November 2026 ADR Centru official news/search-index readback announces a new FAQ / questions-and-answers centralizer for the Action 2.2 Digital SMEs – Apel 2 guide. This is an official guidance DISCOVERY item, not a guide corrigendum, authoritative legal interpretation without reading the attachment, proof of current application availability, or evidence of any changed eligibility, budget or deadline. The linked exact action is SRC-PRC-22-DIGITAL-SMES-APEL2-FUTURE-INTAKE-20261119 with MySMIS code HINT PRC/1059/PRC_P2/OP1/RSO1.2/PRC_A32 and FUTURE scheduled application start 2 December 2026, not 20 November. Direct ADR origin returned HTTP 403 on 21 November 2026; SEARCH-INDEX EXCERPT ONLY, official FAQ attachment original NOT_CAPTURED. SURFACEMC acquisition-only of HTML and linked FAQ file, immutable handoff, exact requested/final_url, fetched_at UTC, raw_sha256/semantic_sha256, parser_version, run_id, handoff_sha256, file hash and source health still MISSING. PARTENER engine must normalize/dedup/reconcile FAQ versus current official signed guide, any corrigenda, exact MySMIS application endpoint and call status. Hold REVIEW and preserve LKG on HTTP 403, ambiguity or semantic drift. NO OPEN_CALL; NO assumed deadline/budget/eligibility changes; NO MATERIAL PUBLICATION; NO DISTRIBUTION; NO ALERT."
+    },
+    {
+      "id": "SRC-EU-INTEROPERABLE-DIGITAL-FUNDING-INDEX-20261121",
+      "tier": "T1B",
+      "class": "official_ec_digital_funding_aggregator_discovery",
+      "owner": "European Commission / Interoperable Europe Portal (multi-programme aggregator, not the call operator)",
+      "url": "https://interoperable-europe.ec.europa.eu/eu-digital-funding-opportunities",
+      "programmes": [
+        "Digital Europe Programme",
+        "Horizon Europe",
+        "Connecting Europe Facility",
+        "Interreg",
+        "Interregional Innovation Investments"
+      ],
+      "programme_family": "EU multi-programme digital funding opportunities",
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "DIGITAL_FUNDING",
+        "MARKET_INTELLIGENCE",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1B_OFFICIAL_EC_MULTI_PROGRAMME_AGGREGATOR",
+      "authority_scope": "DIGITAL_FUNDING_AGGREGATOR_DISCOVERY_ONLY_NOT_EXACT_TOPIC_OPERATOR",
+      "observation_state": "OFFICIAL_AGGREGATOR_INDEX_DISCOVERED_RAW_PENDING",
+      "readback_date_discovery": "2026-11-21",
+      "origin_readback_result": "OFFICIAL_PORTAL_TEXT_READBACK_NOT_SURFACEMC_RAW_CAPTURE",
+      "material_fact_use": false,
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "credentials_required": false,
+      "freshness_hours": 24,
+      "extract": [
+        "eu_digital_multi_programme_candidate_link_discovery",
+        "november_2026_digital_topic_listing_discovery",
+        "reconcile_exact_topic_identifier_and_operator_endpoint",
+        "detect_aggregator_vs_funding_tenders_lifecycle_conflicts"
+      ],
+      "adapter_required": "EU_DIGITAL_INDEX_SURFACEMC_IMMUTABLE_RAW_AND_FT_EXACT_TOPIC_SEMANTIC_RECONCILE",
+      "note": "Official European Commission Interoperable Europe multi-programme funding index read as text on 21 November 2026. It enumerates DIGITAL/HORIZON/CEF/INTERREG/I3 opportunities and includes November 2026 digital-topic listing signals (e.g. 17 November AI/standardisation entries), but it is an aggregator, NOT the individual managing or submission authority and NOT proof that any topic is CURRENT OPEN. The index also mixes programme descriptions, project opportunities, procurements and historical entries; never infer eligibility, deadline, grant budget or live submission. Text readback is NOT an immutable SURFACEMC original. Requested/final_url, fetched_at UTC, raw_sha256, semantic_sha256, parser_version, run_id, handoff_sha256 and health/freshness evidence are NOT_CAPTURED. Acquire HTML and linked official topic pages with SURFACEMC acquisition-only and immutable handoff, normalize/dedup to exact Funding & Tenders topic/call identifiers, check official operator application endpoint, lifecycle amendments and Romanian scope, reconcile semantic conflicts and preserve LKG on error. Review required. NO OPEN_CALL / NO MATERIAL PUBLICATION / NO DISTRIBUTION / NO ALERT."
     }
   ]
 }
