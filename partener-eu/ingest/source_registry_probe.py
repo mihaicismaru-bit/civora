@@ -5,7 +5,9 @@ import re
 import ssl
 import time
 import urllib.request
+from urllib.parse import urlsplit
 from datetime import datetime, timezone
+from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -16,14 +18,78 @@ REVIEWED_BASELINES = ROOT / "partener-eu" / "validation" / "accepted-source-base
 UA = "Mozilla/5.0 CIVORA-PARTENER-EU/1.0 (+production-validation)"
 MIN_SEMANTIC_CHARS = 256
 MIN_HTML_BYTES_FOR_LOW_INFO = 4096
+# A title/hidden metadata payload with a token visible body is not source evidence.
+MIN_VISIBLE_HTML_CHARS = 20
+# A partial/truncated response must never become a healthy source hash or LKG.
+# Operational backoff for a single repeatedly 403-blocked discovery index.
+# Never apply to authorizing sources or infer fresh source health from skipped fetches.
+ADR_CENTRU_DISCOVERY_ID = "SRC-ADR-CENTRU-PR-ACTIONS"
+ADR_CENTRU_DISCOVERY_URL = "https://www.regiocentru.ro/actiuni/"
+ADR_CENTRU_403_RETRY_SKIPS = 5
+
+
+def adr_centre_discovery_403_guard(src: dict, old: dict) -> bool:
+    """Only a proven long-term 403 on this non-authorizing index may back off."""
+    try:
+        failures = int(old.get("consecutive_failures") or 0)
+    except (TypeError, ValueError):
+        return False
+    return (
+        src.get("id") == ADR_CENTRU_DISCOVERY_ID
+        and src.get("url") == ADR_CENTRU_DISCOVERY_URL
+        and old.get("url") == ADR_CENTRU_DISCOVERY_URL
+        and src.get("authority_scope") == "CALL_INDEX_DISCOVERY"
+        and src.get("material_fact_use") is False
+        and not src.get("canonical_aliases")  # approved new transport must be tried
+        and old.get("health") == "FAIL"
+        and failures >= 100
+        and "HTTP Error 403: Forbidden" in str(old.get("error") or "")
+    )
+
+
+def adr_centre_discovery_cooldown(src: dict, old: dict) -> dict | None:
+    """Return a FAIL/STALE observation, NEVER an artificial fresh receipt."""
+    if not adr_centre_discovery_403_guard(src, old):
+        return None
+    try:
+        remaining = int(old.get("cooldown_runs_remaining") or 0)
+    except (TypeError, ValueError):
+        remaining = 0
+    if remaining <= 0:
+        return None
+    return {
+        "ok": False, "health": "FAIL", "error": old["error"],
+        "content_quality_ok": False, "quality_issue": None,
+        "semantic_hash_changed": False,
+        "resolution_task_required": False, "publish_material_fact_update": False,
+        "consecutive_failures": int(old["consecutive_failures"]),
+        "last_known_semantic_sha256": old.get("last_known_semantic_sha256"),
+        "quarantined": True,
+        "probe_evidence_state": "SKIPPED_403_COOLDOWN_NOT_OBSERVED",
+        "cooldown_runs_remaining": remaining - 1,
+        "last_probe_attempt_at": old.get("last_probe_attempt_at"),
+    }
+
+MAX_SOURCE_BYTES = 3_000_000
 
 
 def utc_now():
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def official_media_type(content_type: object) -> str:
+    """Parse the actual HTTP media type, not HTML-looking parameters/suffixes."""
+    if not isinstance(content_type, str):
+        return ""
+    return content_type.split(";", 1)[0].strip().casefold()
+
+
+def is_html_content_type(content_type: object) -> bool:
+    return official_media_type(content_type) in {"text/html", "application/xhtml+xml"}
+
+
 def semantic_bytes(raw: bytes, content_type: str) -> bytes:
-    if "html" not in (content_type or "").lower():
+    if not is_html_content_type(content_type):
         return raw
     text = raw.decode("utf-8", errors="ignore")
     text = re.sub(r"<script\b[^>]*>.*?</script>", " ", text, flags=re.I | re.S)
@@ -42,12 +108,147 @@ def semantic_bytes(raw: bytes, content_type: str) -> bytes:
     return text.encode("utf-8")
 
 
+
+class _VisibleEvidenceText(HTMLParser):
+    """Reject metadata/JS/hidden-only HTTP-200 HTML as official evidence.
+
+    Independent quality guard: existing semantic-hash normalization is unchanged.
+    """
+    SKIP = {"head", "script", "style", "noscript", "template", "svg",
+            "iframe", "nav", "footer", "dialog", "textarea", "select"}
+    VOID = {"img", "meta", "link", "input", "br", "hr", "source", "wbr"}
+    HIDDEN_CLASSES = {"hidden", "d-none", "d-sm-none", "d-md-none",
+                      "d-lg-none", "d-xl-none", "d-xxl-none", "invisible",
+                      "visually-hidden", "sr-only"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.stack = []
+        self.visible_chars = 0
+
+    def handle_starttag(self, tag, attrs):
+        seen = {name: (value or "") for name, value in attrs}
+        style = seen.get("style", "").casefold().replace(" ", "")
+        css = {x.strip() for x in style.split(";")}
+        classes = set(seen.get("class", "").casefold().split())
+        hidden = (
+            tag in self.SKIP or "hidden" in seen or "inert" in seen
+            or seen.get("aria-hidden", "").casefold() == "true"
+            or bool(classes & self.HIDDEN_CLASSES)
+            or "display:none" in css or "visibility:hidden" in css
+            or "content-visibility:hidden" in css
+            or bool(re.search(r"(?:^|;)opacity:0(?:\.0+)?%?(?:;|$)", style))
+        )
+        if tag not in self.VOID:
+            parent_hidden = self.stack[-1][1] if self.stack else False
+            self.stack.append((tag, parent_hidden or hidden))
+
+    def handle_startendtag(self, tag, attrs):
+        # A slash-suffixed non-void HTML element remains open in the browser.
+        if tag not in self.VOID | {"svg", "math"}:
+            self.handle_starttag(tag, attrs)
+
+    def handle_endtag(self, tag):
+        for pos in range(len(self.stack) - 1, -1, -1):
+            if self.stack[pos][0] == tag:
+                del self.stack[pos:]
+                break
+
+    def handle_data(self, data):
+        if (not self.stack or not self.stack[-1][1]) and data.strip():
+            self.visible_chars += len(data.strip())
+
+
+def visible_html_characters(raw: bytes) -> int:
+    parser = _VisibleEvidenceText()
+    parser.feed(raw.decode("utf-8", errors="ignore"))
+    parser.close()
+    return parser.visible_chars
+
+
 def classify_content_quality(raw_size: int, content_type: str, sem: bytes):
     semantic_chars = len(sem.decode("utf-8", errors="ignore"))
-    is_html = "html" in (content_type or "").lower()
+    is_html = is_html_content_type(content_type)
+    # HTTP-200 script/metadata-only HTML can have many raw bytes but no
+    # visible programme evidence. Never replace the prior semantic LKG
+    # with the empty-string hash (even when the HTML is below 4 KiB).
+    if is_html and semantic_chars == 0:
+        return False, "EMPTY_SEMANTIC_HTML", semantic_chars
+    # Tiny HTTP-200 anti-bot/error pages are not official programme evidence.
+    # They may be far smaller than the ordinary low-information shell cutoff.
+    # Keep the signature narrow and only inspect short HTML, so real source
+    # documents mentioning these expressions remain eligible for review.
+    if is_html and semantic_chars < MIN_SEMANTIC_CHARS:
+        text = " ".join(sem.decode("utf-8", errors="ignore").casefold().split())
+        challenge_prefixes = (
+            "just a moment",
+            "checking your browser",
+            "checking if the site connection is secure",
+            "please enable javascript and cookies",
+            "enable javascript and cookies to continue",
+            "attention required! | cloudflare",
+            "verify you are human",
+            "verifying you are human",
+            "access denied",
+            "403 forbidden",
+            "502 bad gateway",
+            "503 service unavailable",
+            "service unavailable",
+            "sorry, you have been blocked",
+        )
+        if text.startswith(challenge_prefixes):
+            return False, "HTML_CHALLENGE_OR_ERROR_SHELL", semantic_chars
     if is_html and raw_size >= MIN_HTML_BYTES_FOR_LOW_INFO and semantic_chars < MIN_SEMANTIC_CHARS:
         return False, "LOW_INFORMATION_HTML_SHELL", semantic_chars
     return True, None, semantic_chars
+
+
+def _assert_source_origin(registered_url: str, candidate_url: str) -> None:
+    """Bind a health observation to the exact registered HTTPS endpoint.
+
+    A same-host redirect to another programme page is not evidence for the
+    original source, even when both pages belong to an official authority.
+    Explicit canonical_aliases are separately attempted, identity-locked
+    transports. Only a harmless www spelling or trailing slash may vary.
+    """
+    registered = urlsplit(registered_url)
+    candidate = urlsplit(candidate_url)
+    for parsed in (registered, candidate):
+        if (
+            parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.port not in (None, 443)
+            or parsed.fragment
+            or ";" in parsed.path
+        ):
+            raise ValueError("untrusted official source URL or redirect")
+    original_host = registered.hostname.lower().removeprefix("www.")
+    candidate_host = candidate.hostname.lower().removeprefix("www.")
+    if original_host != candidate_host:
+        raise ValueError("official source redirect crossed registered origin")
+    # Do not silently accept a different resource on the same official host.
+    # A new canonical endpoint must be registered/reviewed, not inferred
+    # from a 200 response or its plausible official-looking HTML.
+    if (
+        (registered.path.rstrip("/") or "/") != (candidate.path.rstrip("/") or "/")
+        or registered.query != candidate.query
+    ):
+        raise ValueError("official source redirect changed registered endpoint")
+
+
+class _SourceOriginRedirect(urllib.request.HTTPRedirectHandler):
+    """Reject an off-authority redirect *before* performing the next request."""
+
+    def __init__(self, registered_url: str) -> None:
+        super().__init__()
+        self.registered_url = registered_url
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        _assert_source_origin(self.registered_url, req.full_url)
+        _assert_source_origin(self.registered_url, newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 def fetch_once(url: str):
@@ -57,14 +258,67 @@ def fetch_once(url: str):
         "Accept-Language": "ro-RO,ro;q=0.9,en;q=0.5",
         "Connection": "close",
     })
+    _assert_source_origin(url, url)
     ctx = ssl.create_default_context()
-    with urllib.request.urlopen(req, timeout=18, context=ctx) as r:
-        raw = r.read(3_000_000)
+    opener = urllib.request.build_opener(
+        urllib.request.HTTPSHandler(context=ctx),
+        _SourceOriginRedirect(url),
+    )
+    with opener.open(req, timeout=18) as r:
+        # Check the final response too, independent of redirect handler behavior.
+        _assert_source_origin(url, r.geturl())
+        if r.status != 200:
+            raise ValueError(f"unexpected official source HTTP status {r.status}")
         ctype = r.headers.get("content-type") or ""
+        if official_media_type(ctype) not in {
+            "text/html", "application/xhtml+xml", "application/pdf",
+        }:
+            # A false HTML suffix/parameter, JSON error, binary download or
+            # generic response is not healthy official source evidence.
+            # Keep the previous semantic LKG and classify as degraded.
+            raise ValueError("unsupported official source Content-Type")
+        # Read one byte past the bound: exactly 3 MB without a proof of EOF
+        # may be a truncated official document, not a verified healthy source.
+        raw = r.read(MAX_SOURCE_BYTES + 1)
+        if len(raw) > MAX_SOURCE_BYTES:
+            raise ValueError("oversized official source response")
+        # HTTP 200 and a plausible media type do not prove that a document was
+        # acquired. Empty bodies, and HTML challenges served as PDF, must not
+        # overwrite the last-known semantic source hash.
+        if not raw:
+            raise ValueError("empty official source response")
+        if official_media_type(ctype) == "application/pdf":
+            if not raw.startswith(b"%PDF-"):
+                raise ValueError("invalid official source PDF signature")
+            # A %PDF- prefix alone cannot prove acquisition of a complete
+            # official document. The final trailer must be present near EOF
+            # before the body can refresh source health or semantic LKG.
+            # This is a bounded truncation check, not a full PDF parser.
+            if b"%%EOF" not in raw[-8192:]:
+                raise ValueError("incomplete official source PDF: missing EOF trailer")
+        content_encoding = (r.headers.get("content-encoding") or "identity").strip().lower()
+        if content_encoding != "identity":
+            raise ValueError("unsupported official source Content-Encoding")
+        declared_length = r.headers.get("content-length")
+        if declared_length is not None:
+            declared = str(declared_length).strip()
+            if not declared.isdecimal() or int(declared) != len(raw):
+                raise ValueError("official source Content-Length mismatch")
         sem = semantic_bytes(raw, ctype)
         content_quality_ok, quality_issue, semantic_chars = classify_content_quality(len(raw), ctype, sem)
+        # Legacy semantic digests also include <title>/hidden text. A metadata
+        # shell can have a nonempty digest without any visible official evidence.
+        if content_quality_ok and is_html_content_type(ctype):
+            visible_chars = visible_html_characters(raw)
+            if visible_chars == 0:
+                content_quality_ok, quality_issue = False, "EMPTY_VISIBLE_HTML"
+            elif semantic_chars >= MIN_SEMANTIC_CHARS and visible_chars < MIN_VISIBLE_HTML_CHARS:
+                # An ample <title>/hidden node can inflate the legacy semantic
+                # digest while the rendered official document says only "OK".
+                # Preserve LKG and force source review, not a false freshness PASS.
+                content_quality_ok, quality_issue = False, "INSUFFICIENT_VISIBLE_HTML"
         return {
-            "ok": 200 <= r.status < 400,
+            "ok": r.status == 200,
             "http_status": r.status,
             "final_url": r.geturl(),
             "content_type": ctype,
@@ -307,6 +561,11 @@ def main():
             "material_fact_use": bool(src.get("material_fact_use")),
             "source_families": list(src.get("source_families") or []),
         }
+        cooldown = adr_centre_discovery_cooldown(src, old)
+        if cooldown is not None:
+            row.update(cooldown)
+            out["sources"].append(row)
+            continue
         try:
             row.update(fetch_source(src))
             baseline_hash = task_baseline_hash(src["id"], old)
@@ -351,6 +610,14 @@ def main():
                 "last_known_semantic_sha256": task_baseline_hash(src["id"], old),
                 "quarantined": failures >= 3,
             })
+            # A bounded periodic retry, never an invented PASS, for the exact
+            # non-authorizing ADR Centru index that repeatedly returns HTTP 403.
+            if adr_centre_discovery_403_guard(src, {**old,
+                    "url": row["url"], "health": "FAIL", "error": row["error"],
+                    "consecutive_failures": failures}):
+                row["cooldown_runs_remaining"] = ADR_CENTRU_403_RETRY_SKIPS
+                row["last_probe_attempt_at"] = observed_at
+                row["probe_evidence_state"] = "HTTP_403_ATTEMPT_FAILED"
         out["sources"].append(row)
 
     out["summary"] = {

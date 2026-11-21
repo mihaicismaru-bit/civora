@@ -35,7 +35,7 @@ const P = loadGlobal('decision-products.js', 'PARTENER_DECISION_PRODUCTS');
 const C = loadGlobal('mipe-canonical-calls.js', 'PARTENER_MIPE_CANONICAL_CALLS');
 if (!P || !Array.isArray(P.dossiers)) throw new Error('decision-products.js has no dossiers');
 
-const SHOWN_FACTS = new Set(['termen', 'grant', 'finantare', 'buget', 'contributie proprie', 'status'].map(fold));
+const SHOWN_FACTS = new Set(['termen', 'deschidere', 'grant', 'finantare', 'buget', 'contributie proprie', 'status'].map(fold));
 
 // Per dossier: folded section titles + one vocabulary string "word:mask,..."
 // where mask (base 36) marks the sections containing that word.
@@ -58,6 +58,14 @@ const dossiers = P.dossiers.filter(d => String(d.publicationState || '').toUpper
   region: d.region,
   code: d.code,
   status: d.status,
+  // Keep every competing opening/closing observation in the compact Ask
+  // projection. Dropping one could falsely reconcile an unverified OPEN.
+  openFrom: d.openFrom,
+  opensAt: d.opensAt,
+  openAt: d.openAt,
+  deadline: d.deadline,
+  closesAt: d.closesAt,
+  closeAt: d.closeAt,
   sourceType: d.sourceType,
   sourceLinks: (d.sourceLinks || []).map(x => ({ source: x && x.source })),
   audience: d.audience,

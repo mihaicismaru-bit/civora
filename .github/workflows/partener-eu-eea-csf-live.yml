@@ -37,6 +37,11 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: EEA CSF deterministic fail-closed regression
+        run: |
+          python -m py_compile partener-eu/ingest/eea_civil_society_fetch.py
+          python partener-eu/ops/test_eea_civil_society_fetch.py
+
       - name: Capture exact official call-page evidence
         run: |
           mkdir -p /tmp/partener-eea-csf

@@ -28,14 +28,44 @@ function displayValue(v){
  const text=String(v).replace(/\s+/g,' ').trim();
  return /^\s*[\[{]/.test(text)?'':text;
 }
+// Convert official Romanian wall-clock deadlines to exact UTC instants.
+// Device timezone must not shift an OPEN/CONSULTATION cutoff. The round-trip
+// also rejects impossible local instants at the spring DST transition and
+// selects the earlier instant on an ambiguous autumn clock change (fail closed).
+function romaniaTime(year,month,day,hour,minute){
+ const fmt=new Intl.DateTimeFormat('en-GB',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+ for(const offset of [3,2]){
+  const candidate=new Date(Date.UTC(year,month-1,day,hour-offset,minute));
+  const fields=Object.fromEntries(fmt.formatToParts(candidate).filter(p=>p.type!=='literal').map(p=>[p.type,Number(p.value)]));
+  if(fields.year===year&&fields.month===month&&fields.day===day&&fields.hour===hour&&fields.minute===minute)return candidate;
+ }
+ return null;
+}
 function parseDate(v){
  if(!v)return null;
- const d=new Date(v);if(!Number.isNaN(d.getTime()))return d;
- const ro=String(v).toLowerCase();
- const months={ianuarie:0,februarie:1,martie:2,aprilie:3,mai:4,iunie:5,iulie:6,august:7,septembrie:8,octombrie:9,noiembrie:10,decembrie:11};
+ const raw=String(v).trim();
+ // Explicit UTC/offset timestamps are already exact. Otherwise source dates
+ // without a timezone are Romanian local dates, NOT browser-local dates.
+ const iso=raw.match(/^(20\d{2})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$/i);
+ if(iso){
+  const year=Number(iso[1]),month=Number(iso[2]),day=Number(iso[3]);
+  const calendar=new Date(Date.UTC(year,month-1,day));
+  if(calendar.getUTCFullYear()!==year||calendar.getUTCMonth()!==month-1||calendar.getUTCDate()!==day)return null;
+  // Explicit ISO clocks need an explicit zone. A browser-local or impossible
+  // timestamp cannot establish an actionable deadline or OPEN call.
+  if(iso[4]!=null&&(!iso[6]||Number(iso[4])>23||Number(iso[5])>59))return null;
+  if(iso[6]){
+   const offset=iso[6];
+   if(offset.toUpperCase()!=='Z'&&(Number(offset.slice(1,3))>23||Number(offset.slice(4,6))>59))return null;
+   const exact=new Date(raw);return Number.isNaN(exact.getTime())?null:exact;
+  }
+  return romaniaTime(year,month,day,Number(iso[4]??23),Number(iso[5]??59));
+ }
+ const ro=raw.toLocaleLowerCase('ro-RO');
+ const months={ianuarie:1,februarie:2,martie:3,aprilie:4,mai:5,iunie:6,iulie:7,august:8,septembrie:9,octombrie:10,noiembrie:11,decembrie:12};
  const m=ro.match(/(\d{1,2})\s+([a-zăâîșț]+)\s+(20\d{2})(?:[^0-9]+(\d{1,2}):(\d{2}))?/i);
- if(!m||months[m[2]]===undefined)return null;
- return new Date(Number(m[3]),months[m[2]],Number(m[1]),Number(m[4]||23),Number(m[5]||59));
+ if(!m||!months[m[2]])return null;
+ return romaniaTime(Number(m[3]),months[m[2]],Number(m[1]),Number(m[4]??23),Number(m[5]??59));
 }
 function dateText(v){
  const d=parseDate(v);if(!d)return '';
@@ -55,15 +85,54 @@ function openHub(query='',tab='dossiers'){
 }
 function isOpen(d){
  if(currentStatus(d)!=='OPEN'||String(d.publicationState||'').toUpperCase()!=='PUBLISHABLE')return false;
- if(!confirmed(d,'Status'))return false;
+ const observedStatus=confirmed(d,'Status');
+ if(!observedStatus||!['OPEN','DESCHIS'].includes(norm(observedStatus.value).toUpperCase()))return false;
  const deadline=confirmed(d,'Termen');if(!deadline)return false;
- const parsed=parseDate(deadline.value);return !!(parsed&&parsed.getTime()>=Date.now());
+ // Date-only facts carry no verified cutoff hour. Never invent 23:59 OPEN.
+ if(!/\b\d{1,2}:\d{2}(?::\d{2})?\b/.test(String(deadline.value||'')))return false;
+ // All independently projected closing clocks must agree with the
+ // confirmed source fact. A future stale alternative cannot defeat a
+ // shorter/expired official deadline or an unparseable competing value.
+ const rawClocks=[deadline.value,...['deadline','closesAt','closeAt'].filter(k=>d?.[k]!=null).map(k=>d[k])];
+ const clocks=rawClocks.map(parseDate);
+ return clocks.length>0&&clocks.every(t=>t&&t.getTime()===clocks[0]?.getTime()&&t.getTime()>Date.now());
+}
+// A current-year reference or a PUBLISHABLE flag alone cannot establish that
+// a planned/consultation dossier is actionable *now*. An expired explicit
+// submission/consultation deadline wins over a later, unrelated calendar clue.
+// Unknown/unparseable calendars remain queryable in the dossier, not on home.
+function hasFreshPrepareEvidence(d){
+ const now=Date.now(),dated=[];
+ let expiredCutoff=false;
+ const add=(raw,cutoff=false)=>{
+   // A year is programme context, not a verifiable date/window.
+   if(/^20\d{2}$/.test(String(raw??'').trim()))return;
+   const value=parseDate(raw);
+   if(!value)return;
+   const ts=value.getTime();
+   dated.push(ts);
+   if(cutoff&&ts<=now)expiredCutoff=true;
+ };
+ for(const key of ['deadline','closesAt','closeAt','consultationDeadline'])add(d?.[key],true);
+ for(const key of ['openFrom','opensAt','openAt'])add(d?.[key]);
+ for(const row of d?.quickFacts||[]){
+   const label=norm(row?.label);
+   if(/termen|inchidere|depunere/.test(label))add(row?.value,true);
+   else if(/deschidere|calendar/.test(label))add(row?.value);
+ }
+ return !expiredCutoff&&dated.some(ts=>ts>now);
 }
 function isUpcoming(d){
  const s=currentStatus(d);
- return ['EXPECTED','ANNOUNCED','UPCOMING','PREPARE_NOW'].includes(s)&&String(d.publicationState||'').toUpperCase()==='PUBLISHABLE';
+ return ['EXPECTED','ANNOUNCED','UPCOMING','PREPARE_NOW'].includes(s)
+   &&String(d.publicationState||'').toUpperCase()==='PUBLISHABLE'
+   &&hasFreshPrepareEvidence(d);
 }
-function isConsultation(d){return currentStatus(d)==='PUBLIC_CONSULTATION'&&String(d.publicationState||'').toUpperCase()==='PUBLISHABLE'};
+function isConsultation(d){
+ return currentStatus(d)==='PUBLIC_CONSULTATION'
+   &&String(d.publicationState||'').toUpperCase()==='PUBLISHABLE'
+   &&hasFreshPrepareEvidence(d);
+}
 function score(d){
  const c=Number(d?.quality?.completeness||0);const dl=parseDate(confirmed(d,'Termen')?.value);let urgency=0;
  if(dl){const days=Math.max(0,(dl-Date.now())/86400000);urgency=days<=7?30:days<=21?20:days<=45?10:0;}
@@ -137,8 +206,8 @@ function render(){
 
  document.querySelector('[data-concierge-surface]')?.remove();
  const open=P.dossiers.filter(isOpen).sort((a,b)=>score(b)-score(a));
- const openTotal=Number(P?.summary?.openCount);
- const canonicalOpenTotal=Number.isFinite(openTotal)?openTotal:open.length;
+ // Count only records still passing the live gate, never a stale snapshot total.
+ const canonicalOpenTotal=open.length;
  const legacyOpenMetric=hero.querySelector('.heroCard .big');
  if(legacyOpenMetric)legacyOpenMetric.textContent=String(canonicalOpenTotal);
  const upcoming=P.dossiers.filter(isUpcoming).sort((a,b)=>score(b)-score(a));

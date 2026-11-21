@@ -11,6 +11,7 @@ on:
       - 'partener-eu/ops/test_web_hygiene.py'
       - 'partener-eu/ops/test_public_boot_performance.py'
       - 'partener-eu/ops/check_deployment_freshness.py'
+      - 'partener-eu/ops/prove_public_deploy.py'
       - 'partener-eu/ops/test_frontend_regression.py'
       - 'partener-eu/ops/test_brand_civic_intelligence_v1.py'
       - 'partener-eu/web/brand-civic-intelligence-v1.css'
@@ -24,12 +25,14 @@ on:
       - 'partener-eu/ops/test_public_product_v3.py'
       - 'partener-eu/ops/test_ask_partener_v2.py'
       - 'partener-eu/ops/test_ask_eligibility_projection.js'
+      - 'partener-eu/ops/test_decision_iti_p0_containment.js'
       - 'partener-eu/ops/test_home_freshness_guard.mjs'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_consultant_workspace_v3.py'
       - 'partener-eu/ops/test_consultant_crud_v4.py'
       - 'partener-eu/ops/test_consultant_runtime_v5.py'
+      - 'partener-eu/ops/test_consultant_mysmis_freshness.mjs'
       - '.github/workflows/partener-eu-web-qa.yml'
   pull_request:
     branches: [main]
@@ -40,6 +43,7 @@ on:
       - 'partener-eu/ops/test_web_hygiene.py'
       - 'partener-eu/ops/test_public_boot_performance.py'
       - 'partener-eu/ops/check_deployment_freshness.py'
+      - 'partener-eu/ops/prove_public_deploy.py'
       - 'partener-eu/ops/test_frontend_regression.py'
       - 'partener-eu/ops/test_brand_civic_intelligence_v1.py'
       - 'partener-eu/web/brand-civic-intelligence-v1.css'
@@ -53,12 +57,14 @@ on:
       - 'partener-eu/ops/test_public_product_v3.py'
       - 'partener-eu/ops/test_ask_partener_v2.py'
       - 'partener-eu/ops/test_ask_eligibility_projection.js'
+      - 'partener-eu/ops/test_decision_iti_p0_containment.js'
       - 'partener-eu/ops/test_home_freshness_guard.mjs'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_consultant_workspace_v3.py'
       - 'partener-eu/ops/test_consultant_crud_v4.py'
       - 'partener-eu/ops/test_consultant_runtime_v5.py'
+      - 'partener-eu/ops/test_consultant_mysmis_freshness.mjs'
       - '.github/workflows/partener-eu-web-qa.yml'
 
 permissions:
@@ -73,7 +79,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact checkout SHA before QA
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$EXPECTED_SHA"
+          echo "Web QA exact checked-out SHA: $actual"
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
@@ -102,6 +120,7 @@ jobs:
           python partener-eu/ops/test_frontend_regression.py
           python partener-eu/ops/test_brand_civic_intelligence_v1.py
           python partener-eu/ops/test_public_static_pages.py
+          python partener-eu/ops/prove_public_deploy.py --self-test
           python partener-eu/ops/test_public_site_transport.py
 
       - name: Homepage and Ask contracts
@@ -111,17 +130,20 @@ jobs:
           python partener-eu/ops/test_public_product_v3.py
           python partener-eu/ops/test_ask_partener_v2.py
           node partener-eu/ops/test_ask_eligibility_projection.js
+          node partener-eu/ops/test_decision_iti_p0_containment.js
 
       - name: Consultant lazy-load and runtime contracts
         run: |
           python partener-eu/ops/test_consultant_workspace_v3.py
           python partener-eu/ops/test_consultant_crud_v4.py
           python partener-eu/ops/test_consultant_runtime_v5.py
+          node partener-eu/ops/test_consultant_mysmis_freshness.mjs
 
       - name: Public semantics and freshness
         run: |
           python partener-eu/ops/test_public_language.py
           node partener-eu/ops/test_home_freshness_guard.mjs
+          node partener-eu/ops/test_home_concierge_freshness.mjs
           python partener-eu/ops/test_decision_products.py
 
       - name: Syntax-check active web control modules

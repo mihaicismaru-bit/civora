@@ -19,6 +19,11 @@ on:
       - 'partener-eu/ops/test_source_registry_task_revert.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ingest/eui_capacity_handoff.py'
+      - 'partener-eu/ingest/pddtj_oi_discovery_acquire.py'
+      - 'partener-eu/ops/test_pddtj_oi_discovery_acquire.py'
+      - 'partener-eu/ingest/pddtj_t1_primary_acquire.py'
+      - 'partener-eu/ops/test_pddtj_t1_primary_acquire.py'
       - 'partener-eu/ops/test_interreg_programming_intelligence.py'
       - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
       - 'partener-eu/ops/test_interreg_rohu_pipeline_split.py'
@@ -43,6 +48,11 @@ on:
       - 'partener-eu/ops/test_source_registry_task_revert.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ingest/eui_capacity_handoff.py'
+      - 'partener-eu/ingest/pddtj_oi_discovery_acquire.py'
+      - 'partener-eu/ops/test_pddtj_oi_discovery_acquire.py'
+      - 'partener-eu/ingest/pddtj_t1_primary_acquire.py'
+      - 'partener-eu/ops/test_pddtj_t1_primary_acquire.py'
       - 'partener-eu/ops/test_interreg_programming_intelligence.py'
       - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
       - 'partener-eu/ops/test_interreg_rohu_pipeline_split.py'
@@ -63,7 +73,10 @@ concurrency:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    # 68 official sources can consume ~11 min under upstream timeouts;
+    # keep headroom for immutable PDDTJ/Interreg receipts and replay.
+    # Bound remains below the 60-minute schedule, with one serialized runner.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
         with:
@@ -97,6 +110,15 @@ jobs:
       - name: Regression — external source and future-programming taxonomy stays fail-closed
         run: python partener-eu/ops/test_source_registry_external_expansion.py
 
+      - name: Regression — EUI capacity-building SURFACEMC raw handoff is non-authorizing
+        run: python partener-eu/ingest/eui_capacity_handoff.py --self-test
+
+      - name: Regression — PDDTJ delegated OI raw capture cannot authorize calls
+        run: python partener-eu/ops/test_pddtj_oi_discovery_acquire.py
+
+      - name: Regression — MIPE T1 original candidate remains non-admitting
+        run: python partener-eu/ops/test_pddtj_t1_primary_acquire.py
+
       - name: Regression — Interreg programming dates override stale open copy
         run: python partener-eu/ops/test_interreg_programming_intelligence.py
 
@@ -119,13 +141,91 @@ jobs:
         run: python partener-eu/p11/test_interreg_call_stage.py
 
       - name: Probe classified official sources without changing facts
+        id: source_health_probe
         run: python partener-eu/ingest/source_registry_probe.py
+
+      # Persist only verified source-health evidence even when optional live
+      # Interreg enrichment fails later. Never convert a probe into call facts.
+      - name: Validate source-health provenance and fail-closed ledger before enrichment
+        id: source_health_gate
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          p=Path('partener-eu/ingest/state/source_registry_health.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          if not d.get('observed_at') or not isinstance(d.get('sources'), list) or not d['sources']:
+              sys.exit('FAIL missing verified source-health observation')
+          bad=[]; missing=[]; unsafe_shell=[]
+          for x in d['sources']:
+              if x.get('semantic_hash_changed') and x.get('material_fact_use') and x.get('publish_material_fact_update') is not False:
+                  bad.append(x.get('id'))
+              if x.get('resolution_task_required'):
+                  task=Path('partener-eu/validation/resolution-tasks') / f"{x.get('id')}.json"
+                  if not task.exists():
+                      missing.append(x.get('id'))
+              if x.get('quality_issue') == 'LOW_INFORMATION_HTML_SHELL' and (x.get('semantic_hash_changed') or x.get('resolution_task_required')):
+                  unsafe_shell.append(x.get('id'))
+          if bad or missing or unsafe_shell:
+              sys.exit(f'FAIL verified source-health gate: {dict(unsafe=bad, missing_tasks=missing, unsafe_shells=unsafe_shell)}')
+          print('PASS source-health-only provenance / no material fact autoupdate')
+          PY
+
+      - name: Capture PDDTJ delegated OI HTML originals (discovery only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python partener-eu/ingest/pddtj_oi_discovery_acquire.py \
+            --out /tmp/partener-pddtj-oi-handoff.json \
+            --raw-dir "/tmp/partener-pddtj-oi-originals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/pddtj_oi_discovery_acquire.py \
+            --out /tmp/partener-pddtj-oi-handoff.json \
+            --raw-dir "/tmp/partener-pddtj-oi-originals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --replay-manifest /tmp/partener-pddtj-oi-handoff.json
+
+      - name: Archive immutable PDDTJ delegated OI evidence (not MIPE T1)
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-pddtj-delegated-oi-discovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            /tmp/partener-pddtj-oi-handoff.json
+            /tmp/partener-pddtj-oi-originals-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Capture exact MIPE T1 order page candidate (no admission)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python partener-eu/ingest/pddtj_t1_primary_acquire.py \
+            --out /tmp/partener-pddtj-t1-primary-handoff.json \
+            --raw-dir "/tmp/partener-pddtj-t1-primary-originals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/pddtj_t1_primary_acquire.py \
+            --out /tmp/partener-pddtj-t1-primary-handoff.json \
+            --raw-dir "/tmp/partener-pddtj-t1-primary-originals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --replay-manifest /tmp/partener-pddtj-t1-primary-handoff.json
+
+      - name: Archive immutable MIPE T1 candidate source health (no promotion)
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-pddtj-mipe-t1-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            /tmp/partener-pddtj-t1-primary-handoff.json
+            /tmp/partener-pddtj-t1-primary-originals-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: error
 
       - name: Capture live Interreg programming evidence without changing facts
         run: |
           python partener-eu/ingest/interreg_programming_live_fetch.py \
             --out /tmp/interreg-programming-live-evidence.json \
+            --raw-dir "/tmp/interreg-programming-originals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/interreg_programming_live_fetch.py \
+            --out /tmp/interreg-programming-live-evidence.json \
+            --replay-dir "/tmp/interreg-programming-originals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
       - name: Validate live Interreg programming receipt stays fail-closed
         run: |
@@ -136,7 +236,20 @@ jobs:
           if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False or d.get('publish_authorized') is not False:
               print('FAIL unsafe Interreg programming envelope')
               sys.exit(2)
+          if d.get('schema') != 'PARTENER_EU_INTERREG_PROGRAMMING_LIVE_EVIDENCE_V2':
+              print('FAIL stale Interreg programming provenance schema')
+              sys.exit(2)
           rows={row.get('source_id'): row for row in d.get('rows', [])}
+          for row in rows.values():
+              if not row.get('attempted_at'):
+                  print('FAIL missing per-source Interreg attempted_at:', row.get('source_id'))
+                  sys.exit(2)
+              if row.get('fetch_status') == 'FAIL' and row.get('fetched_at') is not None:
+                  print('FAIL Interreg failed source fabricated fetched_at:', row.get('source_id'))
+                  sys.exit(2)
+              if row.get('fetch_status') == 'PASS' and not row.get('fetched_at'):
+                  print('FAIL Interreg successful source lacks verified fetched_at:', row.get('source_id'))
+                  sys.exit(2)
           if 'SRC-INTERREG-ROHU' in rows:
               print('FAIL current Romania-Hungary 2021-2027 source leaked into future-programming selector')
               sys.exit(2)
@@ -160,6 +273,69 @@ jobs:
               sys.exit(2)
           if not obs.get('raw_hash') or not obs.get('fetched_at') or not obs.get('parser_version') or not obs.get('run_id'):
               print('FAIL Romania-Hungary programming observation lost provenance:', obs)
+              sys.exit(2)
+
+          # The newer October-November survey must have its own exact-page
+          # evidence. The older June-August ROHU survey is CLOSED; combining
+          # both into a single scraped landing-page window is forbidden.
+          survey=rows.get('SRC-INTERREG-ROHU-2028-2034-SURVEY-OCT2026')
+          official_survey='https://interreg-rohu.eu/ro/contribuiti-la-definirea-viitorului-cooperarii-transfrontaliere/'
+          if not survey or survey.get('fetch_status') != 'PASS':
+              print('FAIL official current ROHU survey not captured:', survey)
+              sys.exit(2)
+          if survey.get('registered_url') != official_survey or survey.get('final_url') != official_survey:
+              print('FAIL ROHU survey exact-page identity drift:', survey.get('final_url'))
+              sys.exit(2)
+          survey_obs=survey.get('normalized') or {}
+          if (survey_obs.get('observation_state') != 'CONSULTATION'
+              or survey_obs.get('consultation_start') != '2026-10-05'
+              or survey_obs.get('consultation_end') != '2026-11-30'
+              or survey_obs.get('not_a_call') is not True
+              or survey_obs.get('open_call_authorized') is not False
+              or survey_obs.get('publish_authorized') is not False
+              or survey_obs.get('material_fact_use') is not False
+              or survey_obs.get('publication_effect') != 'NONE'):
+              print('FAIL ROHU 2026 survey consultation/call boundary:', survey_obs)
+              sys.exit(2)
+          if (survey_obs.get('raw_hash') != survey.get('raw_hash')
+              or survey_obs.get('run_id') != survey.get('run_id')
+              or survey_obs.get('fetched_at') != survey.get('fetched_at')
+              or survey_obs.get('authority_url') != official_survey
+              or not survey_obs.get('parser_version') or not survey.get('bytes')):
+              print('FAIL ROHU survey raw acquisition provenance:', survey_obs)
+              sys.exit(2)
+
+          # The official November 2026 workshops have a dedicated raw
+          # article, not an OPEN_CALL, application deadline or call index.
+          workshop=rows.get('SRC-INTERREG-ROHU-2028-2034-WORKSHOPS-NOV2026')
+          workshop_url='https://interreg-rohu.eu/ro/participati-la-atelierele-transfrontaliere-si-contribuiti-la-definirea-capitolului-interreg-2028-2034/'
+          if not workshop or workshop.get('fetch_status') != 'PASS':
+              print('FAIL November ROHU official workshops raw acquisition missing:', workshop)
+              sys.exit(2)
+          if workshop.get('registered_url') != workshop_url or workshop.get('final_url') != workshop_url:
+              print('FAIL ROHU workshops exact-page authority mismatch')
+              sys.exit(2)
+          workshop_obs=workshop.get('normalized') or {}
+          if (workshop_obs.get('programme_family') != 'Interreg Romania-Hungary 2028-2034'
+              or workshop_obs.get('observation_state') != 'PROGRAMME_PREPARATION'
+              or workshop_obs.get('intelligence_family') != 'PROGRAMMING_PIPELINE'
+              or workshop_obs.get('not_a_call') is not True
+              or workshop_obs.get('open_call_authorized') is not False
+              or workshop_obs.get('material_fact_use') is not False
+              or workshop_obs.get('publish_authorized') is not False
+              or workshop_obs.get('publication_effect') != 'NONE'
+              or workshop.get('material_fact_use') is not False
+              or workshop.get('publish_authorized') is not False
+              or workshop.get('publication_effect') != 'NONE'):
+              print('FAIL ROHU workshops future-programming/call isolation:', workshop_obs)
+              sys.exit(2)
+          if (workshop_obs.get('authority_url') != workshop_url
+              or workshop_obs.get('raw_hash') != workshop.get('raw_hash')
+              or workshop_obs.get('fetched_at') != workshop.get('fetched_at')
+              or workshop_obs.get('run_id') != workshop.get('run_id')
+              or not workshop_obs.get('parser_version')
+              or not workshop.get('bytes')):
+              print('FAIL ROHU workshops immutable source provenance:', workshop_obs)
               sys.exit(2)
 
           romd=rows.get('SRC-INTERREG-ROMD-2028-2034')
@@ -193,7 +369,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: partener-interreg-programming-live-evidence
-          path: /tmp/interreg-programming-live-evidence.json
+          path: |
+            /tmp/interreg-programming-live-evidence.json
+            /tmp/interreg-programming-originals-${{ github.run_id }}-${{ github.run_attempt }}/
           retention-days: 7
           if-no-files-found: error
 
@@ -339,7 +517,7 @@ jobs:
           PY
 
       - name: Persist source health ledger and resolution tasks conflict-safe
-        if: github.event_name != 'pull_request'
+        if: ${{ always() && github.event_name != 'pull_request' && steps.source_health_probe.outcome == 'success' && steps.source_health_gate.outcome == 'success' }}
         shell: bash
         run: |
           set -euo pipefail

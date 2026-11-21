@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Static guard for P10 orchestration and fail-closed publication policy."""
 import json
+from datetime import datetime, timedelta, timezone
+from runpy import run_path
 import re
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -12,6 +14,12 @@ WORKFLOWS = REPO / ".github" / "workflows"
 validation = (WORKFLOWS / "partener-eu-validation.yml").read_text(encoding="utf-8")
 peo_workflow = (WORKFLOWS / "partener-eu-peo-calendar.yml").read_text(encoding="utf-8")
 pages_workflow = (WORKFLOWS / "partener-eu-pages.yml").read_text(encoding="utf-8")
+source_registry_workflow = (WORKFLOWS / "partener-eu-source-registry.yml").read_text(encoding="utf-8")
+mipe_nas_workflow = (WORKFLOWS / "partener-eu-mipe-ro-crawl-v3.yml").read_text(encoding="utf-8")
+mipe_ingest_workflow = (WORKFLOWS / "partener-eu-mipe-ingest.yml").read_text(encoding="utf-8")
+afir_workflow = (WORKFLOWS / "partener-eu-afir-ingest.yml").read_text(encoding="utf-8")
+decision_workflow = (WORKFLOWS / "partener-eu-decision-products.yml").read_text(encoding="utf-8")
+mff_workflow = (WORKFLOWS / "partener-eu-mff-2028.yml").read_text(encoding="utf-8")
 auto_deploy_path = WORKFLOWS / "partener-eu-auto-deploy.yml"
 go_live_workflow = (WORKFLOWS / "partener-eu-go-live.yml").read_text(encoding="utf-8")
 tasks = (PARTENER / "ops" / "p10_resolution_tasks.py").read_text(encoding="utf-8")
@@ -27,6 +35,177 @@ stale_validation_trigger = PARTENER / "ops" / "p10-validation-trigger.txt"
 
 errors = []
 
+# Deterministic-boundary regression: future-dated source-health ledgers must not
+# appear fresh to P10 monitoring. Bounded capture/runner skew remains allowed.
+monitor_ns = run_path(str(PARTENER / "ops" / "p10_monitor_integrity.py"))
+monitor_age = monitor_ns["age_seconds"]
+reference = datetime.now(timezone.utc)
+if monitor_age((reference + timedelta(minutes=6)).isoformat()) is not None:
+    errors.append("P10 treats a >5-minute future-dated source-health ledger as fresh")
+if monitor_age((reference + timedelta(minutes=4)).isoformat()) != 0:
+    errors.append("P10 rejects bounded source acquisition clock skew")
+old_age = monitor_age((reference - timedelta(hours=9)).isoformat())
+if old_age is None or old_age <= monitor_ns["MAX_REGISTRY_AGE_SECONDS"]:
+    errors.append("P10 fails to mark a 9-hour old source-health ledger stale")
+if monitor_age("not-a-date") is not None:
+    errors.append("P10 accepts malformed source-health timestamps")
+if monitor_age(reference.replace(tzinfo=None).isoformat()) is not None:
+    errors.append("P10 treats an unzoned source timestamp as verified UTC evidence")
+
+# A recent failed MIPE acquisition is not a fresh canonical corpus. The live
+# hosted-route status DEGRADED_LAST_KNOWN_GOOD_PRESERVED must never be PASS.
+monitor_mipe_health = monitor_ns["mipe_health_status"]
+for degraded in (
+    "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+    "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+    "UNKNOWN",
+    None,
+):
+    if monitor_mipe_health(degraded) != "DEGRADED_FAIL_CLOSED":
+        errors.append(f"P10 reports unverified MIPE status {degraded!r} as healthy")
+for success in ("OK", "OK_NO_NEW_RELEVANT_ITEMS"):
+    if monitor_mipe_health(success) != "PASS":
+        errors.append(f"P10 rejects verified MIPE ingestion success status {success}")
+
+# Both observed MIPE transport-failure codes retain the previous LKG corpus.
+# The report must not claim that LKG was discarded or that it is fresh.
+monitor_mipe_lkg = monitor_ns["mipe_lkg_preserved"]
+for preserved in (
+    "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+    "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+):
+    if not monitor_mipe_lkg(preserved):
+        errors.append(f"P10 misses retained MIPE LKG for {preserved}")
+    if monitor_mipe_health(preserved) != "DEGRADED_FAIL_CLOSED":
+        errors.append(f"P10 incorrectly marks LKG-only MIPE {preserved} as fresh")
+for not_preserved in ("OK", "OK_NO_NEW_RELEVANT_ITEMS", "UNKNOWN", None):
+    if monitor_mipe_lkg(not_preserved):
+        errors.append(f"P10 fabricates MIPE LKG preservation for {not_preserved!r}")
+
+# Health-only source summary must be reconciled against each actual
+# observation. A missing/forged counter is not a healthy official source feed.
+monitor_registry_health = monitor_ns["registry_health_status"]
+registered_row = {
+    "id": "T1-OFFICIAL", "tier": "T1", "class": "official_call_registry",
+    "url": "https://authority.example/calls", "material_fact_use": True,
+    "source_families": ["ROMANIA"],
+}
+healthy_row = {
+    **registered_row, "health": "PASS", "quarantined": False,
+    "ok": True, "content_quality_ok": True, "quality_issue": None,
+    "bytes": 4096, "raw_sha256": "a" * 64, "semantic_sha256": "b" * 64,
+    "semantic_bytes": 1024, "semantic_chars": 1000,
+    "http_status": 200, "content_type": "text/html; charset=utf-8",
+    "selected_url": "https://authority.example/calls",
+    "final_url": "https://authority.example/calls",
+}
+healthy_counts = {"total": 1, "pass": 1, "degraded": 0, "fail": 0, "quarantined": 0}
+expected_roster = [registered_row]
+if monitor_registry_health(False, healthy_counts, [healthy_row], expected_roster) != "PASS":
+    errors.append("P10 rejects internally consistent healthy source registry")
+negative_registry_cases = (
+    (True, healthy_counts, [healthy_row], expected_roster, "stale source ledger"),
+    (False, {}, [healthy_row], expected_roster, "missing source counters"),
+    (False, healthy_counts, [], expected_roster, "empty observations"),
+    (False, healthy_counts, [{**healthy_row, "health": "FAIL"}], expected_roster, "hidden failed source"),
+    (False, healthy_counts, [{**healthy_row, "health": "DEGRADED"}], expected_roster, "hidden degraded source"),
+    (False, healthy_counts, [{**healthy_row, "health": "UNKNOWN"}], expected_roster, "unknown source health"),
+    (False, healthy_counts, [{**healthy_row, "quarantined": True}], expected_roster, "hidden quarantine"),
+    (False, {**healthy_counts, "total": 2}, [healthy_row], expected_roster, "incorrect source total"),
+    (False, {**healthy_counts, "pass": True}, [healthy_row], expected_roster, "non-numeric source count"),
+    (False, healthy_counts, [healthy_row], None, "missing canonical roster"),
+    (False, healthy_counts, [healthy_row], [], "empty canonical roster"),
+    (False, healthy_counts, [healthy_row], expected_roster + expected_roster, "duplicate roster identity"),
+    (False, healthy_counts, [healthy_row], expected_roster + [
+        {**registered_row, "id": "T1-MISSING", "url": "https://authority.example/missing"}
+    ], "omitted official source with consistent counters"),
+    (False, {"total": 2, "pass": 2, "degraded": 0, "fail": 0, "quarantined": 0},
+        [healthy_row, healthy_row], expected_roster, "duplicate observed source"),
+    (False, healthy_counts, [{**healthy_row, "id": "T1-UNKNOWN"}], expected_roster,
+        "unknown source replacing a registered source"),
+    (False, healthy_counts, [{**healthy_row, "url": "https://authority.example/other"}],
+        expected_roster, "source endpoint substitution"),
+    (False, healthy_counts, [{**healthy_row, "tier": "T2"}], expected_roster,
+        "authority tier substitution"),
+    (False, healthy_counts, [{**healthy_row, "class": "discovery_only"}], expected_roster,
+        "authority class substitution"),
+    (False, healthy_counts, [{**healthy_row, "material_fact_use": False}],
+        expected_roster, "material fact scope substitution"),
+    (False, healthy_counts, [{**healthy_row, "source_families": ["EU_DIRECT"]}],
+        expected_roster, "programme source-family substitution"),
+    (False, healthy_counts, [{**healthy_row, "ok": False}],
+        expected_roster, "HTTP/acquisition error hidden as PASS"),
+    (False, healthy_counts, [{**healthy_row, "http_status": 403}],
+        expected_roster, "HTTP 403 disguised as successful acquisition"),
+    (False, healthy_counts, [{**healthy_row, "http_status": True}],
+        expected_roster, "boolean HTTP status disguised as 200"),
+    (False, healthy_counts, [{**healthy_row, "content_type": "application/json"}],
+        expected_roster, "API error body disguised as official HTML"),
+    (False, healthy_counts, [{**healthy_row, "content_type": "text/htmlx"}],
+        expected_roster, "fabricated near-matching HTML media type"),
+    (False, healthy_counts, [{**healthy_row, "semantic_bytes": 0}],
+        expected_roster, "empty semantic body with a forged PASS"),
+    (False, healthy_counts, [{**healthy_row, "semantic_chars": True}],
+        expected_roster, "boolean semantic character count"),
+    (False, healthy_counts, [{**healthy_row, "final_url": None}],
+        expected_roster, "missing final URL"),
+    (False, healthy_counts, [{**healthy_row, "final_url": "https://authority.example/other"}],
+        expected_roster, "same-host redirect to different official programme"),
+    (False, healthy_counts, [{**healthy_row, "final_url": "https://evil.example/calls"}],
+        expected_roster, "cross-authority redirect with forged PASS"),
+    (False, healthy_counts, [{**healthy_row, "final_url": "http://authority.example/calls"}],
+        expected_roster, "downgraded redirect with forged PASS"),
+    (False, healthy_counts, [{**healthy_row, "final_url": "https://authority.example/calls?new=1"}],
+        expected_roster, "redirect changed official query identity"),
+    (False, healthy_counts, [{**healthy_row, "content_quality_ok": False}],
+        expected_roster, "HTML challenge hidden as PASS"),
+    (False, healthy_counts, [{**healthy_row, "quality_issue": "HTML_CHALLENGE_OR_ERROR_SHELL"}],
+        expected_roster, "error-shell metadata hidden as PASS"),
+    (False, healthy_counts, [{**healthy_row, "raw_sha256": ""}],
+        expected_roster, "missing raw body hash"),
+    (False, healthy_counts, [{**healthy_row, "semantic_sha256": "bad"}],
+        expected_roster, "invalid semantic body hash"),
+    (False, healthy_counts, [{**healthy_row, "bytes": 0}],
+        expected_roster, "empty body with forged PASS label"),
+    (False, healthy_counts, [{**healthy_row, "bytes": True}],
+        expected_roster, "boolean body length with forged PASS label"),
+    (False, healthy_counts, [{**healthy_row, "selected_url": "https://authority.example/other"}],
+        expected_roster, "unregistered transport endpoint"),
+)
+for stale, summary, rows, roster, reason in negative_registry_cases:
+    if monitor_registry_health(stale, summary, rows, roster) != "DEGRADED":
+        errors.append(f"P10 promotes {reason} to green official-source health")
+# The positive two-source path also proves that roster coverage, not a fixed
+# source count, is enforced when all registered observations are healthy.
+second = {**registered_row, "id": "T1-SECOND", "url": "https://authority.example/second"}
+two_counts = {"total": 2, "pass": 2, "degraded": 0, "fail": 0, "quarantined": 0}
+if monitor_registry_health(False, two_counts, [healthy_row, {**healthy_row, **second,
+        "selected_url": second["url"], "final_url": second["url"]}], [registered_row, second]) != "PASS":
+    errors.append("P10 rejects complete two-source registered coverage")
+# Explicitly registered alternate transport is allowed, never silently inferred.
+registered_alias = {**registered_row, "canonical_aliases": ["https://www.authority.example/calls-v2"]}
+healthy_alias = {**healthy_row, "selected_url": registered_alias["canonical_aliases"][0],
+                 "final_url": registered_alias["canonical_aliases"][0]}
+if monitor_registry_health(False, healthy_counts, [healthy_alias], [registered_alias]) != "PASS":
+    errors.append("P10 rejects a curated official canonical alias with valid raw evidence")
+# Probe permits only a harmless www spelling or trailing slash on redirects.
+healthy_www = {**healthy_row, "final_url": "https://www.authority.example/calls/"}
+if monitor_registry_health(False, healthy_counts, [healthy_www], expected_roster) != "PASS":
+    errors.append("P10 rejects harmless official www/trailing-slash redirect")
+
+# A genuinely degraded registry is represented as such, even if all counters
+# are internally consistent. No warning state is ever interpreted as a PASS.
+failed_counts = {"total": 1, "pass": 0, "degraded": 0, "fail": 1, "quarantined": 0}
+if monitor_registry_health(False, failed_counts, [{**healthy_row, "health": "FAIL"}],
+        expected_roster) != "DEGRADED":
+    errors.append("P10 hides correctly counted failed official source")
+# Preserve an operator-visible acquisition gap when source registration
+# outruns live official fetch/probe evidence; never silently imply coverage.
+for field in ("registered_source_count", "observed_source_count",
+              "unobserved_registered_source_ids", "unregistered_observed_source_ids"):
+    if f'"{field}"' not in monitor:
+        errors.append(f"P10 omits source-registry roster coverage evidence: {field}")
+
 for marker in [
     "workflow_run:",
     "PARTENER.EU AFIR Ingestion",
@@ -40,8 +219,27 @@ for marker in [
     if marker not in validation:
         errors.append(f"production validation orchestration missing: {marker}")
 
-if "cron: '45 * * * *'" not in validation:
-    errors.append("production validation is not scheduled hourly at canonical :45")
+hourly_slots = [
+    ("PEO Calendar", peo_workflow, "2 * * * *"),
+    ("Verified Source Registry", source_registry_workflow, "5 * * * *"),
+    ("MFF 2028-2034", mff_workflow, "10 * * * *"),
+    ("MIPE NAS Crawl v3", mipe_nas_workflow, "15 * * * *"),
+    ("MIPE Ingestion", mipe_ingest_workflow, "20 * * * *"),
+    ("AFIR Ingestion", afir_workflow, "30 * * * *"),
+    ("Decision Products", decision_workflow, "35 * * * *"),
+    ("Pages", pages_workflow, "45 * * * *"),
+    ("Production Validation", validation, "55 * * * *"),
+]
+for workflow_name, workflow_text, cron in hourly_slots:
+    if f"cron: '{cron}'" not in workflow_text:
+        errors.append(f"{workflow_name} is not scheduled hourly at canonical cron {cron}")
+# The MFF source monitor has a contents:write ledger step. A PR branch push or
+# manual workflow_dispatch on a non-main ref must never reset and push to main.
+if "  push:\n    branches: [main]\n" not in mff_workflow:
+    errors.append("MFF source monitor can be triggered from a non-main branch")
+if ("github.repository == 'mihaicismaru-bit/civora'" not in mff_workflow
+        or "github.ref == 'refs/heads/main'" not in mff_workflow):
+    errors.append("MFF source monitor main-only ledger writer guard missing")
 if "ACTIVE_HOURLY_PLUS_WORKFLOW_RUN_MONITOR_TRIGGERS" not in acceptance:
     errors.append("P10 acceptance contract does not record hourly autonomous validation")
 
@@ -100,6 +298,62 @@ def has_exact_yaml_scalar(workflow: str, key: str, value: str) -> bool:
         rf"(?m)^[ \\t]*{re.escape(key)}:[ \\t]*{re.escape(value)}[ \\t]*(?:#.*)?$",
         workflow,
     ))
+
+# Hourly :15 NAS acquisition has a 100-minute job bound (80-minute crawler).
+# GitHub must serialize, not cancel an active collection when the next hour ticks.
+# A cancelled job produces no immutable SURFACEMC handoff for PARTENER Engine.
+if not has_exact_yaml_scalar(mipe_nas_workflow, "group", "partener-eu-mipe-ro-crawl-v3"):
+    errors.append("MIPE NAS acquisition does not use its dedicated single-run lock")
+if not has_exact_yaml_scalar(mipe_nas_workflow, "cancel-in-progress", "false"):
+    errors.append("hourly MIPE NAS schedule can cancel in-flight acquisition before handoff")
+
+# Verified Registry is a single, serialized hourly source-health/acquisition job.
+# 2026-11-10 exact-head run 42876369268 spent 10m54s in 68 source probes,
+# then reached its old 12m job timeout before MIPE T1 and Interreg artifacts.
+# Keep a strict sub-hour bound while preserving time for raw handoff/replay.
+if not has_exact_yaml_scalar(source_registry_workflow, "group", "partener-eu-source-registry"):
+    errors.append("Verified Source Registry lost its single-run source acquisition lock")
+if not has_exact_yaml_scalar(source_registry_workflow, "cancel-in-progress", "false"):
+    errors.append("Verified Source Registry may cancel an in-flight immutable handoff")
+registry_budget = re.search(r"(?m)^    timeout-minutes: (\d+)\s*$", source_registry_workflow)
+if not registry_budget or not 25 <= int(registry_budget.group(1)) <= 45:
+    errors.append("Verified Source Registry needs a bounded 25-45m acquisition/replay budget")
+
+
+# Source-health persistence must not starve when optional per-family
+# Interreg retrieval fails after a verified, non-authorizing health probe.
+# Preserve exact-head CI and prohibit writing on pull-request checkouts.
+source_health_chain = [
+    "      - name: Probe classified official sources without changing facts",
+    "        id: source_health_probe",
+    "      - name: Validate source-health provenance and fail-closed ledger before enrichment",
+    "        id: source_health_gate",
+    "      - name: Capture PDDTJ delegated OI HTML originals (discovery only)",
+]
+if not all(anchor in source_registry_workflow for anchor in source_health_chain):
+    errors.append("Verified Source Registry lost its independent source-health verification chain")
+elif [source_registry_workflow.index(anchor) for anchor in source_health_chain] != sorted(
+    source_registry_workflow.index(anchor) for anchor in source_health_chain
+):
+    errors.append("Source-health gate must precede optional enrichment")
+persist_guard = (
+    "if: ${{ always() && github.event_name != 'pull_request' "
+    "&& steps.source_health_probe.outcome == 'success' "
+    "&& steps.source_health_gate.outcome == 'success' }}"
+)
+if persist_guard not in source_registry_workflow:
+    errors.append("Verified source-health persistence can be skipped by optional enrichment failure")
+for required in (
+    "if x.get('semantic_hash_changed') and x.get('material_fact_use')",
+    "x.get('publish_material_fact_update') is not False",
+    "x.get('resolution_task_required')",
+    "x.get('quality_issue') == 'LOW_INFORMATION_HTML_SHELL'",
+):
+    health_step = source_registry_workflow.split(
+        "      - name: Validate source-health provenance and fail-closed ledger before enrichment", 1
+    )[-1].split("      - name: Capture PDDTJ delegated OI HTML originals", 1)[0]
+    if required not in health_step:
+        errors.append(f"Source-health independent gate lost safety invariant: {required}")
 
 for workflow_name, workflow in [
     ("PARTENER.EU Pages", pages_workflow),
