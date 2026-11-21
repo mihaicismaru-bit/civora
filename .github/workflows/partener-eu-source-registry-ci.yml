@@ -15,6 +15,7 @@ on:
       - 'partener-eu/ops/test_hadea_eu4health_biotech_survey_pipeline.py'
       - 'partener-eu/ops/test_prc_65_campuses_consultation_discovery.py'
       - 'partener-eu/ops/test_prc_22_digital_future_open_badge.py'
+      - 'partener-eu/ops/test_prc_22_digital_faq_20261120_discovery.py'
       - 'partener-eu/ops/test_mai_fami_am11h_stale_status_currency_discovery.py'
       - 'partener-eu/ops/test_peo_schools_extension_secondary_discovery.py'
       - 'partener-eu/ops/test_erasmus_2027_annual_notice_rolling_guide.py'
@@ -187,6 +188,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_hadea_eu4health_biotech_survey_pipeline.py
           python -m py_compile partener-eu/ops/test_prc_65_campuses_consultation_discovery.py
           python -m py_compile partener-eu/ops/test_prc_22_digital_future_open_badge.py
+          python -m py_compile partener-eu/ops/test_prc_22_digital_faq_20261120_discovery.py
           python -m py_compile partener-eu/ops/test_mai_fami_am11h_stale_status_currency_discovery.py
           python -m py_compile partener-eu/ops/test_erasmus_2027_annual_notice_rolling_guide.py
           python -m py_compile partener-eu/ops/test_erasmus_eacs13_literacy_exact_call_discovery.py
@@ -250,6 +252,9 @@ jobs:
 
       - name: Hold PR Centru 2.2 future submission despite current active badge
         run: python partener-eu/ops/test_prc_22_digital_future_open_badge.py
+
+      - name: Quarantine ADR Centru 20 Nov digital FAQ before official raw and guide reconciliation
+        run: python partener-eu/ops/test_prc_22_digital_faq_20261120_discovery.py
 
       - name: Quarantine MAI FAMI AM11H stale status and budget currency contradiction
         run: python partener-eu/ops/test_mai_fami_am11h_stale_status_currency_discovery.py
