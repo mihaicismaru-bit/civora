@@ -403,7 +403,17 @@ def main() -> int:
     else:
         assert "afir-dr14-2026" not in home_open
         assert "afir-dr18-2026" not in home_open
-    assert {"afir-fm-public-autoconsum-2026", "afir-fm-public-storage-2026"} <= set(home_open)
+    # The dated 20 Nov 23:59 Bucharest source window has expired; stale OPEN
+    # source fields must not keep either public-energy dossier in today's
+    # actionable homepage shortlist. Expiry does NOT prove official CLOSED,
+    # and pre-cutoff acceptance still needs call-specific endpoint evidence.
+    energy_deadline = datetime.fromisoformat("2026-11-20T23:59:00+02:00")
+    energy_ids = {"afir-fm-public-autoconsum-2026", "afir-fm-public-storage-2026"}
+    if datetime.now(timezone.utc) >= energy_deadline:
+        assert energy_ids.isdisjoint(home_open), (
+            "Expired AFIR public-energy calls must be held for review, not advertised OPEN",
+            sorted(energy_ids.intersection(home_open)),
+        )
     if component_review:
         assert "afir-dr12-2026" not in home_open
     elif dr12_post_launch:
