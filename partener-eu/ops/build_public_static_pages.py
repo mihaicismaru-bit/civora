@@ -609,7 +609,7 @@ def card(dossier: dict[str, Any], slug_by_id: dict[str, str]) -> str:
             None,
         )
     finance_label = "Buget apel" if grant and fold(grant.get("label")) == "buget" else "Finanțare"
-    audience = [str(item) for item in (dossier.get("audience") or []) if item][:2]
+    audience = [str(item) for item in (dossier.get("audience") or []) if item]
     facts_html: list[str] = []
     if grant:
         facts_html.append(
@@ -695,7 +695,7 @@ def compact_home_dossier(
         "publicationState": dossier.get("publicationState"),
         "standfirst": dossier.get("standfirst"),
         "decisionAction": dossier.get("decisionAction"),
-        "audience": list(dossier.get("audience") or [])[:2],
+        "audience": list(dossier.get("audience") or []),
         "quickFacts": quick,
         "quality": {
             "completeness": int(
