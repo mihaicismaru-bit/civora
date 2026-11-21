@@ -38,6 +38,27 @@ assert "Finanțare:</b> Neconfirmat" not in probe_card
 probe_home = module.compact_home_dossier(budget_probe, {"budget-probe": "budget-probe"})
 assert any(row.get("label") == "Buget" for row in probe_home.get("quickFacts") or [])
 
+# A static preview must not silently lose verified beneficiary categories.
+# DR-12 includes young farmers <=40, sM 6.1 beneficiaries and a distinct
+# <=45 category in the official AFIR launch notice (1 October 2026).
+# The first two alone incorrectly hide the third group from listing/search.
+audience_probe = {
+    **budget_probe,
+    "id": "three-audiences-probe",
+    "audience": [
+        "Fermieri până la 40 de ani",
+        "Beneficiari submăsura 6.1",
+        "Fermieri până la 45 de ani, în condițiile ghidului",
+    ],
+}
+audience_card = module.card(audience_probe, {"three-audiences-probe": "three-audiences-probe"})
+assert all(item in audience_card for item in audience_probe["audience"]), "Beneficiary class hidden from public preview"
+audience_home = module.compact_home_dossier(
+    audience_probe, {"three-audiences-probe": "three-audiences-probe"}
+)
+assert audience_home["audience"] == audience_probe["audience"], "Beneficiary class hidden from home/search projection"
+
+
 # Exact regression for the cross-surface truth defect: an OPEN dossier whose
 # confirmed deadline is already behind the render clock must never be shown as
 # DESCHIS. It is not inferred CLOSED; it is rendered REVIEW until refreshed.
