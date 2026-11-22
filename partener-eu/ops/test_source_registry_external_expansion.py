@@ -424,6 +424,19 @@ def main():
     plane = json.loads(DATA_PLANE.read_text(encoding="utf-8"))
     by_id = {row["id"]: row for row in data.get("sources", [])}
 
+    # Source-family lineage is mandatory for legacy and newly expanded roots.
+    # This changes provenance taxonomy only; it must not imply OPEN_CALL,
+    # successful official acquisition, or new material publication authority.
+    if len(by_id) != len(data.get("sources", [])):
+        fail("duplicate source identifiers in verified registry")
+    for source in data.get("sources", []):
+        families = source.get("source_families")
+        if not isinstance(families, list) or not families or any(
+            not isinstance(family, str) or not family.strip() for family in families
+        ):
+            fail("missing/invalid source-family provenance: " + source["id"])
+
+
     # 13-Nov PR Centru: consultation and exact-action guide revision remain
     # strictly discovery-only, regardless of upcoming ITI project intake.
     pr_centre_nov13 = {
