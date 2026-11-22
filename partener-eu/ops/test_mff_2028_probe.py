@@ -115,6 +115,7 @@ def run_tests():
     actual = json.loads((ROOT / "partener-eu/ingest/mff_2028_source_registry.json").read_text(encoding="utf-8"))
     probe.validate_registry(actual)
     expected = {
+        "SRC-RO-MAI-PPNR-SECTORAL-20261027": ("ROMANIA_PREPARATION", "2026-10-27", "2026-10-27"),
         "SRC-EU-MFF-IRISH-NEGOTIATING-BOX-20261010": ("PRESIDENCY_NEGOTIATING_PROPOSAL", "2026-10-10", None),
         "SRC-EU-MFF-EP-CORAPPORTEURS-20261016": ("PARLIAMENTARY_POSITION_COMMENTARY", "2026-10-16", None),
         "SRC-EU-MFF-CMO-PARTIAL-20261019": ("COUNCIL_PARTIAL_CMO_POSITION", "2026-10-19", "2026-10-20"),
@@ -150,7 +151,14 @@ def run_tests():
     assert president["url"].startswith("https://www.consilium.europa.eu/ro/press/press-releases/2026/11/21/")
     assert president["open_call_authorized"] is False
     assert president["material_fact_publication_authorized"] is False
-    assert len(actual["sources"]) == 14
+    mai = entries["SRC-RO-MAI-PPNR-SECTORAL-20261027"]
+    assert mai["authority_class"] == "T1_ROMANIA_MAI_MANAGING_AUTHORITY"
+    assert mai["class"] == "romania_sectoral_preparation_article"
+    assert mai["url"] == "https://fed.mai.gov.ro/11615/fed-afaceri-interne-2028-planul-de-parteneriat-national-si-regional-ppnr-regulamente-sectoriale-si-comune/"
+    assert mai["programme"] == "MFF_2028_2034/NRPP/AFFAIRS_INTERNAL"
+    assert mai["open_call_authorized"] is False
+    assert mai["material_fact_publication_authorized"] is False
+    assert len(actual["sources"]) == 15
     for sid, (stage, event_date, updated_date) in expected.items():
         entry = entries[sid]
         for mutated in (
