@@ -119,6 +119,7 @@ def run_tests():
         "SRC-EU-MFF-EP-CORAPPORTEURS-20261016": ("PARLIAMENTARY_POSITION_COMMENTARY", "2026-10-16", None),
         "SRC-EU-MFF-CMO-PARTIAL-20261019": ("COUNCIL_PARTIAL_CMO_POSITION", "2026-10-19", "2026-10-20"),
         "SRC-EU-MFF-CAP-PARTIAL-20261026": ("COUNCIL_PARTIAL_CAP_POSITION", "2026-10-26", "2026-10-28"),
+        "SRC-EU-MFF-UCPM-HER-PARTIAL-20261120": ("COUNCIL_PARTIAL_CIVIL_PROTECTION_HEALTH_POSITION", "2026-11-20", None),
         "SRC-EU-MFF-EC-PRESIDENT-PROPOSAL-20261121": ("EUROPEAN_COUNCIL_PRESIDENT_PROPOSAL", "2026-11-21", None),
     }
     entries = {s["id"]: s for s in actual["sources"]}
@@ -136,13 +137,20 @@ def run_tests():
     ep = entries["SRC-EU-MFF-EP-CORAPPORTEURS-20261016"]
     assert ep["authority_class"] == "T1_PARLIAMENTARY_OFFICIAL_CONTEXT"
     assert ep["class"] == "official_parliamentary_analyst_commentary"
+    civil_protection = entries["SRC-EU-MFF-UCPM-HER-PARTIAL-20261120"]
+    assert civil_protection["authority_class"] == "T1_COUNCIL_OFFICIAL"
+    assert civil_protection["class"] == "official_council_partial_negotiating_position"
+    assert "/press/press-releases/2026/11/20/" in civil_protection["url"]
+    assert civil_protection["programme"] == "MFF_2028_2034/UCPM/HER"
+    assert civil_protection["open_call_authorized"] is False
+    assert civil_protection["material_fact_publication_authorized"] is False
     president = entries["SRC-EU-MFF-EC-PRESIDENT-PROPOSAL-20261121"]
     assert president["authority_class"] == "T1_EUROPEAN_COUNCIL_PRESIDENT"
     assert president["class"] == "official_european_council_president_proposal"
     assert president["url"].startswith("https://www.consilium.europa.eu/ro/press/press-releases/2026/11/21/")
     assert president["open_call_authorized"] is False
     assert president["material_fact_publication_authorized"] is False
-    assert len(actual["sources"]) == 13
+    assert len(actual["sources"]) == 14
     for sid, (stage, event_date, updated_date) in expected.items():
         entry = entries[sid]
         for mutated in (
