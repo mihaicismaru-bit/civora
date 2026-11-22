@@ -53,6 +53,8 @@ FAIL_ROW_KEYS = {"health", "error", "semantic_hash_changed",
                  "last_known_semantic_sha256"}
 
 DATED_STAGE_LOCKS = {
+    "SRC-RO-MAI-PPNR-SECTORAL-20261027":
+        ("ROMANIA_PREPARATION", "2026-10-27", "2026-10-27"),
     "SRC-EU-MFF-IRISH-NEGOTIATING-BOX-20261010":
         ("PRESIDENCY_NEGOTIATING_PROPOSAL", "2026-10-10", None),
     "SRC-EU-MFF-EP-CORAPPORTEURS-20261016":
