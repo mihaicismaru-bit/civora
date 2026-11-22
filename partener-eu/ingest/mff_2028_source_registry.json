@@ -1,6 +1,6 @@
 {
   "schema_version": "1.2",
-  "updated_utc": "2026-11-05",
+  "updated_utc": "2026-11-22",
   "topic": "EU_MFF_2028_2034",
   "stage_policy": [
     "COMMISSION_PROPOSAL",
@@ -12,9 +12,10 @@
     "PRESIDENCY_NEGOTIATING_PROPOSAL",
     "PARLIAMENTARY_POSITION_COMMENTARY",
     "COUNCIL_PARTIAL_CMO_POSITION",
-    "COUNCIL_PARTIAL_CAP_POSITION"
+    "COUNCIL_PARTIAL_CAP_POSITION",
+    "EUROPEAN_COUNCIL_PRESIDENT_PROPOSAL"
   ],
-  "material_rule": "Presidency negotiating proposals and Council partial positions are not adopted MFF/allocations, and never OPEN_CALL. Hash changes create review-only signals; current official raw receipts and reconciliation are mandatory before any public brief or material field.",
+  "material_rule": "Presidency negotiating proposals and Council partial positions are not adopted MFF/allocations, and never OPEN_CALL. Hash changes create review-only signals; current official raw receipts and reconciliation are mandatory before any public brief or material field. The European Council President's 21 November 2026 revised MFF offer is a proposal for leaders' talks, not an adopted budget, call, national envelope or applicant entitlement. Preserve proposal-stage attribution and review-only raw-evidence gating.",
   "sources": [
     {
       "id": "SRC-EU-MFF-TIMELINE",
@@ -210,6 +211,27 @@
         "partial_position",
         "CAP",
         "negotiation_status"
+      ],
+      "credentials_required": false,
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false
+    },
+    {
+      "id": "SRC-EU-MFF-EC-PRESIDENT-PROPOSAL-20261121",
+      "tier": "T1",
+      "owner": "President of the European Council",
+      "url": "https://www.consilium.europa.eu/ro/press/press-releases/2026/11/21/multiannual-financial-framework-president-costa-s-proposal/",
+      "class": "official_european_council_president_proposal",
+      "stage": "EUROPEAN_COUNCIL_PRESIDENT_PROPOSAL",
+      "event_date": "2026-11-21",
+      "source_family": "PROGRAMMING_PIPELINE_MFF_2028_2034",
+      "programme": "MFF_2028_2034",
+      "authority_class": "T1_EUROPEAN_COUNCIL_PRESIDENT",
+      "extract": [
+        "revised_negotiating_proposal",
+        "proposed_competitiveness_and_cohesion_balance",
+        "proposed_own_resources",
+        "planned_leaders_discussion_2026_11_26_27"
       ],
       "credentials_required": false,
       "open_call_authorized": false,
