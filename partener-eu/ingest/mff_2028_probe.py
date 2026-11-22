@@ -52,7 +52,7 @@ PASS_ROW_KEYS = {"health", "http_status", "final_url", "content_type",
 FAIL_ROW_KEYS = {"health", "error", "semantic_hash_changed",
                  "last_known_semantic_sha256"}
 
-OCTOBER_STAGE_LOCKS = {
+DATED_STAGE_LOCKS = {
     "SRC-EU-MFF-IRISH-NEGOTIATING-BOX-20261010":
         ("PRESIDENCY_NEGOTIATING_PROPOSAL", "2026-10-10", None),
     "SRC-EU-MFF-EP-CORAPPORTEURS-20261016":
@@ -61,6 +61,8 @@ OCTOBER_STAGE_LOCKS = {
         ("COUNCIL_PARTIAL_CMO_POSITION", "2026-10-19", "2026-10-20"),
     "SRC-EU-MFF-CAP-PARTIAL-20261026":
         ("COUNCIL_PARTIAL_CAP_POSITION", "2026-10-26", "2026-10-28"),
+    "SRC-EU-MFF-EC-PRESIDENT-PROPOSAL-20261121":
+        ("EUROPEAN_COUNCIL_PRESIDENT_PROPOSAL", "2026-11-21", None),
 }
 
 
@@ -174,13 +176,15 @@ def validate_registry(reg: dict) -> None:
             raise ValueError("MFF authority URL is not a strictly verified official HTTPS host")
         if src.get("stage") is not None and src["stage"] not in allowed:
             raise ValueError("MFF source stage is outside non-authorizing registry taxonomy")
-        if sid in OCTOBER_STAGE_LOCKS:
-            expected = OCTOBER_STAGE_LOCKS[sid]
+        if sid in DATED_STAGE_LOCKS:
+            expected = DATED_STAGE_LOCKS[sid]
             observed = (src.get("stage"), src.get("event_date"), src.get("updated_date"))
             if observed != expected:
-                raise ValueError("MFF October source identity/stage/date mismatch; fail closed")
+                raise ValueError("MFF dated source identity/stage/date mismatch; fail closed")
         if src.get("class") == "official_parliamentary_analyst_commentary" and src.get("stage") != "PARLIAMENTARY_POSITION_COMMENTARY":
             raise ValueError("Parliamentary commentary cannot be relabelled as a formal EP position")
+        if src.get("class") == "official_european_council_president_proposal" and src.get("stage") != "EUROPEAN_COUNCIL_PRESIDENT_PROPOSAL":
+            raise ValueError("European Council President proposal cannot be relabelled as adoption or Council agreement")
         if src.get("open_call_authorized", False) is not False or src.get("material_fact_publication_authorized", False) is not False:
             raise ValueError("MFF source attempted to grant publication/call authority")
     if not seen:
