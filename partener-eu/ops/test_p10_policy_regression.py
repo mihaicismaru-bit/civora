@@ -114,6 +114,23 @@ for workflow_name, workflow in [
     if not has_exact_yaml_scalar(workflow, "name", "github-pages"):
         errors.append(f"{workflow_name} does not use the canonical GitHub Pages environment")
 
+# A 100-minute Romanian NAS acquisition is scheduled at :15 every hour.
+# Regression: preserve the single runner lock without cancelling in-flight
+# official bytes before the immutable SURFACEMC -> Engine artifact handoff.
+nas_workflow = (WORKFLOWS / "partener-eu-mipe-ro-crawl-v3.yml").read_text(encoding="utf-8")
+if "cron: '15 * * * *'" not in nas_workflow:
+    errors.append("MIPE NAS acquisition lost its hourly :15 schedule")
+if not has_exact_yaml_scalar(nas_workflow, "group", "partener-eu-mipe-ro-crawl-v3"):
+    errors.append("MIPE NAS collector lost its single-run acquisition lock")
+if not has_exact_yaml_scalar(nas_workflow, "cancel-in-progress", "false"):
+    errors.append("MIPE NAS hourly trigger can cancel in-flight official acquisition")
+if "timeout-minutes: 100" not in nas_workflow:
+    errors.append("MIPE NAS collector job bound changed unexpectedly")
+if "runs-on: [self-hosted, Linux, X64, romania-nas]" not in nas_workflow:
+    errors.append("MIPE NAS collector runner/authority boundary changed")
+if "MIPE_ACQUISITION_ONLY: '1'" not in nas_workflow:
+    errors.append("MIPE NAS acquisition-only boundary changed")
+
 if "git add partener-eu/web/peo-calendar.js" in peo_workflow:
     errors.append("PEO workflow auto-publishes public material calendar data")
 if "cp partener-eu/web/peo-calendar.js" in peo_workflow:
