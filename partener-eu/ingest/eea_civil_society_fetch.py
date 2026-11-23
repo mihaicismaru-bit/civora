@@ -280,10 +280,10 @@ def collect_live(
     index_final = _official_url(str(index["final_url"]), call_detail=False)
     index_raw = bytes(index["raw"])
     call_urls = discover_call_urls(index_raw, base_url=index_final)
-    if len(call_urls) < minimum_calls:
-        raise RuntimeError(
-            f"discovered {len(call_urls)} call-detail URLs, below minimum {minimum_calls}"
-        )
+    # An official index can stop listing expired calls. Preserve its hashed
+    # observation even when it no longer links the expected detail pages.
+    # The CLI still exits nonzero below: no all-or-nothing reconciliation.
+    discovery_shortfall = len(call_urls) < minimum_calls
 
     records: list[dict[str, Any]] = []
     pages: list[dict[str, Any]] = []
@@ -360,6 +360,12 @@ def collect_live(
             "content_type": str(index["content_type"]),
             "raw_hash": _sha256(index_raw),
             "bytes": len(index_raw),
+            "observation_state": (
+                "NO_EXACT_CALL_LINKS" if not call_urls
+                else "DISCOVERY_SHORTFALL" if discovery_shortfall
+                else "EXACT_CALL_LINKS_OBSERVED"
+            ),
+            "minimum_calls_required": minimum_calls,
         },
         "fetched_at": fetched_at,
         "parser_version": PARSER_VERSION,
@@ -371,6 +377,8 @@ def collect_live(
         "errors": errors,
         "stats": {
             "discovered_call_urls": len(call_urls),
+            "minimum_calls_required": minimum_calls,
+            "discovery_shortfall": discovery_shortfall,
             "fetched_call_pages": len(pages),
             "normalized_records": len(normalized_records),
             "open_call_evidence": sum(
@@ -388,6 +396,10 @@ def collect_live(
             "errors": len(errors),
             "conflicts": len(conflicts),
         },
+        "acquisition_status": (
+            "INCOMPLETE_DISCOVERY" if discovery_shortfall or errors or conflicts
+            else "COMPLETE_INDEX_DISCOVERY"
+        ),
         "material_fact_use": False,
         "publish_authorized": False,
         "publication_effect": "NONE",
