@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 import hashlib
 import importlib.util
+import json
+import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -126,6 +129,55 @@ def main():
     if page_hashes != expected:
         fail("raw page hashes are not preserved exactly")
 
+    # The official index can drop all call-detail links after a deadline.
+    # A missing index must yield a provenance receipt, not an exception that
+    # prevents the failure artifact from being uploaded.
+    empty_html = b"<html><h1>Calls</h1><p>Applications closed 8 October 2026</p><p>No results found</p></html>"
+
+    def empty_fetch(url):
+        if url != INDEX:
+            raise AssertionError(f"unexpected exact-call fetch: {url}")
+        return response(url, empty_html)
+
+    held = module.collect_live(
+        index_url=INDEX,
+        run_id="TEST-EMPTY-INDEX",
+        fetched_at=FETCHED,
+        minimum_calls=7,
+        fetcher=empty_fetch,
+    )
+    if held["source_index"]["raw_hash"] != hashlib.sha256(empty_html).hexdigest():
+        fail("empty index must preserve exact official response hash")
+    if held["source_index"]["url"] != INDEX or held["fetched_at"] != FETCHED:
+        fail("empty index provenance URL / fetch timestamp drift")
+    if held["source_index"]["observation_state"] != "NO_EXACT_CALL_LINKS":
+        fail("missing exact-call links must have an explicit observation state")
+    if held["acquisition_status"] != "INCOMPLETE_DISCOVERY":
+        fail("empty index cannot count as complete acquisition")
+    if held["stats"]["discovered_call_urls"] != 0 or not held["stats"]["discovery_shortfall"]:
+        fail("empty index must fail the minimum-7 exact-call requirement")
+    if held["pages"] or held["records"] or held["publish_authorized"] or held["material_fact_use"]:
+        fail("empty index cannot invent or authorize call evidence")
+    if held["publication_effect"] != "NONE" or held["stats"]["open_call_evidence"]:
+        fail("index-only shortfall cannot promote OPEN or publish")
+
+    # Exercise CLI behavior: nonzero failure *and* an immutable-ready JSON
+    # receipt, rather than a pre-serialization exception.
+    original_collect, original_argv = module.collect_live, sys.argv
+    try:
+        module.collect_live = lambda **kwargs: original_collect(fetcher=empty_fetch, **kwargs)
+        with tempfile.TemporaryDirectory() as d:
+            output = Path(d) / "live-evidence.json"
+            sys.argv = ["eea_civil_society_fetch.py", "--minimum-calls", "7", "--output", str(output)]
+            exit_code = module.main()
+            if exit_code != 2 or not output.is_file():
+                fail("CLI must fail closed and still persist index evidence")
+            receipt = json.loads(output.read_text(encoding="utf-8"))
+            if receipt["source_index"]["raw_hash"] != held["source_index"]["raw_hash"]:
+                fail("CLI failure receipt hash drift")
+    finally:
+        module.collect_live, sys.argv = original_collect, original_argv
+
     def bad_final(url):
         return response(url, CALL1_HTML, final_url="https://example.org/evil")
 
@@ -142,7 +194,7 @@ def main():
     else:
         fail("non-official redirect must fail closed before call parsing")
 
-    print("PASS EEA CSF live acquisition: official discovery, exact-page readback, raw hashes, parsing, reconciliation and redirect guard")
+    print("PASS EEA CSF live acquisition: official discovery, exact-page readback, hashed empty-index receipt, fail-closed CLI, parsing, reconciliation and redirect guard")
 
 
 if __name__ == "__main__":
