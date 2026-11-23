@@ -1,16 +1,97 @@
 {
-  "status": "BLOCKED",
-  "page_url": null,
+  "status": "LIVE",
+  "page_url": "https://partener.eu/",
   "configure_outcome": "success",
   "upload_outcome": "success",
-  "deploy_outcome": "failure",
-  "readback_outcome": "skipped",
-  "observed_at": "2026-11-23T15:15:10.920089+00:00",
-  "git_sha": "72ffb7c0de495657847a8665faba31ab54a32f98",
+  "deploy_outcome": "success",
+  "readback_outcome": "success",
+  "observed_at": "2026-11-23T16:36:30.637768+00:00",
+  "git_sha": "18e45016d07c7db7e063953a9fd6b0d0cb90ee9c",
   "public_readback": {
-    "status": "FAIL",
-    "fail_closed": true,
-    "error": "FileNotFoundError: [Errno 2] No such file or directory: '/tmp/partener-pages-readback.json'"
+    "status": "PASS",
+    "observed_at": "2026-11-23T16:36:29.990788+00:00",
+    "base_url": "https://partener.eu/",
+    "expected_manifest_sha256": "3d1076d35011a310436a4d9b15346fbc08bde5dc116e4d581b93e1a3992e4c3e",
+    "observed_manifest_sha256": "3d1076d35011a310436a4d9b15346fbc08bde5dc116e4d581b93e1a3992e4c3e",
+    "manifest_matches": true,
+    "manifest_mismatch_keys": [],
+    "expected_counts": {
+      "currentOpen": 4,
+      "prepare": 36,
+      "consultations": 0
+    },
+    "observed_counts": {
+      "finantari/deschise/": 4,
+      "finantari/in-pregatire/": 36,
+      "consultari/": 0
+    },
+    "routes": {
+      "finantari/deschise/": {
+        "http_status": 200,
+        "resolved_url": "https://partener.eu/finantari/deschise/?partener_readback=2026-11-03T20%3A33%3A50Z-1-1795451788",
+        "expected_cards": 4,
+        "observed_cards": 4,
+        "matches": true,
+        "semantic_freshness_ok": true
+      },
+      "finantari/in-pregatire/": {
+        "http_status": 200,
+        "resolved_url": "https://partener.eu/finantari/in-pregatire/?partener_readback=2026-11-03T20%3A33%3A50Z-1-1795451788",
+        "expected_cards": 36,
+        "observed_cards": 36,
+        "matches": true,
+        "semantic_freshness_ok": true
+      },
+      "consultari/": {
+        "http_status": 200,
+        "resolved_url": "https://partener.eu/consultari/?partener_readback=2026-11-03T20%3A33%3A50Z-1-1795451788",
+        "expected_cards": 0,
+        "observed_cards": 0,
+        "matches": true,
+        "semantic_freshness_ok": true
+      }
+    },
+    "attempts_used": 1,
+    "attempts": [
+      {
+        "attempt": 1,
+        "errors": [],
+        "manifest": {
+          "http_status": 200,
+          "resolved_url": "https://partener.eu/static-public-manifest.json?partener_readback=2026-11-03T20%3A33%3A50Z-1-1795451788",
+          "matches": true,
+          "mismatch_keys": [],
+          "sha256": "3d1076d35011a310436a4d9b15346fbc08bde5dc116e4d581b93e1a3992e4c3e"
+        },
+        "routes": {
+          "finantari/deschise/": {
+            "http_status": 200,
+            "resolved_url": "https://partener.eu/finantari/deschise/?partener_readback=2026-11-03T20%3A33%3A50Z-1-1795451788",
+            "expected_cards": 4,
+            "observed_cards": 4,
+            "matches": true,
+            "semantic_freshness_ok": true
+          },
+          "finantari/in-pregatire/": {
+            "http_status": 200,
+            "resolved_url": "https://partener.eu/finantari/in-pregatire/?partener_readback=2026-11-03T20%3A33%3A50Z-1-1795451788",
+            "expected_cards": 36,
+            "observed_cards": 36,
+            "matches": true,
+            "semantic_freshness_ok": true
+          },
+          "consultari/": {
+            "http_status": 200,
+            "resolved_url": "https://partener.eu/consultari/?partener_readback=2026-11-03T20%3A33%3A50Z-1-1795451788",
+            "expected_cards": 0,
+            "observed_cards": 0,
+            "matches": true,
+            "semantic_freshness_ok": true
+          }
+        }
+      }
+    ],
+    "fail_closed": true
   },
   "https_control": {
     "settings_api_url": "https://api.github.com/repos/mihaicismaru-bit/civora/pages",
@@ -25,6 +106,6 @@
     "html_url": "https://partener.eu/",
     "external_dependency": null
   },
-  "lkg_preserved": true,
-  "site_sha256": "f50a59b84c5cb8d8dcca31540193ad1552662cea5c1b1c4de201308a83c6561f"
+  "lkg_preserved": false,
+  "site_sha256": "895a4b765971bab731d071e6b6e6869b38039dc7d3fd6fd664fa6c174b35a86c"
 }
