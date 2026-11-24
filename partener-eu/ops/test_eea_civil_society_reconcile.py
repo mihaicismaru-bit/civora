@@ -170,6 +170,37 @@ def main():
     bad["stats"]["errors"] = 1
     expect_fail(bad, "partial live acquisition")
 
+    # All counts deliberately remain healthy: independent diagnostic markers
+    # must fail closed even if the discovery count is accidentally rewritten.
+    for patch, label in [
+        ({"diagnostic_seed_mode": True}, "seed-mode marker"),
+        ({"seed_urls": [CALL1, CALL2]}, "explicit seed list"),
+        ({"acquisition_status": "DIAGNOSTIC_SEED_CAPTURE"}, "diagnostic acquisition"),
+        ({"acquisition_status": "INCOMPLETE_DISCOVERY"}, "incomplete acquisition"),
+        ({"source_index": {"observation_state": "NO_EXACT_CALL_LINKS"}}, "empty index"),
+        ({"source_index": {"observation_state": "DISCOVERY_SHORTFALL"}}, "short index"),
+        ({"parser_version": "EEA_CSF_ROMANIA_LIVE_FETCH_V2"}, "V2 missing provenance"),
+    ]:
+        bad = copy.deepcopy(evidence)
+        bad.update(patch)
+        expect_fail(bad, label)
+
+    bad = copy.deepcopy(evidence)
+    bad["stats"]["discovery_shortfall"] = True
+    expect_fail(bad, "discovery shortfall despite healthy counts")
+
+    good = copy.deepcopy(evidence)
+    good.update({
+        "parser_version": "EEA_CSF_ROMANIA_LIVE_FETCH_V2",
+        "acquisition_status": "COMPLETE_INDEX_DISCOVERY",
+        "diagnostic_seed_mode": False,
+        "seed_urls": [],
+        "source_index": {"observation_state": "EXACT_CALL_LINKS_OBSERVED"},
+    })
+    good["stats"]["discovery_shortfall"] = False
+    if module.reconcile_live_evidence(good, minimum_calls=2)["stats"]["reconciled_calls"] != 2:
+        fail("valid V2 complete non-diagnostic acquisition rejected")
+
     print("PASS EEA CSF reconciliation: exact authority, semantic integrity, material-field validation, staging-only authorization and fail-closed batch semantics")
 
 
