@@ -324,6 +324,11 @@ def collect_live(
             )
             if normalized is None:
                 raise RuntimeError("call-detail page did not yield a stable call identifier")
+            if seed_mode and normalized["observation_state"] == "OPEN_CALL":
+                # Preserve the authority's label/fingerprint, but a diagnostic
+                # seed receipt cannot admit OPEN without semantic reconciliation.
+                normalized["observation_state"] = "UNKNOWN"
+                normalized["requires_reconcile"] = True
             records.append(normalized)
             pages.append(
                 {

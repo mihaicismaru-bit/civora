@@ -200,6 +200,15 @@ def main():
     if seeded["publish_authorized"] or seeded["material_fact_use"] or seeded["stats"]["open_call_evidence"]:
         fail("seed capture cannot authorize or invent OPEN evidence")
 
+    def stale_open_seed(url):
+        return response(url, empty_html if url == INDEX else CALL1_HTML)
+    stale = module.collect_live(index_url=INDEX, run_id="TEST-OPEN-SEED",
+        fetched_at=FETCHED, fetcher=stale_open_seed, seed_urls=(CALL1,))
+    if stale["stats"]["open_call_evidence"] or stale["records"][0]["status_label"] != "Open":
+        fail("seed must preserve raw Open label without OPEN_CALL admission")
+    if stale["records"][0]["observation_state"] != "UNKNOWN" or not stale["records"][0]["requires_reconcile"]:
+        fail("seed Open label must remain held for reconciliation")
+
     def mismatch_fetch(url):
         return response(url, empty_html if url == INDEX else CALL2_HTML)
     mismatch = module.collect_live(index_url=INDEX, run_id="TEST-MISMATCH",
