@@ -96,33 +96,36 @@ def extract(raw):
     for row in parser.rows:
         names = [HEADER_ALIASES.get(key_text(c["text"])) for c in row]
         if all(name in names for name in required):
-            if header is not None or any(names.count(n) != 1 for n in required):
-                raise ValueError("ambiguous header")
+            if header is not None or any(names.count(n) != 1 for n in set(names) if n):
+                raise ValueError("AMBIGUOUS_HEADER")
             header = names
             continue
         if header is None or not all(c["tag"] == "td" for c in row):
             continue
         if len(row) != len(header):
-            raise ValueError("row width mismatch")
+            raise ValueError("ROW_WIDTH_MISMATCH")
         if not row[header.index("programme")]["text"] or not row[header.index("callTitle")]["text"]:
-            raise ValueError("missing identity fields")
+            raise ValueError("MISSING_IDENTITY_FIELDS")
         hrefs = row[header.index("info")]["hrefs"]
         codes = [replay_info_code(h) for h in hrefs]
         if any(not code and re.search(r"[?&]p201_cod_apel=", decode_js_unicode(h), re.I) for h,code in zip(hrefs,codes)):
-            raise ValueError("invalid identity link")
+            raise ValueError("INVALID_IDENTITY_LINK")
         identities = {c for c in codes if c}
         if len(identities) != 1:
-            raise ValueError("ambiguous identity")
+            raise ValueError("AMBIGUOUS_IDENTITY")
         rows.append((next(iter(identities)), tuple((n,c["text"]) for n,c in zip(header,row) if n and n != "info")))
     if header is None or not rows:
-        raise ValueError("no report table")
+        raise ValueError("NO_REPORT_TABLE")
     return rows
 def summary(raw):
     try:
         rows = extract(raw)
         return rows, {"tableParsed":True,"rowCount":len(rows),"uniqueIdentityCount":len({r[0] for r in rows})}
-    except (ValueError, RuntimeError, UnicodeError):
-        return None, {"tableParsed":False}
+    except (ValueError, RuntimeError, UnicodeError) as exc:
+        # Only fixed reason codes may cross the diagnostic output boundary.
+        allowed = {"AMBIGUOUS_HEADER","ROW_WIDTH_MISMATCH","MISSING_IDENTITY_FIELDS","INVALID_IDENTITY_LINK","AMBIGUOUS_IDENTITY","NO_REPORT_TABLE"}
+        reason = str(exc) if str(exc) in allowed else "PARSER_ERROR"
+        return None, {"tableParsed":False,"reason":reason}
 body, dom = payload["body"], payload["dom"]
 a, sa = summary(body)
 b, sb = summary(dom)
@@ -217,6 +220,15 @@ if (process.argv.includes('--self-test')) {
   assert.equal(compareDecodedTable(fixture,document.replace('<td>S</td>','<td>X</td>'),1).orderedExactRowsMatch,false);
   assert.equal(compareDecodedTable(fixture.replace(href,'https://example.invalid/?p201_cod_apel=PRT%2F1'),document,1).orderedExactRowsMatch,false);
   assert.equal(compareDecodedTable(fixture+fixture,document,1).orderedExactRowsMatch,false);
+  assert.equal(compareDecodedTable(fixture,document+document,1).rendered.reason,'AMBIGUOUS_HEADER');
+  assert.equal(compareDecodedTable(fixture,document.replace('<td>S</td>',''),1).rendered.reason,'ROW_WIDTH_MISMATCH');
+  assert.equal(compareDecodedTable(fixture,document.replace(href,'https://example.invalid/?p201_cod_apel=PRT%2F1'),1).rendered.reason,'INVALID_IDENTITY_LINK');
+  assert.equal(compareDecodedTable(fixture,'<html><body></body></html>',1).rendered.reason,'NO_REPORT_TABLE');
+  // A duplicated header in the outer document is not a second report data table.
+  // The scoped table itself still has to pass the exact same strict parser.
+  const headerOnly=fixture.slice(0,fixture.indexOf('</tr>')+5)+'</table>';
+  assert.equal(compareDecodedTable(fixture,headerOnly+fixture,1).rendered.reason,'AMBIGUOUS_HEADER');
+  assert.equal(compareDecodedTable(fixture,fixture,1).orderedExactRowsMatch,true);
   assert.equal(compareDecodedTable('',document,1).orderedExactRowsMatch,false);
   assert.equal(compareDecodedTable(fixture,document,0).status,'TABLE_COMPARISON_UNAVAILABLE');
   console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit, native focus and decoded table concordance guards');
@@ -416,7 +428,21 @@ try {
   if(!['text/html','application/json','text/plain'].includes(mime))throw new Error('unrecognized response media');
   // The rendered document is observed independently from the decoded response,
   // still in this same session. Never persist or log either HTML representation.
-  const rendered=await evaluate("({url:location.origin+location.pathname,text:[...document.querySelectorAll('.a-IRR-pagination')].map(e=>e.innerText).join(' '),html:document.documentElement.outerHTML})");
+  // APEX can render layout/sticky-header tables outside the actual report.
+  // Limit the second observation to the unique data-bearing report table
+  // inside the same report ordinal that owned the native pagination control.
+  // No fallback to the network fragment or generic page-wide HTML.
+  const rendered=await evaluate(`(()=>{
+    const reports=[...document.querySelectorAll('.a-IRR')];
+    const report=reports[${before.controlIdentity.report-1}];
+    const tables=report?[...report.querySelectorAll('table.a-IRR-table')].filter(t=>t.closest('.a-IRR')===report):[];
+    const data=tables.filter(t=>[...t.rows].some(r=>[...r.cells].some(c=>c.tagName==='TD')));
+    const chosen=data.length===1?data[0]:null;
+    return {url:location.origin+location.pathname,
+      text:report?[...report.querySelectorAll('.a-IRR-pagination')].filter(e=>e.closest('.a-IRR')===report).map(e=>e.innerText).join(' '):'',
+      reportCount:reports.length,tableCount:tables.length,dataTableCount:data.length,
+      html:chosen?chosen.outerHTML:null};
+  })()`);
   const observedRange=range(rendered?.text);
   const concordance=rendered?.url===URL0&&JSON.stringify(observedRange)===JSON.stringify(second)&&mime==='text/html'
     ? compareDecodedTable(bytes.toString('utf8'),rendered.html,second.last-second.first+1)
@@ -426,6 +452,7 @@ try {
     fetchedAt:new Date().toISOString(),firstRange:first,secondRange:second,
     activation,endpointClass:'SAME_ORIGIN_WWV_FLOW_AJAX',method:'POST',httpStatus:200,
     contentType:mime,cdpDecodedBodySha256:sha(bytes),decodedBodyBytes:bytes.length,
+    renderedTableScope:{reportCount:rendered?.reportCount??0,tableCount:rendered?.tableCount??0,dataTableCount:rendered?.dataTableCount??0},
     decodedTableConcordance:concordance,rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
 } catch(e) {
   // No exception messages or arbitrary server values: could contain session data.
