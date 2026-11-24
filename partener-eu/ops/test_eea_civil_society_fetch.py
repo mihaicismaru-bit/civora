@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import base64
 import hashlib
 import importlib.util
 import json
@@ -175,6 +176,45 @@ def main():
             receipt = json.loads(output.read_text(encoding="utf-8"))
             if receipt["source_index"]["raw_hash"] != held["source_index"]["raw_hash"]:
                 fail("CLI failure receipt hash drift")
+    finally:
+        module.collect_live, sys.argv = original_collect, original_argv
+
+    closed_html = CALL1_HTML.replace(b"<div>Open</div>", b"<div>Closed</div>")
+    def seed_fetch(url):
+        if url == INDEX:
+            return response(url, empty_html)
+        if url == CALL1:
+            return response(url, closed_html)
+        raise AssertionError(f"unexpected seed {url}")
+
+    seeded = module.collect_live(index_url=INDEX, run_id="TEST-SEED",
+        fetched_at=FETCHED, minimum_calls=7, fetcher=seed_fetch, seed_urls=(CALL1,))
+    if seeded["acquisition_status"] != "DIAGNOSTIC_SEED_CAPTURE" or not seeded["diagnostic_seed_mode"]:
+        fail("seed capture must remain diagnostic")
+    if seeded["stats"]["discovered_call_urls"] != 0 or seeded["stats"]["fetched_call_pages"] != 1:
+        fail("seed pages cannot count as discovered index links")
+    if base64.b64decode(seeded["pages"][0]["raw_response_b64"]) != closed_html:
+        fail("seed raw page replay bytes drift")
+    if base64.b64decode(seeded["source_index"]["raw_response_b64"]) != empty_html:
+        fail("seed raw index replay bytes drift")
+    if seeded["publish_authorized"] or seeded["material_fact_use"] or seeded["stats"]["open_call_evidence"]:
+        fail("seed capture cannot authorize or invent OPEN evidence")
+
+    def mismatch_fetch(url):
+        return response(url, empty_html if url == INDEX else CALL2_HTML)
+    mismatch = module.collect_live(index_url=INDEX, run_id="TEST-MISMATCH",
+        fetched_at=FETCHED, fetcher=mismatch_fetch, seed_urls=(CALL1,))
+    if mismatch["pages"] or mismatch["records"] or len(mismatch["errors"]) != 1:
+        fail("mismatched exact-call body must be rejected")
+    original_collect, original_argv = module.collect_live, sys.argv
+    try:
+        module.collect_live = lambda **kwargs: original_collect(fetcher=seed_fetch, **kwargs)
+        with tempfile.TemporaryDirectory() as d:
+            output = Path(d) / "seed.json"
+            sys.argv = ["eea_civil_society_fetch.py", "--minimum-calls", "1",
+                        "--seed-url", CALL1, "--output", str(output)]
+            if module.main() != 2 or not output.is_file():
+                fail("even sufficient diagnostic seed capture must exit nonzero")
     finally:
         module.collect_live, sys.argv = original_collect, original_argv
 

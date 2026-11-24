@@ -8,6 +8,7 @@ authorized for publication here; material facts remain reconciliation candidates
 from __future__ import annotations
 
 import argparse
+import base64
 import datetime as dt
 import hashlib
 import importlib.util
@@ -26,7 +27,7 @@ adapter = importlib.util.module_from_spec(spec)
 assert spec and spec.loader
 spec.loader.exec_module(adapter)
 
-PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V1"
+PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V2"
 INDEX_URL = "https://eeagrants.org/en/eea-civil-society-fund-romania/calls"
 OFFICIAL_HOSTS = {"eeagrants.org", "www.eeagrants.org"}
 MAX_BYTES = 4_000_000
@@ -274,6 +275,7 @@ def collect_live(
     fetched_at: str | None = None,
     minimum_calls: int = 1,
     fetcher: Callable[[str], dict[str, Any]] = fetch_url,
+    seed_urls: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     fetched_at = fetched_at or _utc_now()
     index = fetcher(index_url)
@@ -284,15 +286,34 @@ def collect_live(
     # observation even when it no longer links the expected detail pages.
     # The CLI still exits nonzero below: no all-or-nothing reconciliation.
     discovery_shortfall = len(call_urls) < minimum_calls
+    # Explicit seeds are diagnostic only. They cannot certify index health.
+    seed_mode = bool(seed_urls)
+    seeds: dict[str, str] = {}
+    for url in seed_urls:
+        exact = _official_url(url, call_detail=True)
+        number = _call_number_from_url(exact)
+        if not number or number in seeds:
+            raise ValueError("seed URLs require unique numbered exact call paths")
+        seeds[number] = exact
+    acquisition_urls = list(seeds.values()) if seed_mode else call_urls
 
     records: list[dict[str, Any]] = []
     pages: list[dict[str, Any]] = []
     errors: list[dict[str, str]] = []
-    for requested_url in call_urls:
+    for requested_url in acquisition_urls:
         try:
             response = fetcher(requested_url)
             final_url = _official_url(str(response["final_url"]), call_detail=True)
             raw = bytes(response["raw"])
+            if seed_mode:
+                expected_number = _call_number_from_url(requested_url)
+                doc = _parse_document(raw)
+                body_number = _extract_label_value(_flat_text(doc), ("Call number",), r"\d{1,3}\b")
+                title_number = re.search(r"\bCall\s*#?\s*(\d{1,3})\b", " ".join(doc.h1_parts), re.IGNORECASE)
+                if (not expected_number or _call_number_from_url(final_url) != expected_number
+                        or body_number != expected_number or not title_number
+                        or title_number.group(1) != expected_number):
+                    raise ValueError("seed exact-call URL/body/title identity mismatch")
             record = parse_call_page(raw, authority_url=final_url)
             normalized = adapter.normalize_record(
                 record,
@@ -314,6 +335,7 @@ def collect_live(
                     "bytes": len(raw),
                     "call_identifier": normalized["call_identifier"],
                     "observation_state": normalized["observation_state"],
+                    **({"raw_response_b64": base64.b64encode(raw).decode("ascii")} if seed_mode else {}),
                 }
             )
         except Exception as exc:
@@ -366,7 +388,10 @@ def collect_live(
                 else "EXACT_CALL_LINKS_OBSERVED"
             ),
             "minimum_calls_required": minimum_calls,
+            **({"raw_response_b64": base64.b64encode(index_raw).decode("ascii")} if seed_mode else {}),
         },
+        "diagnostic_seed_mode": seed_mode,
+        "seed_urls": list(seeds.values()),
         "fetched_at": fetched_at,
         "parser_version": PARSER_VERSION,
         "adapter_version": adapter.PARSER_VERSION,
@@ -397,7 +422,8 @@ def collect_live(
             "conflicts": len(conflicts),
         },
         "acquisition_status": (
-            "INCOMPLETE_DISCOVERY" if discovery_shortfall or errors or conflicts
+            "DIAGNOSTIC_SEED_CAPTURE" if seed_mode
+            else "INCOMPLETE_DISCOVERY" if discovery_shortfall or errors or conflicts
             else "COMPLETE_INDEX_DISCOVERY"
         ),
         "material_fact_use": False,
@@ -414,6 +440,7 @@ def main() -> int:
     parser.add_argument("--fetched-at", default=None)
     parser.add_argument("--minimum-calls", type=int, default=1)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--seed-url", action="append", default=[], help="Exact numbered official URL; diagnostic only, always nonzero")
     args = parser.parse_args()
 
     run_id = args.run_id or f"EEA-CSF-LIVE-{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
@@ -422,6 +449,7 @@ def main() -> int:
         run_id=run_id,
         fetched_at=args.fetched_at,
         minimum_calls=args.minimum_calls,
+        seed_urls=tuple(args.seed_url),
     )
     payload = json.dumps(evidence, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.output:
@@ -430,6 +458,8 @@ def main() -> int:
     else:
         print(payload, end="")
 
+    if evidence["diagnostic_seed_mode"]:
+        return 2
     if evidence["stats"]["errors"] or evidence["stats"]["conflicts"]:
         return 2
     if evidence["stats"]["fetched_call_pages"] < args.minimum_calls:
