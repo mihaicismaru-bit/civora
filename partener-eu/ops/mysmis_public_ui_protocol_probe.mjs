@@ -111,8 +111,31 @@ try {
   status='FIRST_PAGE_CONFIRMED';
   // Do not click a generic enabled button. Require an explicit accessible
   // next label, then verify the hit target after scrolling into view.
-  const target=await evaluate("(()=>{if(location.origin+location.pathname!=="+JSON.stringify(URL0)+")return null;const a=[...document.querySelectorAll('.a-IRR-button--pagination:not([disabled]):not([aria-disabled=true])')].filter(e=>e.getClientRects().length>0);const next=a.filter(e=>/next|următoar/i.test((e.getAttribute('aria-label')||'')+' '+(e.getAttribute('title')||'')));if(next.length!==1)return null;const x=next[0];x.scrollIntoView({block:'center',inline:'center'});const b=x.getBoundingClientRect();const cx=b.left+b.width/2,cy=b.top+b.height/2;const hit=document.elementFromPoint(cx,cy);return hit&&(hit===x||x.contains(hit))?{x:cx,y:cy}:null})()");
-  if(!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))throw new Error('no unambiguous hittable next button');
+  // Report only bounded structural counts, never attributes, labels or session data.
+  // Resolve the accessible label from standard DOM mechanisms, including nested
+  // SVG titles and aria-labelledby. A data-pagination attribute alone is not proof.
+  const inspectTarget = scroll => evaluate(`(()=>{if(location.origin+location.pathname!==${JSON.stringify(URL0)})return null;
+    const a=[...document.querySelectorAll('.a-IRR-button--pagination:not([disabled]):not([aria-disabled=true])')].filter(e=>e.getClientRects().length>0);
+    const label=e=>[e.getAttribute('aria-label'),e.getAttribute('title'),e.innerText,
+      ...[...(e.getAttribute('aria-labelledby')||'').split(/\\s+/)].filter(Boolean).map(id=>document.getElementById(id)?.textContent),
+      ...[...e.querySelectorAll('[title], [aria-label], svg title')].map(x=>[x.getAttribute('title'),x.getAttribute('aria-label'),x.textContent].join(' '))].filter(Boolean).join(' ');
+    const next=a.filter(e=>/\\bnext\\b|următoar/i.test(label(e)));
+    const result={enabled:a.length,explicitNext:next.length,hasPaginationData:a.filter(e=>e.hasAttribute('data-pagination')).length,
+      rowSelects:[...document.querySelectorAll('select')].filter(e=>e.getClientRects().length>0&&/rows|rânduri/i.test([e.getAttribute('aria-label'),e.getAttribute('title'),...[...e.labels||[]].map(l=>l.textContent)].join(' '))).length,
+      hittable:false,target:null};
+    if(next.length!==1)return result;
+    const x=next[0];if(${scroll})x.scrollIntoView({block:'center',inline:'center',behavior:'instant'});
+    const b=x.getBoundingClientRect(),cx=b.left+b.width/2,cy=b.top+b.height/2,hit=document.elementFromPoint(cx,cy);
+    result.hittable=!!hit&&(hit===x||x.contains(hit));if(result.hittable)result.target={x:cx,y:cy};return result})()`);
+  const before=await inspectTarget(true);
+  await sleep(350);
+  const after=await inspectTarget(false);
+  if(!before||!after)throw new Error('target inspection unavailable');
+  console.log(JSON.stringify({...base,status:'UI_CONTROL_SHAPE_ONLY',fetchedAt:new Date().toISOString(),
+    firstRange:first,controlCounts:{enabled:after.enabled,explicitNext:after.explicitNext,hasPaginationData:after.hasPaginationData,rowSelects:after.rowSelects},
+    beforeHittable:before.hittable,afterHittable:after.hittable,paginationProtocolConfirmed:false}));
+  const target=after.target;
+  if(before.explicitNext!==1||after.explicitNext!==1||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))throw new Error('no unambiguous hittable next button');
   status='NEXT_TARGET_CONFIRMED';
   capture=true;
   await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',x:target.x,y:target.y});
