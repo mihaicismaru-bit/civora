@@ -33,8 +33,9 @@ function officialAjax(url) {
 // a request from it. Mirrored controls are equivalent only within one report
 // and with the identical complete action value.
 function selectNextControl(controls, first) {
-  const candidates = controls.filter(c => {
-    if (!c.next || !c.report || !c.pagination) return false;
+  const explicit = controls.filter(c => c.next);
+  const candidates = explicit.filter(c => {
+    if (!c.report || !c.pagination) return false;
     const m = /^pgR_min_row=(\d+)max_rows=(\d+)rows_fetched=(\d+)$/.exec(c.pagination);
     if (!m) return false;
     const [start,max,fetched] = m.slice(1).map(Number);
@@ -43,6 +44,8 @@ function selectNextControl(controls, first) {
       fetched > 0 && fetched <= max;
   });
   if (!candidates.length) return {index:null,count:0};
+  // An explicit contradictory Next control is not an ignorable alternative.
+  if (candidates.length !== explicit.length) return {index:null,count:candidates.length};
   const c = candidates[0];
   if (!candidates.every(x=>x.report===c.report && x.pagination===c.pagination))
     return {index:null,count:candidates.length};
@@ -63,7 +66,10 @@ if (process.argv.includes('--self-test')) {
   assert.deepEqual(selectNextControl([next,mirror],first),{index:0,count:2});
   assert.deepEqual(selectNextControl([next,{...mirror,report:2}],first),{index:null,count:2});
   assert.deepEqual(selectNextControl([next,{...mirror,pagination:'pgR_min_row=51max_rows=50rows_fetched=49'}],first),{index:null,count:2});
-  assert.deepEqual(selectNextControl([{...next,pagination:'pgR_min_row=101max_rows=50rows_fetched=50'},mirror],first),{index:1,count:1});
+  assert.deepEqual(selectNextControl([{...next,pagination:'pgR_min_row=101max_rows=50rows_fetched=50'},mirror],first),{index:null,count:1});
+  assert.deepEqual(selectNextControl([next,{...mirror,pagination:'unrecognized'}],first),{index:null,count:1});
+  assert.deepEqual(selectNextControl([next,{...mirror,report:0}],first),{index:null,count:1});
+  assert.deepEqual(selectNextControl([next,{...mirror,next:false}],first),{index:0,count:1});
   assert.deepEqual(selectNextControl([{...next,report:0}],first),{index:null,count:0});
   assert.deepEqual(selectNextControl([{...next,pagination:'unrecognized'}],first),{index:null,count:0});
   assert.deepEqual(selectNextControl([{...next,next:false}],first),{index:null,count:0});
@@ -83,11 +89,13 @@ let status='NOT_STARTED';
 const counters={sameOriginPosts:0,officialAjaxPosts:0,officialAjax200:0,officialAjaxFinished:0};
 try {
   dir=await mkdtemp(join(tmpdir(),'mysmis-public-ui-'));
+  status='PROFILE_CREATED';
   chrome=spawn(process.env.CHROME_BIN || 'google-chrome',[
     '--headless=new','--disable-dev-shm-usage','--no-first-run','--no-default-browser-check',
     '--disable-background-networking','--remote-debugging-address=127.0.0.1',
     '--remote-debugging-port=0','--user-data-dir='+dir,'about:blank'
   ],{stdio:'ignore'});
+  status='BROWSER_SPAWN_REQUESTED';
   let spawnError=false; chrome.on('error',()=>{spawnError=true;});
   let port;
   for(let i=0;i<40&&!port&&!spawnError;i++){
@@ -95,15 +103,18 @@ try {
     if(!port) await sleep(250);
   }
   if(!port) throw new Error('browser unavailable');
+  status='DEVTOOLS_PORT_READY';
   const tabs=await (await fetch('http://127.0.0.1:'+port+'/json/list',{signal:AbortSignal.timeout(3000)})).json();
   const tab=tabs.find(t=>t.type==='page');
   if(!tab?.webSocketDebuggerUrl) throw new Error('no page');
+  status='DEVTOOLS_PAGE_FOUND';
   ws=new WebSocket(tab.webSocketDebuggerUrl);
   await new Promise((resolve,reject)=>{
     ws.addEventListener('open',resolve,{once:true});
     ws.addEventListener('error',reject,{once:true});
     setTimeout(reject,3000).unref();
   });
+  status='DEVTOOLS_CONNECTED';
   let id=0, capture=false;
   const pending=new Map(), requests=new Map(), responses=new Map(), finished=new Set();
   ws.addEventListener('message',e=>{
@@ -133,10 +144,26 @@ try {
     return r.result?.value;
   }
   await cdp('Page.enable');await cdp('Network.enable',{maxTotalBufferSize:4000000,maxResourceBufferSize:2000000});
-  await cdp('Page.navigate',{url:URL0});
+  status='CDP_ENABLED';
+  const navigation=await cdp('Page.navigate',{url:URL0});
+  if(navigation?.errorText)throw new Error('navigation rejected');
+  status='NAVIGATION_REQUESTED';
   const snapshot=()=>evaluate("({url:location.origin+location.pathname,text:[...document.querySelectorAll('.a-IRR-pagination')].map(e=>e.innerText).join(' '),ready:document.readyState==='complete'&&typeof window.apex?.jQuery==='function'&&typeof window.apex?.server?.plugin==='function'})");
+  // A navigation may destroy the initial execution context between polls.
+  // Retry only passive snapshots within a fixed time/attempt budget; no new
+  // navigation or click and no relaxation of origin/range/readiness gates.
   let first;
-  for(let i=0;i<40;i++){const s=await snapshot();if(s?.url===URL0&&s.ready&&range(s.text)){first=range(s.text);break;}await sleep(250);}
+  const firstPollDeadline=Date.now()+15000;
+  const firstPoll={attempts:0,evaluationFailures:0,officialDocument:0,ready:0,rangePresent:0};
+  for(let i=0;i<60&&Date.now()<firstPollDeadline;i++){
+    firstPoll.attempts++;
+    let s;
+    try{s=await snapshot();}catch{firstPoll.evaluationFailures++;await sleep(250);continue;}
+    if(s?.url===URL0){firstPoll.officialDocument++;if(s.ready)firstPoll.ready++;if(range(s.text))firstPoll.rangePresent++;}
+    if(s?.url===URL0&&s.ready&&range(s.text)){first=range(s.text);break;}
+    await sleep(250);
+  }
+  console.log(JSON.stringify({...base,status:'UI_FIRST_PAGE_READINESS_ONLY',fetchedAt:new Date().toISOString(),firstPoll,paginationProtocolConfirmed:false}));
   if(!first||first.first!==1||first.last>=first.total)throw new Error('first page range missing');
   status='FIRST_PAGE_CONFIRMED';
   // Do not click a generic enabled button. Require an explicit accessible
