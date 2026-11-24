@@ -50,6 +50,7 @@ const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
   openCallAuthorized:false,deadlineAuthorized:false,budgetAuthorized:false,eligibilityAuthorized:false,
   publicationEffect:'NONE'};
 let status='NOT_STARTED';
+const counters={sameOriginPosts:0,officialAjaxPosts:0,officialAjax200:0,officialAjaxFinished:0};
 try {
   dir=await mkdtemp(join(tmpdir(),'mysmis-public-ui-'));
   chrome=spawn(process.env.CHROME_BIN || 'google-chrome',[
@@ -81,9 +82,12 @@ try {
       if(m.id){const p=pending.get(m.id);if(p){pending.delete(m.id);m.error?p.reject(new Error('CDP error')):p.resolve(m.result);}return;}
       if(!capture)return;
       const p=m.params||{};
-      if(m.method==='Network.requestWillBeSent' && p.request?.method==='POST' && officialAjax(p.request.url)) requests.set(p.requestId,true);
-      if(m.method==='Network.responseReceived' && requests.has(p.requestId) && officialAjax(p.response?.url) && p.response.status===200) responses.set(p.requestId,{mimeType:String(p.response.mimeType||'').split(';')[0]});
-      if(m.method==='Network.loadingFinished' && requests.has(p.requestId))finished.add(p.requestId);
+      if(m.method==='Network.requestWillBeSent' && p.request?.method==='POST') {
+        try {if(new URL(p.request.url).origin===origin)counters.sameOriginPosts++;}catch{}
+        if(officialAjax(p.request.url)){requests.set(p.requestId,true);counters.officialAjaxPosts++;}
+      }
+      if(m.method==='Network.responseReceived' && requests.has(p.requestId) && officialAjax(p.response?.url) && p.response.status===200){responses.set(p.requestId,{mimeType:String(p.response.mimeType||'').split(';')[0]});counters.officialAjax200++;}
+      if(m.method==='Network.loadingFinished' && requests.has(p.requestId)){finished.add(p.requestId);counters.officialAjaxFinished++;}
     } catch {}
   });
   function cdp(method,params={}){
@@ -100,17 +104,23 @@ try {
   }
   await cdp('Page.enable');await cdp('Network.enable',{maxTotalBufferSize:4000000,maxResourceBufferSize:2000000});
   await cdp('Page.navigate',{url:URL0});
-  const snapshot=()=>evaluate("({url:location.origin+location.pathname,text:[...document.querySelectorAll('.a-IRR-pagination')].map(e=>e.innerText).join(' '),controls:document.querySelectorAll('.a-IRR-button--pagination:not([disabled])').length})");
+  const snapshot=()=>evaluate("({url:location.origin+location.pathname,text:[...document.querySelectorAll('.a-IRR-pagination')].map(e=>e.innerText).join(' '),ready:document.readyState==='complete'&&typeof window.apex?.jQuery==='function'&&typeof window.apex?.server?.plugin==='function'})");
   let first;
-  for(let i=0;i<40;i++){const s=await snapshot();if(s?.url===URL0&&range(s.text)){first=range(s.text);break;}await sleep(250);}
+  for(let i=0;i<40;i++){const s=await snapshot();if(s?.url===URL0&&s.ready&&range(s.text)){first=range(s.text);break;}await sleep(250);}
   if(!first||first.first!==1||first.last>=first.total)throw new Error('first page range missing');
   status='FIRST_PAGE_CONFIRMED';
+  // Do not click a generic enabled button. Require an explicit accessible
+  // next label, then verify the hit target after scrolling into view.
+  const target=await evaluate("(()=>{if(location.origin+location.pathname!=="+JSON.stringify(URL0)+")return null;const a=[...document.querySelectorAll('.a-IRR-button--pagination:not([disabled]):not([aria-disabled=true])')].filter(e=>e.getClientRects().length>0);const next=a.filter(e=>/next|următoar/i.test((e.getAttribute('aria-label')||'')+' '+(e.getAttribute('title')||'')));if(next.length!==1)return null;const x=next[0];x.scrollIntoView({block:'center',inline:'center'});const b=x.getBoundingClientRect();const cx=b.left+b.width/2,cy=b.top+b.height/2;const hit=document.elementFromPoint(cx,cy);return hit&&(hit===x||x.contains(hit))?{x:cx,y:cy}:null})()");
+  if(!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))throw new Error('no unambiguous hittable next button');
+  status='NEXT_TARGET_CONFIRMED';
   capture=true;
-  const clicked=await evaluate("(()=>{if(location.origin+location.pathname!=="+JSON.stringify(URL0)+")return false;const a=[...document.querySelectorAll('.a-IRR-button--pagination:not([disabled])')].filter(e=>e.getClientRects().length>0);const next=a.filter(e=>/next|următoar/i.test((e.getAttribute('aria-label')||'')+' '+(e.getAttribute('title')||'')));const x=next.length===1?next[0]:a.length===1?a[0]:null;if(!x)return false;x.click();return true})()");
-  if(!clicked)throw new Error('no unambiguous next button');
+  await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',x:target.x,y:target.y});
+  await cdp('Input.dispatchMouseEvent',{type:'mousePressed',x:target.x,y:target.y,button:'left',buttons:1,clickCount:1});
+  await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',x:target.x,y:target.y,button:'left',buttons:0,clickCount:1});
   status='NEXT_CLICKED';
   let second;
-  for(let i=0;i<48;i++){const s=await snapshot();const b=range(s?.text);if(s?.url===URL0&&nextRange(first,b)){second=b;break;}await sleep(250);}
+  for(let i=0;i<80;i++){const s=await snapshot();const b=range(s?.text);if(s?.url===URL0&&nextRange(first,b)){second=b;break;}await sleep(250);}
   if(!second)throw new Error('contiguous next range not observed');
   status='NEXT_RANGE_CONFIRMED';
   await sleep(500);
@@ -121,14 +131,14 @@ try {
   if(!bytes.length||bytes.length>=2000000)throw new Error('response size outside diagnostic bound');
   const mime=responses.get(ids[0]).mimeType.toLowerCase();
   if(!['text/html','application/json','text/plain'].includes(mime))throw new Error('unrecognized response media');
-  console.log(JSON.stringify({...base,status:'UI_NEXT_RANGE_AND_OFFICIAL_AJAX_OBSERVED',
+  console.log(JSON.stringify({...base,status:'UI_NEXT_RANGE_AND_OFFICIAL_AJAX_OBSERVED',counters,
     fetchedAt:new Date().toISOString(),firstRange:first,secondRange:second,
     endpointClass:'SAME_ORIGIN_WWV_FLOW_AJAX',method:'POST',httpStatus:200,
     contentType:mime,cdpDecodedBodySha256:sha(bytes),decodedBodyBytes:bytes.length,
     rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
 } catch(e) {
   // No exception messages or arbitrary server values: could contain session data.
-  console.log(JSON.stringify({...base,status:'UI_PROTOCOL_DIAGNOSTIC_FAIL_CLOSED',stage:status,
+  console.log(JSON.stringify({...base,status:'UI_PROTOCOL_DIAGNOSTIC_FAIL_CLOSED',stage:status,counters,
     fetchedAt:new Date().toISOString(),paginationProtocolConfirmed:false}));
   process.exitCode=2;
 } finally {
