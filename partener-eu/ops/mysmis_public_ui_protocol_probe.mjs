@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// One public, anonymous UI pagination click. Diagnostic only: no session
+// At most two public, anonymous UI pagination clicks. Diagnostic only: no session
 // material, request values, HTML or reconstructed DOM is logged or persisted.
 // This is NOT an immutable raw receipt or an acquisition adapter.
 import { spawn, spawnSync } from 'node:child_process';
@@ -23,8 +23,11 @@ function range(s) {
 }
 function nextRange(a,b) {
   return !!a && !!b && [a.first,a.last,a.total,b.first,b.last,b.total].every(Number.isSafeInteger) &&
-    a.first === 1 && a.last < a.total && b.first === a.last+1 && b.total === a.total &&
+    a.first > 0 && a.first <= a.last && a.last < a.total && b.first === a.last+1 && b.total === a.total &&
     b.last === Math.min(a.total,a.last+(a.last-a.first+1));
+}
+function sameReportIdentity(a,b) {
+  return Number.isSafeInteger(a) && a > 0 && a === b;
 }
 function officialAjax(url) {
   try {
@@ -194,6 +197,14 @@ if (process.argv.includes('--self-test')) {
   assert.equal(nextRange(range('1 - 50 of 1002'),range('51 - 101 of 1002')),false);
   assert.equal(nextRange(range('1 - 50 of 52'),range('51 - 52 of 52')),true);
   assert.equal(nextRange(range('1 - 50 of 52'),range('51 - 51 of 52')),false);
+  assert.equal(nextRange(range('51 - 100 of 1002'),range('101 - 150 of 1002')),true);
+  assert.equal(nextRange(range('51 - 100 of 1002'),range('151 - 200 of 1002')),false);
+  assert.equal(nextRange(range('51 - 100 of 1002'),range('101 - 149 of 1002')),false);
+  assert.equal(nextRange(range('51 - 100 of 1002'),range('101 - 150 of 1003')),false);
+  assert.equal(nextRange(range('951 - 1000 of 1002'),range('1001 - 1002 of 1002')),true);
+  assert.equal(sameReportIdentity(1,1),true);
+  assert.equal(sameReportIdentity(1,2),false);
+  assert.equal(sameReportIdentity(0,0),false);
   assert.equal(officialAjax(origin+'/ords/wwv_flow.ajax?session=secret'),true);
   assert.equal(officialAjax('https://example.org/ords/wwv_flow.ajax'),false);
   const first = {first:1,last:50,total:1002};
@@ -380,6 +391,14 @@ try {
   console.log(JSON.stringify({...base,status:'UI_FIRST_PAGE_READINESS_ONLY',fetchedAt:new Date().toISOString(),firstPoll,paginationProtocolConfirmed:false}));
   if(!first||first.first!==1||first.last>=first.total)throw new Error('first page range missing');
   status='FIRST_PAGE_CONFIRMED';
+  // Bounded repeatability experiment: second transition only after the first
+  // has exact ordered concordance and no conflicting duplicates. Each exchange
+  // gets its own counters; no request values, HTML, or identities are emitted.
+  let reportOrdinal=null, initialDom=null, initialRange=first;
+  for(let transition=1;transition<=2 && first.last<first.total;transition++){
+  capture=false;
+  requests.clear();responses.clear();finished.clear();
+  for(const key of Object.keys(counters))counters[key]=0;
   // Do not click a generic enabled button. Require an explicit accessible
   // next label, then verify the hit target after scrolling into view.
   // Report only bounded structural counts, never attributes, labels or session data.
@@ -421,6 +440,8 @@ try {
     return result})()`);
   const before=await inspectTarget(true);
   if(!before?.unambiguous)throw new Error('target inspection unavailable or ambiguous');
+  if(reportOrdinal===null)reportOrdinal=before.controlIdentity.report;
+  if(!sameReportIdentity(reportOrdinal,before.controlIdentity.report))throw new Error('report identity changed');
   const observeReportTable=reportOrdinal=>evaluate(`(()=>{
     const reports=[...document.querySelectorAll('.a-IRR')];
     const report=reports[${reportOrdinal-1}];
@@ -438,6 +459,8 @@ try {
   const firstDom=firstRendered?.url===URL0&&JSON.stringify(range(firstRendered?.text))===JSON.stringify(first)&&
     typeof firstRendered.html==='string'&&Buffer.byteLength(firstRendered.html)<2000000
     ? firstRendered.html : null;
+  if(firstDom===null)throw new Error('first table unavailable');
+  if(transition===1)initialDom=firstDom;
   let previous=null,after=before,confirmed=false;
   const hitPoll={attempts:0,hittable:0,stablePairs:0,ambiguous:0};
   for(let i=0;i<12;i++){
@@ -504,12 +527,25 @@ try {
     ? compareDecodedTable(bytes.toString('utf8'),rendered.html,second.last-second.first+1,firstDom,first.last-first.first+1)
     : {status:'TABLE_COMPARISON_UNAVAILABLE'};
   if(!singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))throw new Error('ambiguous late official ajax exchange');
-  console.log(JSON.stringify({...base,status:'UI_NEXT_RANGE_AND_OFFICIAL_AJAX_OBSERVED',counters,
+  // Also compare page 3 against page 1, not merely its immediate predecessor.
+  const nonAdjacent=transition===2&&concordance.orderedExactRowsMatch
+    ? compareDecodedTable(bytes.toString('utf8'),rendered.html,second.last-second.first+1,
+        initialDom,initialRange.last-initialRange.first+1) : null;
+  if(!singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))throw new Error('ambiguous late official ajax exchange');
+  console.log(JSON.stringify({...base,status:'UI_NEXT_RANGE_AND_OFFICIAL_AJAX_OBSERVED',transition,counters,
     fetchedAt:new Date().toISOString(),firstRange:first,secondRange:second,
     activation,endpointClass:'SAME_ORIGIN_WWV_FLOW_AJAX',method:'POST',httpStatus:200,
     contentType:mime,cdpDecodedBodySha256:sha(bytes),decodedBodyBytes:bytes.length,
     renderedTableScope:{reportCount:rendered?.reportCount??0,tableCount:rendered?.tableCount??0,dataTableCount:rendered?.dataTableCount??0},
-    decodedTableConcordance:concordance,rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
+    decodedTableConcordance:concordance,
+    nonAdjacentDuplicateDiagnostic:nonAdjacent?.twoPageDuplicateDiagnostic??null,
+    rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
+  if(!concordance.orderedExactRowsMatch||!concordance.twoPageDuplicateDiagnostic?.exactIdentityComplete||
+    (transition===2&&!nonAdjacent?.twoPageDuplicateDiagnostic?.exactIdentityComplete))
+    throw new Error('transition semantic guard failed');
+  capture=false;
+  first=second;
+  }
 } catch(e) {
   // No exception messages or arbitrary server values: could contain session data.
   console.log(JSON.stringify({...base,status:'UI_PROTOCOL_DIAGNOSTIC_FAIL_CLOSED',stage:status,counters,browserStartup,
