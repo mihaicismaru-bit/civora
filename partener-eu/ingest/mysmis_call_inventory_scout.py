@@ -135,7 +135,26 @@ def semantic_sha(rows: list[dict[str, Any]]) -> str:
     return hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
-def parse_inventory(raw: str) -> dict[str, Any]:
+def replay_info_code(href: str) -> str | None:
+    """Replay-only check; never execute the APEX link or trust a foreign URL."""
+    decoded = decode_js_unicode(href)
+    dialog = re.match(r"^javascript:apex\.navigation\.dialog\('([^']+)'", decoded)
+    target = dialog.group(1) if dialog else decoded
+    try:
+        parsed = urllib.parse.urlsplit(urllib.parse.urljoin(CANONICAL_URL, target))
+        if (
+            parsed.scheme != "https" or parsed.netloc.lower() != EXPECTED_HOST
+            or parsed.path != EXPECTED_PATH.rsplit("/", 1)[0] + "/detaliu-apel"
+        ):
+            return None
+        params = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
+    except ValueError:
+        return None
+    codes = [v for k, v in params if k.lower() == "p201_cod_apel"]
+    return call_code_from_href(href) if len(codes) == 1 and codes[0] else None
+
+
+def parse_inventory(raw: str, *, replay_strict: bool = False) -> dict[str, Any]:
     if "Apeluri validate 2021-2027" not in raw:
         raise RuntimeError("expected MySMIS registry marker missing")
     parser = ReportTableParser()
@@ -165,7 +184,14 @@ def parse_inventory(raw: str) -> dict[str, Any]:
         if not programme or not call_title:
             continue
         info_cell = cells[header["info"]]
-        codes = [call_code_from_href(href) for href in info_cell.get("hrefs", [])]
+        hrefs = info_cell.get("hrefs", [])
+        extractor = replay_info_code if replay_strict else call_code_from_href
+        codes = [extractor(href) for href in hrefs]
+        if replay_strict and any(
+            not code and re.search(r"[?&]p201_cod_apel=", decode_js_unicode(href), re.I)
+            for href, code in zip(hrefs, codes)
+        ):
+            codes = []
         codes = [code for code in codes if code]
         code = codes[0] if len(set(codes)) == 1 else None
         if not code:
@@ -246,6 +272,7 @@ def replay_paginated_inventory(
     seen_hashes: set[str] = set()
     seen_identity_pages: set[tuple[str, ...]] = set()
     coverage = []
+    previous_fetched_at = None
     for receipt, raw in pages:
         # V1 accepts only full documents with the exact stable official URL.
         # Session-specific URLs / APEX fragments need a separately reviewed
@@ -261,7 +288,8 @@ def replay_paginated_inventory(
         }
         if any(receipt.get(k) != v for k, v in required.items()):
             raise ValueError("receipt provenance mismatch")
-        if receipt.get("httpStatus") != 200 or "html" not in str(receipt.get("contentType", "")).lower():
+        media_type = str(receipt.get("contentType", "")).split(";", 1)[0].strip().lower()
+        if receipt.get("httpStatus") != 200 or media_type not in ("text/html", "application/xhtml+xml"):
             raise ValueError("invalid page transport receipt")
         try:
             fetched_at = dt.datetime.fromisoformat(receipt["fetchedAt"].replace("Z", "+00:00"))
@@ -269,6 +297,9 @@ def replay_paginated_inventory(
                 raise ValueError("timestamp must be UTC")
         except (KeyError, AttributeError, TypeError, ValueError) as exc:
             raise ValueError("invalid fetchedAt") from exc
+        if previous_fetched_at is not None and fetched_at < previous_fetched_at:
+            raise ValueError("nonmonotonic sequential acquisition timestamps")
+        previous_fetched_at = fetched_at
         if not raw or len(raw) >= MAX_BYTES:
             raise ValueError("empty or potentially truncated page")
         digest = hashlib.sha256(raw).hexdigest()
@@ -289,7 +320,7 @@ def replay_paginated_inventory(
             total = reported_total
         if reported_total != total or start != next_row or not start <= end <= total:
             raise ValueError("noncontiguous page range or changing total")
-        parsed = parse_inventory(doc)
+        parsed = parse_inventory(doc, replay_strict=True)
         if (
             not parsed["exactIdentityCompleteForVisiblePage"]
             or parsed["validatedCallCount"] != total
