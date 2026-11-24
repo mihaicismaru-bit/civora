@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import pathlib
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "ingest"))
 
-from mysmis_call_inventory_scout import call_code_from_href, parse_inventory  # noqa: E402
+from mysmis_call_inventory_scout import (  # noqa: E402
+    CANONICAL_URL, PARSER_VERSION, call_code_from_href, parse_inventory,
+    replay_paginated_inventory,
+)
 
 
 def info_href(code: str) -> str:
@@ -74,6 +78,78 @@ def fixtures() -> list[dict[str, str]]:
     ]
 
 
+
+def replay_receipt(rows, start, total, **overrides):
+    raw = page(rows, total).replace(
+        f"1 - {len(rows)} of {total}",
+        f"{start} - {start + len(rows) - 1} of {total}",
+    ).encode("utf-8")
+    receipt = {
+        "url": CANONICAL_URL, "runId": "fixture-run",
+        "parserVersion": PARSER_VERSION,
+        "sourceFamily": "ROMANIA_MIPE_MYSMIS",
+        "authorityClass": "T1_OFFICIAL_MYSMIS_REPORTING",
+        "programmeFamily": "ROMANIA_MULTI_PROGRAMME",
+        "observationState": "ACQUIRED_CANDIDATE_ONLY",
+        "fetchedAt": "2026-11-24T06:00:00Z",
+        "httpStatus": 200, "contentType": "text/html",
+        "rawSha256": hashlib.sha256(raw).hexdigest(),
+        **overrides,
+    }
+    return receipt, raw
+
+
+def test_replay():
+    first, second = fixtures()
+    third = dict(second, href=info_href("PRT/103/PRT_P1/OP1"))
+    left = replay_receipt([first, second], 1, 4)
+    right = replay_receipt([second, third], 3, 4)
+    result = replay_paginated_inventory([left, right], "fixture-run")
+    assert result["validatedCallCount"] == 4
+    assert result["exactIdentityRowCount"] == 3
+    assert result["mirroredDuplicateRowCount"] == 1
+    assert result["pageCount"] == 2
+    assert not any(result[key] for key in (
+        "materialFactUse", "publishAuthorized", "openCallAuthorized",
+        "deadlineAuthorized", "budgetAuthorized", "eligibilityAuthorized",
+    ))
+    assert result == replay_paginated_inventory([left, right], "fixture-run")
+    # Operational-only drift on an unrelated row changes coverage, not semantics.
+    counters = replay_receipt([second, dict(third, contracts="999")], 3, 4)
+    after = replay_paginated_inventory([left, counters], "fixture-run")
+    assert after["materialSemanticSha256"] == result["materialSemanticSha256"]
+    assert after["coverageSha256"] != result["coverageSha256"]
+    changed = replay_receipt([second, dict(third, status="FINALIZAT")], 3, 4)
+    assert replay_paginated_inventory([left, changed], "fixture-run")["materialSemanticSha256"] != result["materialSemanticSha256"]
+    # Valid reordered rows preserve the order-independent semantic digest.
+    reordered = replay_receipt([third, second], 3, 4)
+    assert replay_paginated_inventory([left, reordered], "fixture-run")["materialSemanticSha256"] == result["materialSemanticSha256"]
+
+    bad_raw = right[1].removesuffix(b"</html>")
+    truncated = (dict(right[0], rawSha256=hashlib.sha256(bad_raw).hexdigest()), bad_raw)
+    invalid = [
+        [left], [right], [right, left], [left, left],
+        [left, replay_receipt([first, second], 3, 4)],
+        [left, replay_receipt([third], 4, 4)],
+        [left, replay_receipt([second, third], 3, 5)],
+        [left, replay_receipt([dict(second, budget="999"), third], 3, 4)],
+        [left, replay_receipt([second, dict(third, href="")], 3, 4)],
+        [left, (dict(right[0], rawSha256="0" * 64), right[1])],
+        [left, (dict(right[0], runId="other"), right[1])],
+        [left, (dict(right[0], url="https://example.com/"), right[1])],
+        [left, (dict(right[0], fetchedAt="2026-11-24"), right[1])],
+        [left, (dict(right[0], httpStatus=503), right[1])],
+        [left, truncated],
+    ]
+    for i, receipts in enumerate(invalid):
+        try:
+            replay_paginated_inventory(receipts, "fixture-run")
+        except (ValueError, RuntimeError):
+            pass
+        else:
+            raise AssertionError(f"invalid replay accepted: case {i}")
+
+
 def main() -> int:
     code = "PFM/169/PFM_P1/NA/P1_OS1/FM_1.1"
     assert call_code_from_href(info_href(code)) == code
@@ -114,6 +190,7 @@ def main() -> int:
     assert duplicate_result["exactIdentityCompleteForVisiblePage"] is False
     assert duplicate_result["duplicateCallCodes"] == ["PRT/101/PRT_P1/OP1"]
 
+    test_replay()
     print("PASS: MySMIS exact-call inventory identity, semantic hash, pagination and fail-closed regressions")
     return 0
 
