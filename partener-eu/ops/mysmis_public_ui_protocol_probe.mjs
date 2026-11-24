@@ -51,6 +51,15 @@ function selectNextControl(controls, first) {
     return {index:null,count:candidates.length};
   return {index:c.index,count:candidates.length};
 }
+// A transient hit is not enough: require the same native target twice.
+function stableTarget(a,b) {
+  if(!a?.unambiguous||!b?.unambiguous||!a.hittable||!b.hittable||
+     !a.target||!b.target||a.matchingNext!==b.matchingNext) return false;
+  const x=a.target,y=b.target;
+  return x.index===y.index&&x.report===y.report&&x.action===y.action&&
+    [x.x,x.y,y.x,y.y].every(Number.isFinite)&&
+    Math.abs(x.x-y.x)<=0.5&&Math.abs(x.y-y.y)<=0.5;
+}
 if (process.argv.includes('--self-test')) {
   assert.deepEqual(range('1 - 50 of 1,002'),{first:1,last:50,total:1002});
   assert.equal(range('1 - 50 of 1002 51 - 100 of 1002'),null);
@@ -74,7 +83,17 @@ if (process.argv.includes('--self-test')) {
   assert.deepEqual(selectNextControl([{...next,pagination:'unrecognized'}],first),{index:null,count:0});
   assert.deepEqual(selectNextControl([{...next,next:false}],first),{index:null,count:0});
   assert.deepEqual(selectNextControl([{...next,pagination:'pgR_min_row=51max_rows=100rows_fetched=50'}],first),{index:null,count:0});
-  console.log('PASS: public UI protocol diagnostic range, endpoint and native-control equivalence guards');
+  const hit = {unambiguous:true,hittable:true,matchingNext:2,target:{index:0,report:1,action:next.pagination,x:100,y:200}};
+  assert.equal(stableTarget(hit,{...hit,target:{...hit.target,x:100.25}}),true);
+  assert.equal(stableTarget(hit,{...hit,hittable:false}),false);
+  assert.equal(stableTarget(hit,{...hit,target:{...hit.target,index:1}}),false);
+  assert.equal(stableTarget(hit,{...hit,target:{...hit.target,report:2}}),false);
+  assert.equal(stableTarget(hit,{...hit,target:{...hit.target,action:'different'}}),false);
+  assert.equal(stableTarget(hit,{...hit,target:{...hit.target,y:201}}),false);
+  assert.equal(stableTarget(hit,{...hit,matchingNext:1}),false);
+  assert.equal(stableTarget(hit,{...hit,target:{...hit.target,x:NaN}}),false);
+  assert.equal(stableTarget(null,hit),false);
+  console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence and stable hit guards');
   process.exit(0);
 }
 let dir, chrome, ws;
@@ -172,6 +191,8 @@ try {
   // Resolve the accessible label from standard DOM mechanisms, including nested
   // SVG titles and aria-labelledby. A data-pagination attribute alone is not proof.
   const inspectTarget = scroll => evaluate(`(()=>{if(location.origin+location.pathname!==${JSON.stringify(URL0)})return null;
+    const current=(${range.toString()})([...document.querySelectorAll('.a-IRR-pagination')].map(e=>e.innerText).join(' '));
+    if(!current||JSON.stringify(current)!==${JSON.stringify(JSON.stringify(first))})return null;
     const a=[...document.querySelectorAll('.a-IRR-button--pagination:not([disabled]):not([aria-disabled=true])')].filter(e=>e.getClientRects().length>0);
     const label=e=>[e.getAttribute('aria-label'),e.getAttribute('title'),e.innerText,
       ...[...(e.getAttribute('aria-labelledby')||'').split(/\\s+/)].filter(Boolean).map(id=>document.getElementById(id)?.textContent),
@@ -185,18 +206,31 @@ try {
       rowSelects:[...document.querySelectorAll('select')].filter(e=>e.getClientRects().length>0&&/rows|rânduri/i.test([e.getAttribute('aria-label'),e.getAttribute('title'),...[...e.labels||[]].map(l=>l.textContent)].join(' '))).length,
       matchingNext:selection.count,unambiguous:selection.index!==null,hittable:false,target:null};
     if(selection.index===null)return result;
-    const x=a[selection.index];if(${scroll})x.scrollIntoView({block:'center',inline:'center',behavior:'instant'});
-    const b=x.getBoundingClientRect(),cx=b.left+b.width/2,cy=b.top+b.height/2,hit=document.elementFromPoint(cx,cy);
-    result.hittable=!!hit&&(hit===x||x.contains(hit));if(result.hittable)result.target={x:cx,y:cy};return result})()`);
+    if(${scroll})a[selection.index].scrollIntoView({block:'center',inline:'center',behavior:'instant'});
+    // All explicit mirrors already passed the same-report/action gate.
+    for(const d of descriptors.filter(d=>d.next)){
+      const x=a[d.index],b=x.getBoundingClientRect(),cx=b.left+b.width/2,cy=b.top+b.height/2,hit=document.elementFromPoint(cx,cy);
+      if(hit&&(hit===x||x.contains(hit))){result.hittable=true;result.target={index:d.index,report:d.report,action:d.pagination,x:cx,y:cy};break;}
+    }
+    return result})()`);
   const before=await inspectTarget(true);
-  await sleep(350);
-  const after=await inspectTarget(false);
-  if(!before||!after)throw new Error('target inspection unavailable');
+  if(!before?.unambiguous)throw new Error('target inspection unavailable or ambiguous');
+  let previous=null,after=before,confirmed=false;
+  const hitPoll={attempts:0,hittable:0,stablePairs:0,ambiguous:0};
+  for(let i=0;i<12;i++){
+    await sleep(150);
+    after=await inspectTarget(false);
+    hitPoll.attempts++;
+    if(!after?.unambiguous||after.matchingNext!==before.matchingNext){hitPoll.ambiguous++;break;}
+    if(after.hittable)hitPoll.hittable++;
+    if(stableTarget(previous,after)){hitPoll.stablePairs++;confirmed=true;break;}
+    previous=after;
+  }
   console.log(JSON.stringify({...base,status:'UI_CONTROL_SHAPE_ONLY',fetchedAt:new Date().toISOString(),
-    firstRange:first,controlCounts:{enabled:after.enabled,explicitNext:after.explicitNext,hasPaginationData:after.hasPaginationData,rowSelects:after.rowSelects,matchingNext:after.matchingNext,unambiguous:after.unambiguous},
-    beforeHittable:before.hittable,afterHittable:after.hittable,paginationProtocolConfirmed:false}));
-  const target=after.target;
-  if(!before.unambiguous||!after.unambiguous||before.matchingNext!==after.matchingNext||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))throw new Error('no unambiguous hittable next button');
+    firstRange:first,controlCounts:{enabled:before.enabled,explicitNext:before.explicitNext,hasPaginationData:before.hasPaginationData,rowSelects:before.rowSelects,matchingNext:before.matchingNext,unambiguous:before.unambiguous},
+    beforeHittable:before.hittable,afterHittable:!!after?.hittable,hitPoll,paginationProtocolConfirmed:false}));
+  const target=after?.target;
+  if(!confirmed||!target)throw new Error('no stable unambiguous hittable next button');
   status='NEXT_TARGET_CONFIRMED';
   capture=true;
   await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',x:target.x,y:target.y});
