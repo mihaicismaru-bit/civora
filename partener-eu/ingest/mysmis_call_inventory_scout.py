@@ -147,11 +147,19 @@ def replay_info_code(href: str) -> str | None:
             or parsed.path != EXPECTED_PATH.rsplit("/", 1)[0] + "/detaliu-apel"
         ):
             return None
-        params = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True)
-    except ValueError:
+        params = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True, errors="strict")
+    except (ValueError, UnicodeError):
         return None
     codes = [v for k, v in params if k.lower() == "p201_cod_apel"]
-    return call_code_from_href(href) if len(codes) == 1 and codes[0] else None
+    if len(codes) != 1 or not codes[0]:
+        return None
+    # Preserve the actual query identity after exactly one URL decoding.
+    # Reject residual escapes, whitespace, control characters and URL delimiters
+    # rather than normalizing distinct or malformed identities into one key.
+    code = codes[0]
+    if any(c.isspace() or not c.isprintable() or c in "%&?#\"'" for c in code):
+        return None
+    return code
 
 
 def parse_inventory(raw: str, *, replay_strict: bool = False) -> dict[str, Any]:
