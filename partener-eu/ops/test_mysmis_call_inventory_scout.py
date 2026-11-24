@@ -145,6 +145,14 @@ def test_replay():
         [left, (dict(right[0], contentType="text/nothtml"), right[1])],
         [left, (dict(right[0], fetchedAt="2025-01-01T00:00:00Z"), right[1])],
     ]
+    # Distinct malformed query values must never collapse to a valid identity.
+    detail = CANONICAL_URL.rsplit("/", 1)[0] + "/detaliu-apel?p201_cod_apel="
+    for malformed in (
+        "PRT%252F103%252FPRT_P1%252FOP1",
+        "PRT%2F103%2FPRT_P1%2FOP1%0A",
+        "PRT+103", "PRT%FF103", "PRT%26X", "PRT%23X",
+    ):
+        invalid.append([left, replay_receipt([second, dict(third, href=detail + malformed)], 3, 4)])
     for i, receipts in enumerate(invalid):
         try:
             replay_paginated_inventory(receipts, "fixture-run")
