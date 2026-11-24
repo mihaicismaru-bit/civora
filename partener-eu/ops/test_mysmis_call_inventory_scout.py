@@ -140,6 +140,10 @@ def test_replay():
         [left, (dict(right[0], fetchedAt="2026-11-24"), right[1])],
         [left, (dict(right[0], httpStatus=503), right[1])],
         [left, truncated],
+        [left, replay_receipt([second, dict(third, href="https://example.invalid/?p201_cod_apel=PRT/103/PRT_P1/OP1")], 3, 4)],
+        [left, replay_receipt([second, dict(third, href=info_href("PRT/103/PRT_P1/OP1").replace("\\u0026clear=Y", "\\u0026p201_cod_apel=OTHER"))], 3, 4)],
+        [left, (dict(right[0], contentType="text/nothtml"), right[1])],
+        [left, (dict(right[0], fetchedAt="2025-01-01T00:00:00Z"), right[1])],
     ]
     for i, receipts in enumerate(invalid):
         try:
