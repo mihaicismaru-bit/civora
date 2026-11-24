@@ -2,7 +2,8 @@
 // One public, anonymous UI pagination click. Diagnostic only: no session
 // material, request values, HTML or reconstructed DOM is logged or persisted.
 // This is NOT an immutable raw receipt or an acquisition adapter.
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -78,6 +79,75 @@ function stableFocus(a,b) {
   return x.index===y.index&&x.report===y.report&&x.action===y.action&&
     x.nativeButton===true&&y.nativeButton===true;
 }
+// In-memory response/DOM concordance only. Reuse the existing Python
+// table parser and strict Info-link resolver; never print rows, links or HTML.
+// A decoded AJAX fragment and a rendered DOM are not immutable raw receipts.
+const tableCheckPython = `
+import json, re, sys
+sys.path.insert(0, sys.argv[1])
+from mysmis_call_inventory_scout import ReportTableParser, HEADER_ALIASES, key_text, replay_info_code, decode_js_unicode
+payload = json.load(sys.stdin)
+required = ("programme", "callType", "callTitle", "status", "callBudgetRon", "info")
+def extract(raw):
+    parser = ReportTableParser()
+    parser.feed(raw)
+    header = None
+    rows = []
+    for row in parser.rows:
+        names = [HEADER_ALIASES.get(key_text(c["text"])) for c in row]
+        if all(name in names for name in required):
+            if header is not None or any(names.count(n) != 1 for n in required):
+                raise ValueError("ambiguous header")
+            header = names
+            continue
+        if header is None or not all(c["tag"] == "td" for c in row):
+            continue
+        if len(row) != len(header):
+            raise ValueError("row width mismatch")
+        if not row[header.index("programme")]["text"] or not row[header.index("callTitle")]["text"]:
+            raise ValueError("missing identity fields")
+        hrefs = row[header.index("info")]["hrefs"]
+        codes = [replay_info_code(h) for h in hrefs]
+        if any(not code and re.search(r"[?&]p201_cod_apel=", decode_js_unicode(h), re.I) for h,code in zip(hrefs,codes)):
+            raise ValueError("invalid identity link")
+        identities = {c for c in codes if c}
+        if len(identities) != 1:
+            raise ValueError("ambiguous identity")
+        rows.append((next(iter(identities)), tuple((n,c["text"]) for n,c in zip(header,row) if n and n != "info")))
+    if header is None or not rows:
+        raise ValueError("no report table")
+    return rows
+def summary(raw):
+    try:
+        rows = extract(raw)
+        return rows, {"tableParsed":True,"rowCount":len(rows),"uniqueIdentityCount":len({r[0] for r in rows})}
+    except (ValueError, RuntimeError, UnicodeError):
+        return None, {"tableParsed":False}
+body, dom = payload["body"], payload["dom"]
+a, sa = summary(body)
+b, sb = summary(dom)
+shape = "FULL_HTML_DOCUMENT" if re.search(r"<html(?:\s|>)",body,re.I) and re.search(r"</html>\s*$",body,re.I) else "HTML_FRAGMENT_OR_OTHER"
+expected = payload["expected"]
+match = a is not None and b is not None and len(a) == expected and len(b) == expected and a == b
+print(json.dumps({"responseShape":shape,"response":sa,"rendered":sb,"expectedRows":expected,"orderedExactRowsMatch":match}))
+`;
+function compareDecodedTable(body,dom,expected) {
+  if(typeof body!=='string'||typeof dom!=='string'||!Number.isSafeInteger(expected)||expected<1||
+      Buffer.byteLength(body)>=2000000||Buffer.byteLength(dom)>=2000000)
+    return {status:'TABLE_COMPARISON_UNAVAILABLE'};
+  const result=spawnSync('python',['-c',tableCheckPython,fileURLToPath(new URL('../ingest',import.meta.url))],
+    {input:JSON.stringify({body,dom,expected}),encoding:'utf8',timeout:5000,maxBuffer:16000});
+  if(result.status!==0)return {status:'TABLE_COMPARISON_UNAVAILABLE'};
+  try {
+    const parsed=JSON.parse(result.stdout);
+    return {status:parsed.orderedExactRowsMatch?'DECODED_TABLE_CONCORDANT':'DECODED_TABLE_UNVERIFIED',...parsed};
+  } catch { return {status:'TABLE_COMPARISON_UNAVAILABLE'}; }
+}
+function singleAjaxExchange(counters,requestCount,matchedCount) {
+  return requestCount===1&&matchedCount===1&&counters.sameOriginPosts===1&&
+    counters.officialAjaxPosts===1&&counters.officialAjax200===1&&
+    counters.officialAjaxFinished===1&&counters.redirects===0;
+}
 if (process.argv.includes('--self-test')) {
   assert.deepEqual(range('1 - 50 of 1,002'),{first:1,last:50,total:1002});
   assert.equal(range('1 - 50 of 1002 51 - 100 of 1002'),null);
@@ -131,7 +201,25 @@ if (process.argv.includes('--self-test')) {
   for(const delta of [{index:1},{report:2},{action:'other'},{nativeButton:false}])
     assert.equal(stableFocus(focus,{...focus,focusTarget:{...focus.focusTarget,...delta}}),false);
   assert.equal(stableFocus(null,focus),false);
-  console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit and native focus guards');
+  const counts={sameOriginPosts:1,officialAjaxPosts:1,officialAjax200:1,officialAjaxFinished:1,redirects:0};
+  assert.equal(singleAjaxExchange(counts,1,1),true);
+  for(const key of Object.keys(counts))assert.equal(singleAjaxExchange({...counts,[key]:counts[key]+1},1,1),false);
+  assert.equal(singleAjaxExchange(counts,2,1),false);
+  assert.equal(singleAjaxExchange(counts,1,0),false);
+  const href='/ords/repo_bo/r/mysmis-2021/detaliu-apel?p201_cod_apel=PRT%2F1';
+  const fixture='<table><tr>'+['Program operațional','Tip apel','Apel','Stare apel','Buget nerambursabil apel','Info'].map(x=>'<th>'+x+'</th>').join('')+'</tr><tr><td>P</td><td>T</td><td>A</td><td>S</td><td>1</td><td><a href="'+href+'">i</a></td></tr></table>';
+  const document='<html><body>'+fixture+'</body></html>';
+  const good=compareDecodedTable(fixture,document,1);
+  assert.equal(good.status,'DECODED_TABLE_CONCORDANT');
+  assert.equal(good.responseShape,'HTML_FRAGMENT_OR_OTHER');
+  assert.equal(compareDecodedTable(document,document,1).responseShape,'FULL_HTML_DOCUMENT');
+  assert.equal(compareDecodedTable(fixture,document,2).orderedExactRowsMatch,false);
+  assert.equal(compareDecodedTable(fixture,document.replace('<td>S</td>','<td>X</td>'),1).orderedExactRowsMatch,false);
+  assert.equal(compareDecodedTable(fixture.replace(href,'https://example.invalid/?p201_cod_apel=PRT%2F1'),document,1).orderedExactRowsMatch,false);
+  assert.equal(compareDecodedTable(fixture+fixture,document,1).orderedExactRowsMatch,false);
+  assert.equal(compareDecodedTable('',document,1).orderedExactRowsMatch,false);
+  assert.equal(compareDecodedTable(fixture,document,0).status,'TABLE_COMPARISON_UNAVAILABLE');
+  console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit, native focus and decoded table concordance guards');
   process.exit(0);
 }
 let dir, chrome, ws;
@@ -144,7 +232,7 @@ const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
   publicationEffect:'NONE'};
 let status='NOT_STARTED';
 const browserStartup={polls:0,spawnError:false,exited:false,portReady:false};
-const counters={sameOriginPosts:0,officialAjaxPosts:0,officialAjax200:0,officialAjaxFinished:0};
+const counters={sameOriginPosts:0,officialAjaxPosts:0,officialAjax200:0,officialAjaxFinished:0,redirects:0};
 try {
   dir=await mkdtemp(join(tmpdir(),'mysmis-public-ui-'));
   status='PROFILE_CREATED';
@@ -187,6 +275,7 @@ try {
       if(m.id){const p=pending.get(m.id);if(p){pending.delete(m.id);m.error?p.reject(new Error('CDP error')):p.resolve(m.result);}return;}
       if(!capture)return;
       const p=m.params||{};
+      if(m.method==='Network.requestWillBeSent' && p.redirectResponse && (requests.has(p.requestId)||officialAjax(p.request?.url)))counters.redirects++;
       if(m.method==='Network.requestWillBeSent' && p.request?.method==='POST') {
         try {if(new URL(p.request.url).origin===origin)counters.sameOriginPosts++;}catch{}
         if(officialAjax(p.request.url)){requests.set(p.requestId,true);counters.officialAjaxPosts++;}
@@ -319,17 +408,25 @@ try {
   status='NEXT_RANGE_CONFIRMED';
   await sleep(500);
   const ids=[...responses.keys()].filter(k=>finished.has(k));
-  if(ids.length!==1 || requests.size!==1)throw new Error('ambiguous official ajax request');
+  if(!singleAjaxExchange(counters,requests.size,ids.length))throw new Error('ambiguous official ajax exchange');
   const response=await cdp('Network.getResponseBody',{requestId:ids[0]});
   const bytes=response.base64Encoded?Buffer.from(response.body,'base64'):Buffer.from(response.body,'utf8');
   if(!bytes.length||bytes.length>=2000000)throw new Error('response size outside diagnostic bound');
   const mime=responses.get(ids[0]).mimeType.toLowerCase();
   if(!['text/html','application/json','text/plain'].includes(mime))throw new Error('unrecognized response media');
+  // The rendered document is observed independently from the decoded response,
+  // still in this same session. Never persist or log either HTML representation.
+  const rendered=await evaluate("({url:location.origin+location.pathname,text:[...document.querySelectorAll('.a-IRR-pagination')].map(e=>e.innerText).join(' '),html:document.documentElement.outerHTML})");
+  const observedRange=range(rendered?.text);
+  const concordance=rendered?.url===URL0&&JSON.stringify(observedRange)===JSON.stringify(second)&&mime==='text/html'
+    ? compareDecodedTable(bytes.toString('utf8'),rendered.html,second.last-second.first+1)
+    : {status:'TABLE_COMPARISON_UNAVAILABLE'};
+  if(!singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))throw new Error('ambiguous late official ajax exchange');
   console.log(JSON.stringify({...base,status:'UI_NEXT_RANGE_AND_OFFICIAL_AJAX_OBSERVED',counters,
     fetchedAt:new Date().toISOString(),firstRange:first,secondRange:second,
     activation,endpointClass:'SAME_ORIGIN_WWV_FLOW_AJAX',method:'POST',httpStatus:200,
     contentType:mime,cdpDecodedBodySha256:sha(bytes),decodedBodyBytes:bytes.length,
-    rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
+    decodedTableConcordance:concordance,rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
 } catch(e) {
   // No exception messages or arbitrary server values: could contain session data.
   console.log(JSON.stringify({...base,status:'UI_PROTOCOL_DIAGNOSTIC_FAIL_CLOSED',stage:status,counters,browserStartup,
