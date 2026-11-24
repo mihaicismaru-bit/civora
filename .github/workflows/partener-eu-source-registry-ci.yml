@@ -100,6 +100,180 @@ jobs:
       - name: Validate MySMIS exact-call inventory and immutable pagination replay
         run: python partener-eu/ops/test_mysmis_call_inventory_scout.py
 
+      - name: Inspect official MySMIS pagination protocol shape (diagnostic only)
+        continue-on-error: true
+        run: |
+          python - <<'PY'
+          import hashlib, json, re, sys
+          sys.path.insert(0, 'partener-eu/ingest')
+          import mysmis_call_inventory_scout as scout
+          try:
+              _, body, content_type = scout.fetch_html(timeout=25)
+              if not body or len(body) >= scout.MAX_BYTES:
+                  raise ValueError('empty or potentially truncated response')
+              raw = body.decode('utf-8', errors='strict')
+              if not re.search(r'</html>\s*
+        run: python partener-eu/ops/test_source_registry_low_info.py
+
+      - name: Validate official alias transport fallback
+        run: python partener-eu/ops/test_source_registry_alias_fallback.py
+
+      - name: Validate current official OI Research hosts
+        run: python partener-eu/ops/test_source_registry_current_hosts.py
+
+      - name: Validate EU/EEA/Interreg source and programming taxonomy
+        run: python partener-eu/ops/test_source_registry_external_expansion.py
+
+      - name: Validate ROHU current versus future programming lifecycle split
+        run: python partener-eu/ops/test_interreg_rohu_pipeline_split.py
+
+      - name: Validate Funding & Tenders structured normalization
+        run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
+
+      - name: Validate Funding & Tenders live Search/Facet boundary
+        run: python partener-eu/ops/test_funding_tenders_live_fetch.py
+
+      - name: Validate EEA Civil Society Fund Romania call normalization
+        run: python partener-eu/ops/test_eea_civil_society_calls.py
+
+      - name: Validate EEA Civil Society Fund exact-page acquisition
+        run: python partener-eu/ops/test_eea_civil_society_fetch.py
+
+      - name: Validate EEA Civil Society Fund semantic reconciliation
+        run: python partener-eu/ops/test_eea_civil_society_reconcile.py
+
+      - name: Validate EEA Civil Society Fund canonical staging admission
+        working-directory: partener-eu/p11
+        run: python test_eea_civil_society_stage.py
+
+      - name: Validate RegioCentru action-index acquisition contract
+        run: python partener-eu/ops/test_regiocentru_actions_fetch.py
+
+      - name: Capture live RegioCentru action-index evidence without changing facts
+        id: regiocentru_live
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/regiocentru_actions_fetch.py \
+            --output-dir /tmp/regiocentru-actions \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Validate live RegioCentru receipt stays discovery-only
+        if: steps.regiocentru_live.outcome == 'success'
+        run: |
+          python - <<'PY'
+          import json, string, sys
+          from urllib.parse import urlparse
+          p='/tmp/regiocentru-actions/handoff/regiocentru_actions_fetch.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('source_id') != 'SRC-ADR-CENTRU-PR-ACTIONS' or d.get('adapter_id') != 'REGIOCENTRU_ACTIONS_V1':
+              print('FAIL RegioCentru identity drift:', d.get('source_id'), d.get('adapter_id'))
+              sys.exit(2)
+          if d.get('observation_state') != 'CALL_INDEX_DISCOVERY':
+              print('FAIL RegioCentru action index escaped discovery-only state')
+              sys.exit(2)
+          for key in ('material_fact_use','open_call_authorized','publish_authorized','deadline_authorized','budget_authorized','eligibility_authorized'):
+              if d.get(key) is not False:
+                  print('FAIL RegioCentru receipt became authorizing:', key, d.get(key))
+                  sys.exit(2)
+          if d.get('action_candidate_count', 0) < 1 or len(d.get('action_candidates') or []) != d.get('action_candidate_count'):
+              print('FAIL no bounded RegioCentru action candidates were acquired')
+              sys.exit(2)
+          raw_hash=str(d.get('raw_sha256') or '')
+          if len(raw_hash) != 64 or any(ch not in string.hexdigits for ch in raw_hash):
+              print('FAIL invalid RegioCentru raw SHA-256')
+              sys.exit(2)
+          if not d.get('fetched_at') or not d.get('run_id'):
+              print('FAIL RegioCentru provenance incomplete')
+              sys.exit(2)
+          for key in ('requested_url','final_url'):
+              u=urlparse(str(d.get(key) or ''))
+              if u.scheme != 'https' or (u.hostname or '').lower() not in {'regiocentru.ro','www.regiocentru.ro'} or not (u.path or '/').startswith('/actiuni/'):
+                  print('FAIL RegioCentru authority/path drift:', key, d.get(key))
+                  sys.exit(2)
+          missing=set(d.get('missing_for_open_confirmation') or [])
+          required={'exact_call_or_mysmis_identifier','current_official_exact_action_endpoint','explicit_current_open_status','semantic_reconciliation'}
+          if not required.issubset(missing):
+              print('FAIL RegioCentru exact-call proof requirements incomplete:', sorted(missing))
+              sys.exit(2)
+          print(json.dumps({'candidate_count': d.get('action_candidate_count'), 'raw_sha256': raw_hash, 'observation_state': d.get('observation_state'), 'publish_authorized': d.get('publish_authorized')}, ensure_ascii=False))
+          PY
+
+      - name: Confirm RegioCentru transport failure stays fail-closed
+        if: steps.regiocentru_live.outcome == 'failure'
+        run: |
+          python - <<'PY'
+          import json, sys
+          p='partener-eu/ingest/regiocentru_actions_source.json'
+          d=json.load(open(p, encoding='utf-8'))
+          s=d.get('source') or {}
+          if s.get('id') != 'SRC-ADR-CENTRU-PR-ACTIONS':
+              print('FAIL RegioCentru source identity drift')
+              sys.exit(2)
+          if s.get('material_fact_use') is not False or s.get('authority_scope') != 'CALL_INDEX_DISCOVERY' or s.get('observation_state') != 'CALL_INDEX_DISCOVERY':
+              print('FAIL RegioCentru transport failure is not bounded to discovery-only:', s)
+              sys.exit(2)
+          print(json.dumps({
+              'status': 'DEGRADED_FAIL_CLOSED',
+              'source_id': s.get('id'),
+              'material_fact_use': s.get('material_fact_use'),
+              'authority_scope': s.get('authority_scope'),
+              'publication_effect': 'NONE'
+          }, ensure_ascii=False))
+          PY
+
+      - name: Upload bounded RegioCentru acquisition evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-regiocentru-actions-live-evidence
+          path: /tmp/regiocentru-actions
+          retention-days: 7
+          if-no-files-found: warn
+, raw, re.I):
+                  raise ValueError('incomplete document')
+              inventory = scout.parse_inventory(raw, replay_strict=True)
+              # Fixed allowlist of marker names only. Never log HTML, hrefs,
+              # inline JS, cookies, session IDs, checksums or request values.
+              markers = (
+                  'apex.widget.report.paginate', 'apex.widget.report',
+                  'apex.widget.interactiveReport', 'apex.widget.interactiveGrid',
+                  'apex.server.plugin', 'apex.region', 'a-IRR-pagination',
+                  'a-IRR-button--pagination', 'a-Report-pagination',
+                  'data-pagination', 'data-page', 'data-action',
+                  'p_request', 'p_flow_id', 'p_flow_step_id', 'p_instance',
+              )
+              print(json.dumps({
+                  'schema': 'MYSMIS_PROTOCOL_SHAPE_DIAGNOSTIC_V1',
+                  'canonicalUrl': scout.CANONICAL_URL,
+                  'fetchedAt': scout.now(),
+                  'runId': scout.run_id(),
+                  'parserVersion': scout.PARSER_VERSION,
+                  'sourceFamily': 'ROMANIA_MIPE_MYSMIS',
+                  'programmeFamily': 'ROMANIA_MULTI_PROGRAMME',
+                  'authorityClass': 'T1_OFFICIAL_MYSMIS_REPORTING',
+                  'observationState': 'PROTOCOL_DISCOVERY_ONLY',
+                  'rawSha256': hashlib.sha256(body).hexdigest(),
+                  'contentType': content_type,
+                  'bytes': len(body),
+                  'visibleRowCount': inventory['visibleRowCount'],
+                  'validatedCallCount': inventory['validatedCallCount'],
+                  'strictIdentityComplete': inventory['exactIdentityCompleteForVisiblePage'],
+                  'markerPresence': {m: m.lower() in raw.lower() for m in markers},
+                  'rawPersisted': False,
+                  'paginationProtocolConfirmed': False,
+                  'materialFactUse': False,
+                  'publishAuthorized': False,
+                  'openCallAuthorized': False,
+                  'publicationEffect': 'NONE',
+              }, sort_keys=True))
+          except Exception as exc:
+              # Do not print exception messages: URLs may contain session data.
+              print(json.dumps({'status': 'PROTOCOL_DISCOVERY_FAILED_CLOSED',
+                                'errorType': type(exc).__name__,
+                                'publishAuthorized': False, 'openCallAuthorized': False}))
+              sys.exit(2)
+          PY
+
       - name: Validate low-information fail-closed behavior
         run: python partener-eu/ops/test_source_registry_low_info.py
 
