@@ -6,6 +6,7 @@ on:
       - 'partener-eu/ingest/source_registry.json'
       - 'partener-eu/ingest/mysmis_call_inventory_scout.py'
       - 'partener-eu/ops/test_mysmis_call_inventory_scout.py'
+      - 'partener-eu/ops/mysmis_public_ui_protocol_probe.mjs'
       - 'partener-eu/ingest/source_registry_probe.py'
       - 'partener-eu/ingest/data_plane_contract.json'
       - 'partener-eu/ingest/funding_tenders_api.py'
@@ -156,6 +157,18 @@ jobs:
                                 'publishAuthorized': False, 'openCallAuthorized': False}))
               sys.exit(2)
           PY
+
+      - name: Validate MySMIS UI diagnostic range and endpoint guards
+        run: |
+          node --check partener-eu/ops/mysmis_public_ui_protocol_probe.mjs
+          node partener-eu/ops/mysmis_public_ui_protocol_probe.mjs --self-test
+
+      - name: Observe one public MySMIS next-page UI request (draft diagnostic only)
+        if: github.event_name == 'pull_request' && github.head_ref == 'partener/mysmis-paginated-replay-1429'
+        continue-on-error: true
+        timeout-minutes: 2
+        run: |
+          timeout --kill-after=5s 70s node partener-eu/ops/mysmis_public_ui_protocol_probe.mjs
 
       - name: Validate low-information fail-closed behavior
         run: python partener-eu/ops/test_source_registry_low_info.py
