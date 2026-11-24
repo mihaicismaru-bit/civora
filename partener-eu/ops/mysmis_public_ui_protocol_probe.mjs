@@ -60,6 +60,14 @@ function stableTarget(a,b) {
     [x.x,x.y,y.x,y.y].every(Number.isFinite)&&
     Math.abs(x.x-y.x)<=0.5&&Math.abs(x.y-y.y)<=0.5;
 }
+// Keyboard activation is a native browser fallback, never a synthetic DOM click.
+function stableFocus(a,b) {
+  if(!a?.unambiguous||!b?.unambiguous||!a.focused||!b.focused||
+     !a.focusTarget||!b.focusTarget||a.matchingNext!==b.matchingNext)return false;
+  const x=a.focusTarget,y=b.focusTarget;
+  return x.index===y.index&&x.report===y.report&&x.action===y.action&&
+    x.nativeButton===true&&y.nativeButton===true;
+}
 if (process.argv.includes('--self-test')) {
   assert.deepEqual(range('1 - 50 of 1,002'),{first:1,last:50,total:1002});
   assert.equal(range('1 - 50 of 1002 51 - 100 of 1002'),null);
@@ -93,7 +101,15 @@ if (process.argv.includes('--self-test')) {
   assert.equal(stableTarget(hit,{...hit,matchingNext:1}),false);
   assert.equal(stableTarget(hit,{...hit,target:{...hit.target,x:NaN}}),false);
   assert.equal(stableTarget(null,hit),false);
-  console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence and stable hit guards');
+  const focus={unambiguous:true,focused:true,matchingNext:2,focusTarget:{index:0,report:1,action:next.pagination,nativeButton:true}};
+  assert.equal(stableFocus(focus,{...focus}),true);
+  assert.equal(stableFocus(focus,{...focus,focused:false}),false);
+  assert.equal(stableFocus(focus,{...focus,unambiguous:false}),false);
+  assert.equal(stableFocus(focus,{...focus,matchingNext:1}),false);
+  for(const delta of [{index:1},{report:2},{action:'other'},{nativeButton:false}])
+    assert.equal(stableFocus(focus,{...focus,focusTarget:{...focus.focusTarget,...delta}}),false);
+  assert.equal(stableFocus(null,focus),false);
+  console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit and native focus guards');
   process.exit(0);
 }
 let dir, chrome, ws;
@@ -190,7 +206,7 @@ try {
   // Report only bounded structural counts, never attributes, labels or session data.
   // Resolve the accessible label from standard DOM mechanisms, including nested
   // SVG titles and aria-labelledby. A data-pagination attribute alone is not proof.
-  const inspectTarget = scroll => evaluate(`(()=>{if(location.origin+location.pathname!==${JSON.stringify(URL0)})return null;
+  const inspectTarget = (scroll, focus=false) => evaluate(`(()=>{if(location.origin+location.pathname!==${JSON.stringify(URL0)})return null;
     const current=(${range.toString()})([...document.querySelectorAll('.a-IRR-pagination')].map(e=>e.innerText).join(' '));
     if(!current||JSON.stringify(current)!==${JSON.stringify(JSON.stringify(first))})return null;
     const a=[...document.querySelectorAll('.a-IRR-button--pagination:not([disabled]):not([aria-disabled=true])')].filter(e=>e.getClientRects().length>0);
@@ -204,9 +220,18 @@ try {
     const selection=(${selectNextControl.toString()})(descriptors,${JSON.stringify(first)});
     const result={enabled:a.length,explicitNext:next.length,hasPaginationData:a.filter(e=>e.hasAttribute('data-pagination')).length,
       rowSelects:[...document.querySelectorAll('select')].filter(e=>e.getClientRects().length>0&&/rows|rânduri/i.test([e.getAttribute('aria-label'),e.getAttribute('title'),...[...e.labels||[]].map(l=>l.textContent)].join(' '))).length,
-      matchingNext:selection.count,unambiguous:selection.index!==null,hittable:false,target:null};
+      matchingNext:selection.count,unambiguous:selection.index!==null,hittable:false,target:null,focused:false,focusTarget:null};
     if(selection.index===null)return result;
     if(${scroll})a[selection.index].scrollIntoView({block:'center',inline:'center',behavior:'instant'});
+    // Only an actual non-submit button can receive native Enter activation.
+    const native=e=>e instanceof HTMLButtonElement&&e.type==='button'&&!e.disabled&&
+      e.getAttribute('aria-disabled')!=='true'&&!e.closest('[inert]');
+    if(${focus}){
+      const e=a[selection.index];
+      if(native(e))e.focus({preventScroll:true});
+    }
+    const focused=descriptors.find(d=>d.next&&a[d.index]===document.activeElement&&native(a[d.index]));
+    if(focused){result.focused=true;result.focusTarget={index:focused.index,report:focused.report,action:focused.pagination,nativeButton:true};}
     // All explicit mirrors already passed the same-report/action gate.
     for(const d of descriptors.filter(d=>d.next)){
       const x=a[d.index],b=x.getBoundingClientRect(),cx=b.left+b.width/2,cy=b.top+b.height/2,hit=document.elementFromPoint(cx,cy);
@@ -230,12 +255,32 @@ try {
     firstRange:first,controlCounts:{enabled:before.enabled,explicitNext:before.explicitNext,hasPaginationData:before.hasPaginationData,rowSelects:before.rowSelects,matchingNext:before.matchingNext,unambiguous:before.unambiguous},
     beforeHittable:before.hittable,afterHittable:!!after?.hittable,hitPoll,paginationProtocolConfirmed:false}));
   const target=after?.target;
-  if(!confirmed||!target)throw new Error('no stable unambiguous hittable next button');
-  status='NEXT_TARGET_CONFIRMED';
-  capture=true;
-  await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',x:target.x,y:target.y});
-  await cdp('Input.dispatchMouseEvent',{type:'mousePressed',x:target.x,y:target.y,button:'left',buttons:1,clickCount:1});
-  await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',x:target.x,y:target.y,button:'left',buttons:0,clickCount:1});
+  let activation='NATIVE_MOUSE';
+  if(!confirmed||!target){
+    // No fallback after ambiguity. A single native Enter is permitted only
+    // when the same exact report/action remains focused over passive samples.
+    if(hitPoll.ambiguous||!after?.unambiguous)throw new Error('ambiguous next button');
+    const f0=await inspectTarget(false,true);
+    await sleep(150);
+    const f1=await inspectTarget(false);
+    await sleep(150);
+    const f2=await inspectTarget(false);
+    const focusConfirmed=f0?.matchingNext===before.matchingNext&&stableFocus(f0,f1)&&stableFocus(f1,f2);
+    console.log(JSON.stringify({...base,status:'UI_NATIVE_FOCUS_ONLY',fetchedAt:new Date().toISOString(),
+      focusedSamples:[f0,f1,f2].filter(f=>f?.focused).length,focusConfirmed,paginationProtocolConfirmed:false}));
+    if(!focusConfirmed)throw new Error('no stable native focused next button');
+    activation='NATIVE_KEYBOARD_ENTER';
+    status='NEXT_TARGET_CONFIRMED';
+    capture=true;
+    await cdp('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,nativeVirtualKeyCode:13,text:'\r'});
+    await cdp('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,nativeVirtualKeyCode:13});
+  }else{
+    status='NEXT_TARGET_CONFIRMED';
+    capture=true;
+    await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',x:target.x,y:target.y});
+    await cdp('Input.dispatchMouseEvent',{type:'mousePressed',x:target.x,y:target.y,button:'left',buttons:1,clickCount:1});
+    await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',x:target.x,y:target.y,button:'left',buttons:0,clickCount:1});
+  }
   status='NEXT_CLICKED';
   let second;
   for(let i=0;i<80;i++){const s=await snapshot();const b=range(s?.text);if(s?.url===URL0&&nextRange(first,b)){second=b;break;}await sleep(250);}
@@ -251,7 +296,7 @@ try {
   if(!['text/html','application/json','text/plain'].includes(mime))throw new Error('unrecognized response media');
   console.log(JSON.stringify({...base,status:'UI_NEXT_RANGE_AND_OFFICIAL_AJAX_OBSERVED',counters,
     fetchedAt:new Date().toISOString(),firstRange:first,secondRange:second,
-    endpointClass:'SAME_ORIGIN_WWV_FLOW_AJAX',method:'POST',httpStatus:200,
+    activation,endpointClass:'SAME_ORIGIN_WWV_FLOW_AJAX',method:'POST',httpStatus:200,
     contentType:mime,cdpDecodedBodySha256:sha(bytes),decodedBodyBytes:bytes.length,
     rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
 } catch(e) {
