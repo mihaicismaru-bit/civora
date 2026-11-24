@@ -29,6 +29,25 @@ function officialAjax(url) {
     return u.origin === origin && /^\/ords\/(?:[^/]+\/)*wwv_flow\.ajax$/i.test(u.pathname);
   } catch { return false; }
 }
+// Interpret only the native control's observed pagination metadata, never build
+// a request from it. Mirrored controls are equivalent only within one report
+// and with the identical complete action value.
+function selectNextControl(controls, first) {
+  const candidates = controls.filter(c => {
+    if (!c.next || !c.report || !c.pagination) return false;
+    const m = /^pgR_min_row=(\d+)max_rows=(\d+)rows_fetched=(\d+)$/.exec(c.pagination);
+    if (!m) return false;
+    const [start,max,fetched] = m.slice(1).map(Number);
+    return [start,max,fetched].every(Number.isSafeInteger) &&
+      start === first.last+1 && max === first.last-first.first+1 &&
+      fetched > 0 && fetched <= max;
+  });
+  if (!candidates.length) return {index:null,count:0};
+  const c = candidates[0];
+  if (!candidates.every(x=>x.report===c.report && x.pagination===c.pagination))
+    return {index:null,count:candidates.length};
+  return {index:c.index,count:candidates.length};
+}
 if (process.argv.includes('--self-test')) {
   assert.deepEqual(range('1 - 50 of 1,002'),{first:1,last:50,total:1002});
   assert.equal(range('1 - 50 of 1002 51 - 100 of 1002'),null);
@@ -38,7 +57,18 @@ if (process.argv.includes('--self-test')) {
   assert.equal(nextRange(range('1 - 50 of 1002'),range('1 - 50 of 1002')),false);
   assert.equal(officialAjax(origin+'/ords/wwv_flow.ajax?session=secret'),true);
   assert.equal(officialAjax('https://example.org/ords/wwv_flow.ajax'),false);
-  console.log('PASS: public UI protocol diagnostic range and endpoint guards');
+  const first = {first:1,last:50,total:1002};
+  const next = {index:0,next:true,report:1,pagination:'pgR_min_row=51max_rows=50rows_fetched=50'};
+  const mirror = {...next,index:1};
+  assert.deepEqual(selectNextControl([next,mirror],first),{index:0,count:2});
+  assert.deepEqual(selectNextControl([next,{...mirror,report:2}],first),{index:null,count:2});
+  assert.deepEqual(selectNextControl([next,{...mirror,pagination:'pgR_min_row=51max_rows=50rows_fetched=49'}],first),{index:null,count:2});
+  assert.deepEqual(selectNextControl([{...next,pagination:'pgR_min_row=101max_rows=50rows_fetched=50'},mirror],first),{index:1,count:1});
+  assert.deepEqual(selectNextControl([{...next,report:0}],first),{index:null,count:0});
+  assert.deepEqual(selectNextControl([{...next,pagination:'unrecognized'}],first),{index:null,count:0});
+  assert.deepEqual(selectNextControl([{...next,next:false}],first),{index:null,count:0});
+  assert.deepEqual(selectNextControl([{...next,pagination:'pgR_min_row=51max_rows=100rows_fetched=50'}],first),{index:null,count:0});
+  console.log('PASS: public UI protocol diagnostic range, endpoint and native-control equivalence guards');
   process.exit(0);
 }
 let dir, chrome, ws;
@@ -120,11 +150,15 @@ try {
       ...[...(e.getAttribute('aria-labelledby')||'').split(/\\s+/)].filter(Boolean).map(id=>document.getElementById(id)?.textContent),
       ...[...e.querySelectorAll('[title], [aria-label], svg title')].map(x=>[x.getAttribute('title'),x.getAttribute('aria-label'),x.textContent].join(' '))].filter(Boolean).join(' ');
     const next=a.filter(e=>/\\bnext\\b|următoar/i.test(label(e)));
+    const reports=[...document.querySelectorAll('.a-IRR')];
+    const descriptors=a.map((e,index)=>({index,next:next.includes(e),
+      report:reports.indexOf(e.closest('.a-IRR'))+1,pagination:e.getAttribute('data-pagination')}));
+    const selection=(${selectNextControl.toString()})(descriptors,${JSON.stringify(first)});
     const result={enabled:a.length,explicitNext:next.length,hasPaginationData:a.filter(e=>e.hasAttribute('data-pagination')).length,
       rowSelects:[...document.querySelectorAll('select')].filter(e=>e.getClientRects().length>0&&/rows|rânduri/i.test([e.getAttribute('aria-label'),e.getAttribute('title'),...[...e.labels||[]].map(l=>l.textContent)].join(' '))).length,
-      hittable:false,target:null};
-    if(next.length!==1)return result;
-    const x=next[0];if(${scroll})x.scrollIntoView({block:'center',inline:'center',behavior:'instant'});
+      matchingNext:selection.count,unambiguous:selection.index!==null,hittable:false,target:null};
+    if(selection.index===null)return result;
+    const x=a[selection.index];if(${scroll})x.scrollIntoView({block:'center',inline:'center',behavior:'instant'});
     const b=x.getBoundingClientRect(),cx=b.left+b.width/2,cy=b.top+b.height/2,hit=document.elementFromPoint(cx,cy);
     result.hittable=!!hit&&(hit===x||x.contains(hit));if(result.hittable)result.target={x:cx,y:cy};return result})()`);
   const before=await inspectTarget(true);
@@ -132,10 +166,10 @@ try {
   const after=await inspectTarget(false);
   if(!before||!after)throw new Error('target inspection unavailable');
   console.log(JSON.stringify({...base,status:'UI_CONTROL_SHAPE_ONLY',fetchedAt:new Date().toISOString(),
-    firstRange:first,controlCounts:{enabled:after.enabled,explicitNext:after.explicitNext,hasPaginationData:after.hasPaginationData,rowSelects:after.rowSelects},
+    firstRange:first,controlCounts:{enabled:after.enabled,explicitNext:after.explicitNext,hasPaginationData:after.hasPaginationData,rowSelects:after.rowSelects,matchingNext:after.matchingNext,unambiguous:after.unambiguous},
     beforeHittable:before.hittable,afterHittable:after.hittable,paginationProtocolConfirmed:false}));
   const target=after.target;
-  if(before.explicitNext!==1||after.explicitNext!==1||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))throw new Error('no unambiguous hittable next button');
+  if(!before.unambiguous||!after.unambiguous||before.matchingNext!==after.matchingNext||!target||!Number.isFinite(target.x)||!Number.isFinite(target.y))throw new Error('no unambiguous hittable next button');
   status='NEXT_TARGET_CONFIRMED';
   capture=true;
   await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',x:target.x,y:target.y});
