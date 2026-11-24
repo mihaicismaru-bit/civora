@@ -85,7 +85,7 @@ function stableFocus(a,b) {
 const tableCheckPython = String.raw`
 import json, re, sys
 sys.path.insert(0, sys.argv[1])
-from mysmis_call_inventory_scout import ReportTableParser, HEADER_ALIASES, key_text, replay_info_code, decode_js_unicode
+from mysmis_call_inventory_scout import ReportTableParser, HEADER_ALIASES, MATERIAL_FIELDS, OPERATIONAL_FIELDS, key_text, replay_info_code, decode_js_unicode, clean
 payload = json.load(sys.stdin)
 required = ("programme", "callType", "callTitle", "status", "callBudgetRon", "info")
 def extract(raw):
@@ -126,20 +126,52 @@ def summary(raw):
         allowed = {"AMBIGUOUS_HEADER","ROW_WIDTH_MISMATCH","MISSING_IDENTITY_FIELDS","INVALID_IDENTITY_LINK","AMBIGUOUS_IDENTITY","NO_REPORT_TABLE"}
         reason = str(exc) if str(exc) in allowed else "PARSER_ERROR"
         return None, {"tableParsed":False,"reason":reason}
+def duplicates(rows):
+    # Same full normalized material + operational row as the replay contract.
+    # Return only counts: no identities, text, links or session material.
+    seen = {}
+    mirrored = conflicts = 0
+    for code, pairs in rows:
+        fields = dict(pairs)
+        fingerprint = tuple(clean(fields.get(n, "")) for n in (*MATERIAL_FIELDS[1:], *OPERATIONAL_FIELDS))
+        if code in seen:
+            if seen[code] == fingerprint:
+                mirrored += 1
+            else:
+                conflicts += 1
+        else:
+            seen[code] = fingerprint
+    return {"rowCount":len(rows),"uniqueIdentityCount":len(seen),"mirroredDuplicateRowCount":mirrored,
+            "conflictingDuplicateRowCount":conflicts,"exactIdentityComplete":conflicts == 0}
 body, dom = payload["body"], payload["dom"]
 a, sa = summary(body)
 b, sb = summary(dom)
 shape = "FULL_HTML_DOCUMENT" if re.search(r"<html(?:\s|>)",body,re.I) and re.search(r"</html>\s*$",body,re.I) else "HTML_FRAGMENT_OR_OTHER"
 expected = payload["expected"]
 match = a is not None and b is not None and len(a) == expected and len(b) == expected and a == b
-print(json.dumps({"responseShape":shape,"response":sa,"rendered":sb,"expectedRows":expected,"orderedExactRowsMatch":match}))
+out = {"responseShape":shape,"response":sa,"rendered":sb,"expectedRows":expected,"orderedExactRowsMatch":match}
+if match:
+    out["secondPageDuplicateDiagnostic"] = duplicates(a)
+    first_raw = payload.get("firstDom")
+    if first_raw is not None:
+        first_rows, first_summary = summary(first_raw)
+        first_ok = first_rows is not None and len(first_rows) == payload["firstExpected"]
+        out["firstPageDiagnostic"] = {**first_summary,"expectedRows":payload["firstExpected"],"exactRowCountMatch":first_ok}
+        if first_ok:
+            combined = duplicates(first_rows + a)
+            combined["firstPageDuplicateDiagnostic"] = duplicates(first_rows)
+            combined["crossPageIdentityOverlapCount"] = len({r[0] for r in first_rows} & {r[0] for r in a})
+            out["twoPageDuplicateDiagnostic"] = combined
+print(json.dumps(out))
 `;
-function compareDecodedTable(body,dom,expected) {
+function compareDecodedTable(body,dom,expected,firstDom=null,firstExpected=null) {
   if(typeof body!=='string'||typeof dom!=='string'||!Number.isSafeInteger(expected)||expected<1||
-      Buffer.byteLength(body)>=2000000||Buffer.byteLength(dom)>=2000000)
+      Buffer.byteLength(body)>=2000000||Buffer.byteLength(dom)>=2000000||
+      (firstDom!==null&&(typeof firstDom!=='string'||Buffer.byteLength(firstDom)>=2000000||
+        !Number.isSafeInteger(firstExpected)||firstExpected<1)))
     return {status:'TABLE_COMPARISON_UNAVAILABLE'};
   const result=spawnSync('python',['-c',tableCheckPython,fileURLToPath(new URL('../ingest',import.meta.url))],
-    {input:JSON.stringify({body,dom,expected}),encoding:'utf8',timeout:5000,maxBuffer:16000});
+    {input:JSON.stringify({body,dom,expected,firstDom,firstExpected}),encoding:'utf8',timeout:5000,maxBuffer:16000});
   if(result.status!==0)return {status:'TABLE_COMPARISON_UNAVAILABLE'};
   try {
     const parsed=JSON.parse(result.stdout);
@@ -231,12 +263,29 @@ if (process.argv.includes('--self-test')) {
   assert.equal(compareDecodedTable(fixture,fixture,1).orderedExactRowsMatch,true);
   assert.equal(compareDecodedTable('',document,1).orderedExactRowsMatch,false);
   assert.equal(compareDecodedTable(fixture,document,0).status,'TABLE_COMPARISON_UNAVAILABLE');
+  const row=fixture.slice(fixture.indexOf('<tr><td>'),fixture.lastIndexOf('</table>'));
+  const repeated=fixture.replace('</table>',row+'</table>');
+  const conflicting=fixture.replace('</table>',row.replace('<td>S</td>','<td>X</td>')+'</table>');
+  assert.deepEqual(compareDecodedTable(repeated,repeated,2).secondPageDuplicateDiagnostic,
+    {rowCount:2,uniqueIdentityCount:1,mirroredDuplicateRowCount:1,conflictingDuplicateRowCount:0,exactIdentityComplete:true});
+  assert.equal(compareDecodedTable(conflicting,conflicting,2).secondPageDuplicateDiagnostic.conflictingDuplicateRowCount,1);
+  assert.equal(compareDecodedTable(conflicting,conflicting,2).secondPageDuplicateDiagnostic.exactIdentityComplete,false);
+  const pair=compareDecodedTable(fixture,fixture,1,fixture,1).twoPageDuplicateDiagnostic;
+  assert.equal(pair.crossPageIdentityOverlapCount,1);
+  assert.equal(pair.mirroredDuplicateRowCount,1);
+  assert.equal(pair.exactIdentityComplete,true);
+  assert.equal(compareDecodedTable(fixture,fixture,1,fixture.replace('<td>S</td>','<td>X</td>'),1).twoPageDuplicateDiagnostic.conflictingDuplicateRowCount,1);
+  assert.equal(compareDecodedTable(fixture,fixture,1,fixture.replace(href,href.replace('PRT%2F1','PRT%2F2')),1).twoPageDuplicateDiagnostic.uniqueIdentityCount,2);
+  assert.equal(compareDecodedTable(fixture,fixture,1,fixture,2).twoPageDuplicateDiagnostic,undefined);
+  assert.equal(compareDecodedTable(fixture,fixture,1,'<html></html>',1).firstPageDiagnostic.exactRowCountMatch,false);
+  assert.equal(compareDecodedTable(fixture,fixture.replace('<td>S</td>','<td>X</td>'),1,fixture,1).twoPageDuplicateDiagnostic,undefined);
+  assert.equal(compareDecodedTable(fixture,fixture,1,fixture,0).status,'TABLE_COMPARISON_UNAVAILABLE');
   console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit, native focus and decoded table concordance guards');
   process.exit(0);
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V2',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
@@ -372,6 +421,23 @@ try {
     return result})()`);
   const before=await inspectTarget(true);
   if(!before?.unambiguous)throw new Error('target inspection unavailable or ambiguous');
+  const observeReportTable=reportOrdinal=>evaluate(`(()=>{
+    const reports=[...document.querySelectorAll('.a-IRR')];
+    const report=reports[${reportOrdinal-1}];
+    const tables=report?[...report.querySelectorAll('table.a-IRR-table')].filter(t=>t.closest('.a-IRR')===report):[];
+    const data=tables.filter(t=>[...t.rows].some(r=>[...r.cells].some(c=>c.tagName==='TD')));
+    const chosen=data.length===1?data[0]:null;
+    return {url:location.origin+location.pathname,
+      text:report?[...report.querySelectorAll('.a-IRR-pagination')].filter(e=>e.closest('.a-IRR')===report).map(e=>e.innerText).join(' '):'',
+      reportCount:reports.length,tableCount:tables.length,dataTableCount:data.length,
+      html:chosen?chosen.outerHTML:null};
+  })()`);
+  // Take a separate, bounded first-page DOM observation before native activation.
+  // This does not turn either DOM observation into an immutable receipt.
+  const firstRendered=await observeReportTable(before.controlIdentity.report);
+  const firstDom=firstRendered?.url===URL0&&JSON.stringify(range(firstRendered?.text))===JSON.stringify(first)&&
+    typeof firstRendered.html==='string'&&Buffer.byteLength(firstRendered.html)<2000000
+    ? firstRendered.html : null;
   let previous=null,after=before,confirmed=false;
   const hitPoll={attempts:0,hittable:0,stablePairs:0,ambiguous:0};
   for(let i=0;i<12;i++){
@@ -432,20 +498,10 @@ try {
   // Limit the second observation to the unique data-bearing report table
   // inside the same report ordinal that owned the native pagination control.
   // No fallback to the network fragment or generic page-wide HTML.
-  const rendered=await evaluate(`(()=>{
-    const reports=[...document.querySelectorAll('.a-IRR')];
-    const report=reports[${before.controlIdentity.report-1}];
-    const tables=report?[...report.querySelectorAll('table.a-IRR-table')].filter(t=>t.closest('.a-IRR')===report):[];
-    const data=tables.filter(t=>[...t.rows].some(r=>[...r.cells].some(c=>c.tagName==='TD')));
-    const chosen=data.length===1?data[0]:null;
-    return {url:location.origin+location.pathname,
-      text:report?[...report.querySelectorAll('.a-IRR-pagination')].filter(e=>e.closest('.a-IRR')===report).map(e=>e.innerText).join(' '):'',
-      reportCount:reports.length,tableCount:tables.length,dataTableCount:data.length,
-      html:chosen?chosen.outerHTML:null};
-  })()`);
+  const rendered=await observeReportTable(before.controlIdentity.report);
   const observedRange=range(rendered?.text);
   const concordance=rendered?.url===URL0&&JSON.stringify(observedRange)===JSON.stringify(second)&&mime==='text/html'
-    ? compareDecodedTable(bytes.toString('utf8'),rendered.html,second.last-second.first+1)
+    ? compareDecodedTable(bytes.toString('utf8'),rendered.html,second.last-second.first+1,firstDom,first.last-first.first+1)
     : {status:'TABLE_COMPARISON_UNAVAILABLE'};
   if(!singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))throw new Error('ambiguous late official ajax exchange');
   console.log(JSON.stringify({...base,status:'UI_NEXT_RANGE_AND_OFFICIAL_AJAX_OBSERVED',counters,
