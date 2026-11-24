@@ -21,7 +21,9 @@ function range(s) {
   return first > 0 && first <= last && last <= total ? {first,last,total} : null;
 }
 function nextRange(a,b) {
-  return !!a && !!b && a.first === 1 && a.last < a.total && b.first === a.last+1 && b.total === a.total && b.last >= b.first;
+  return !!a && !!b && [a.first,a.last,a.total,b.first,b.last,b.total].every(Number.isSafeInteger) &&
+    a.first === 1 && a.last < a.total && b.first === a.last+1 && b.total === a.total &&
+    b.last === Math.min(a.total,a.last+(a.last-a.first+1));
 }
 function officialAjax(url) {
   try {
@@ -51,6 +53,14 @@ function selectNextControl(controls, first) {
     return {index:null,count:candidates.length};
   return {index:c.index,count:candidates.length};
 }
+// Bind every observation to the initial report/action, not just mirror count.
+function sameControlIdentity(initial, observed) {
+  const a=initial?.controlIdentity,b=observed?.controlIdentity;
+  return !!initial?.unambiguous && !!observed?.unambiguous &&
+    initial.matchingNext===observed.matchingNext && initial.matchingNext>0 &&
+    !!a?.report && !!a?.action && !!b &&
+    a.report===b.report && a.action===b.action;
+}
 // A transient hit is not enough: require the same native target twice.
 function stableTarget(a,b) {
   if(!a?.unambiguous||!b?.unambiguous||!a.hittable||!b.hittable||
@@ -75,6 +85,10 @@ if (process.argv.includes('--self-test')) {
   assert.equal(nextRange(range('1 - 50 of 1002'),range('51 - 100 of 1002')),true);
   assert.equal(nextRange(range('1 - 50 of 1002'),range('51 - 100 of 1003')),false);
   assert.equal(nextRange(range('1 - 50 of 1002'),range('1 - 50 of 1002')),false);
+  assert.equal(nextRange(range('1 - 50 of 1002'),range('51 - 51 of 1002')),false);
+  assert.equal(nextRange(range('1 - 50 of 1002'),range('51 - 101 of 1002')),false);
+  assert.equal(nextRange(range('1 - 50 of 52'),range('51 - 52 of 52')),true);
+  assert.equal(nextRange(range('1 - 50 of 52'),range('51 - 51 of 52')),false);
   assert.equal(officialAjax(origin+'/ords/wwv_flow.ajax?session=secret'),true);
   assert.equal(officialAjax('https://example.org/ords/wwv_flow.ajax'),false);
   const first = {first:1,last:50,total:1002};
@@ -91,6 +105,14 @@ if (process.argv.includes('--self-test')) {
   assert.deepEqual(selectNextControl([{...next,pagination:'unrecognized'}],first),{index:null,count:0});
   assert.deepEqual(selectNextControl([{...next,next:false}],first),{index:null,count:0});
   assert.deepEqual(selectNextControl([{...next,pagination:'pgR_min_row=51max_rows=100rows_fetched=50'}],first),{index:null,count:0});
+  const initial={unambiguous:true,matchingNext:2,controlIdentity:{report:1,action:next.pagination}};
+  assert.equal(sameControlIdentity(initial,{...initial}),true);
+  assert.equal(sameControlIdentity(initial,{...initial,controlIdentity:{...initial.controlIdentity,report:2}}),false);
+  assert.equal(sameControlIdentity(initial,{...initial,controlIdentity:{...initial.controlIdentity,action:next.pagination.replace('rows_fetched=50','rows_fetched=49')}}),false);
+  assert.equal(sameControlIdentity(initial,{...initial,matchingNext:1}),false);
+  assert.equal(sameControlIdentity(initial,{...initial,unambiguous:false}),false);
+  assert.equal(sameControlIdentity(initial,{...initial,controlIdentity:null}),false);
+  assert.equal(sameControlIdentity(initial,null),false);
   const hit = {unambiguous:true,hittable:true,matchingNext:2,target:{index:0,report:1,action:next.pagination,x:100,y:200}};
   assert.equal(stableTarget(hit,{...hit,target:{...hit.target,x:100.25}}),true);
   assert.equal(stableTarget(hit,{...hit,hittable:false}),false);
@@ -121,6 +143,7 @@ const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
   openCallAuthorized:false,deadlineAuthorized:false,budgetAuthorized:false,eligibilityAuthorized:false,
   publicationEffect:'NONE'};
 let status='NOT_STARTED';
+const browserStartup={polls:0,spawnError:false,exited:false,portReady:false};
 const counters={sameOriginPosts:0,officialAjaxPosts:0,officialAjax200:0,officialAjaxFinished:0};
 try {
   dir=await mkdtemp(join(tmpdir(),'mysmis-public-ui-'));
@@ -131,13 +154,19 @@ try {
     '--remote-debugging-port=0','--user-data-dir='+dir,'about:blank'
   ],{stdio:'ignore'});
   status='BROWSER_SPAWN_REQUESTED';
-  let spawnError=false; chrome.on('error',()=>{spawnError=true;});
+  chrome.on('error',()=>{browserStartup.spawnError=true;});
+  chrome.on('exit',()=>{browserStartup.exited=true;});
   let port;
-  for(let i=0;i<40&&!port&&!spawnError;i++){
-    try {port=Number((await readFile(join(dir,'DevToolsActivePort'),'utf8')).split('\n')[0]);}catch{}
+  for(let i=0;i<40&&!port&&!browserStartup.spawnError&&!browserStartup.exited;i++){
+    browserStartup.polls++;
+    try {
+      const p=Number((await readFile(join(dir,'DevToolsActivePort'),'utf8')).split('\n')[0]);
+      if(Number.isInteger(p)&&p>0&&p<=65535)port=p;
+    }catch{}
     if(!port) await sleep(250);
   }
-  if(!port) throw new Error('browser unavailable');
+  browserStartup.portReady=!!port;
+  if(!port||browserStartup.spawnError||browserStartup.exited) throw new Error('browser unavailable');
   status='DEVTOOLS_PORT_READY';
   const tabs=await (await fetch('http://127.0.0.1:'+port+'/json/list',{signal:AbortSignal.timeout(3000)})).json();
   const tab=tabs.find(t=>t.type==='page');
@@ -220,8 +249,10 @@ try {
     const selection=(${selectNextControl.toString()})(descriptors,${JSON.stringify(first)});
     const result={enabled:a.length,explicitNext:next.length,hasPaginationData:a.filter(e=>e.hasAttribute('data-pagination')).length,
       rowSelects:[...document.querySelectorAll('select')].filter(e=>e.getClientRects().length>0&&/rows|rânduri/i.test([e.getAttribute('aria-label'),e.getAttribute('title'),...[...e.labels||[]].map(l=>l.textContent)].join(' '))).length,
-      matchingNext:selection.count,unambiguous:selection.index!==null,hittable:false,target:null,focused:false,focusTarget:null};
+      matchingNext:selection.count,unambiguous:selection.index!==null,controlIdentity:null,hittable:false,target:null,focused:false,focusTarget:null};
     if(selection.index===null)return result;
+    const selected=descriptors[selection.index];
+    result.controlIdentity={report:selected.report,action:selected.pagination};
     if(${scroll})a[selection.index].scrollIntoView({block:'center',inline:'center',behavior:'instant'});
     // Only an actual non-submit button can receive native Enter activation.
     const native=e=>e instanceof HTMLButtonElement&&e.type==='button'&&!e.disabled&&
@@ -246,7 +277,7 @@ try {
     await sleep(150);
     after=await inspectTarget(false);
     hitPoll.attempts++;
-    if(!after?.unambiguous||after.matchingNext!==before.matchingNext){hitPoll.ambiguous++;break;}
+    if(!sameControlIdentity(before,after)){hitPoll.ambiguous++;break;}
     if(after.hittable)hitPoll.hittable++;
     if(stableTarget(previous,after)){hitPoll.stablePairs++;confirmed=true;break;}
     previous=after;
@@ -265,7 +296,7 @@ try {
     const f1=await inspectTarget(false);
     await sleep(150);
     const f2=await inspectTarget(false);
-    const focusConfirmed=f0?.matchingNext===before.matchingNext&&stableFocus(f0,f1)&&stableFocus(f1,f2);
+    const focusConfirmed=[f0,f1,f2].every(f=>sameControlIdentity(before,f))&&stableFocus(f0,f1)&&stableFocus(f1,f2);
     console.log(JSON.stringify({...base,status:'UI_NATIVE_FOCUS_ONLY',fetchedAt:new Date().toISOString(),
       focusedSamples:[f0,f1,f2].filter(f=>f?.focused).length,focusConfirmed,paginationProtocolConfirmed:false}));
     if(!focusConfirmed)throw new Error('no stable native focused next button');
@@ -301,7 +332,7 @@ try {
     rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
 } catch(e) {
   // No exception messages or arbitrary server values: could contain session data.
-  console.log(JSON.stringify({...base,status:'UI_PROTOCOL_DIAGNOSTIC_FAIL_CLOSED',stage:status,counters,
+  console.log(JSON.stringify({...base,status:'UI_PROTOCOL_DIAGNOSTIC_FAIL_CLOSED',stage:status,counters,browserStartup,
     fetchedAt:new Date().toISOString(),paginationProtocolConfirmed:false}));
   process.exitCode=2;
 } finally {
