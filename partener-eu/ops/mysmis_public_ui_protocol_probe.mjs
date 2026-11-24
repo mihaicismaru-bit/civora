@@ -82,7 +82,7 @@ function stableFocus(a,b) {
 // In-memory response/DOM concordance only. Reuse the existing Python
 // table parser and strict Info-link resolver; never print rows, links or HTML.
 // A decoded AJAX fragment and a rendered DOM are not immutable raw receipts.
-const tableCheckPython = `
+const tableCheckPython = String.raw`
 import json, re, sys
 sys.path.insert(0, sys.argv[1])
 from mysmis_call_inventory_scout import ReportTableParser, HEADER_ALIASES, key_text, replay_info_code, decode_js_unicode
