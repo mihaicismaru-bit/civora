@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// At most six public, anonymous UI pagination activations. Diagnostic only: no session
+// At most twenty public, anonymous UI pagination activations. Diagnostic only: no session
 // material, request values, HTML or reconstructed DOM is logged or persisted.
 // This is NOT an immutable raw receipt or an acquisition adapter.
 import { spawn, spawnSync } from 'node:child_process';
@@ -17,7 +17,7 @@ const sha = s => createHash('sha256').update(s).digest('hex');
 // Startup is local and passive; a slow runner is not evidence of source failure.
 // Keep the existing outer workflow timeout and never restart or navigate here.
 const STARTUP_POLLS=60, STARTUP_INTERVAL_MS=250;
-const MAX_TRANSITIONS=6, MAX_DIAGNOSTIC_BYTES=8000000;
+const MAX_TRANSITIONS=20, MAX_DIAGNOSTIC_BYTES=8000000;
 function parseDevToolsPort(contents) {
   const first=String(contents).split(/\r?\n/)[0];
   if(!/^[1-9]\d{0,4}$/.test(first))return null;
@@ -358,7 +358,7 @@ function diagnosticManifest(records, coverage, runId, runAttempt, fingerprints) 
   if(totalBytes>=MAX_DIAGNOSTIC_BYTES||previous.last!==coverage.observedRows||
     previous.total!==coverage.totalRows)return null;
   const manifest={schema:'MYSMIS_DECODED_OBSERVATION_MANIFEST_V3',canonicalUrl:URL0,runId,runAttempt,
-    parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V13',sourceFamily:'ROMANIA_MIPE_MYSMIS',
+    parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V14',sourceFamily:'ROMANIA_MIPE_MYSMIS',
     programmeFamily:'ROMANIA_MULTI_PROGRAMME',authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',
     observationState:'PROTOCOL_DISCOVERY_ONLY',pages,totalDecodedBytes:totalBytes,
     observedRows:coverage.observedRows,totalRows:coverage.totalRows,
@@ -677,7 +677,35 @@ if (process.argv.includes('--self-test')) {
   assert.equal(sevenCoverage.fullInventoryProven,false);
   const sevenRecords=seven.map((p,i)=>({...records[0],range:p.range,fetchedAt:'2026-11-25T08:00:0'+i+'.000Z',method:i?'POST':'GET',endpointClass:i?'SAME_ORIGIN_WWV_FLOW_AJAX':'EXACT_CANONICAL_DOCUMENT',cdpDecodedBodySha256:sha(p.html),decodedBodyBytes:Buffer.byteLength(p.html)}));
   assert.equal(diagnosticManifest(sevenRecords,sevenCoverage,'123','1',sevenResult.boundedSemanticFingerprints).pages.length,7);
-  assert.equal(validDiagnosticHistory(seven,{first:8,last:8,total:8}),false);
+  assert.equal(validDiagnosticHistory(seven,{first:8,last:8,total:8}),true);
+  // V14 can exhaust the observed source range, but cannot prove an immutable
+  // inventory or authorize publication. Verify the entire bounded path offline.
+  const allPages=Array.from({length:MAX_TRANSITIONS+1},(_,i)=>({
+    range:{first:i+1,last:i+1,total:MAX_TRANSITIONS+1},html:distinct(i+1)}));
+  const finalPage=allPages.at(-1);
+  const allResult=compareDecodedTable(finalPage.html,finalPage.html,1,null,null,allPages.slice(0,-1),finalPage.range);
+  const allCoverage=terminalCoverage(allPages,finalPage.range,allResult.cumulativeDuplicateDiagnostic,true,true);
+  assert.equal(allCoverage.observedRows,21);
+  assert.equal(allCoverage.uniqueIdentityCount,21);
+  assert.equal(allCoverage.sourceRangeExhausted,true);
+  assert.equal(allCoverage.fullInventoryProven,false);
+  const allRecords=allPages.map((p,i)=>({...records[0],range:p.range,
+    fetchedAt:new Date(Date.UTC(2026,10,25,8,0,i)).toISOString(),
+    method:i?'POST':'GET',endpointClass:i?'SAME_ORIGIN_WWV_FLOW_AJAX':'EXACT_CANONICAL_DOCUMENT',
+    cdpDecodedBodySha256:sha(p.html),decodedBodyBytes:Buffer.byteLength(p.html)}));
+  const allManifest=diagnosticManifest(allRecords,allCoverage,'123','1',allResult.boundedSemanticFingerprints);
+  assert.equal(allManifest.pages.length,21);
+  for(const k of ['rawPersisted','rawByteIdentityProven','immutableReceipt','fullInventoryProven','materialFactUse','publishAuthorized','openCallAuthorized','deadlineAuthorized','budgetAuthorized','eligibilityAuthorized'])
+    assert.equal(allManifest[k],false);
+  assert.equal(replayDecodedHistory(allRecords,allPages,allCoverage,allResult.boundedSemanticFingerprints),true);
+  const overLimit=allPages.map(p=>({...p,range:{...p.range,total:22}}));
+  assert.equal(validDiagnosticHistory(overLimit,{first:22,last:22,total:22}),false);
+  assert.equal(diagnosticManifest([...allRecords,allRecords.at(-1)],{...allCoverage,pageCount:22},'123','1',allResult.boundedSemanticFingerprints),null);
+  const missingMiddle=allPages.filter((_,i)=>i!==10);
+  assert.equal(terminalCoverage(missingMiddle,finalPage.range,allResult.cumulativeDuplicateDiagnostic,true,true),null);
+  const lastShort={first:1001,last:1002,total:1002};
+  assert.equal(nextRange({first:951,last:1000,total:1002},lastShort),true);
+  assert.equal(nextRange({first:951,last:1000,total:1002},{...lastShort,last:1001}),false);
   // Replay must bind original decoded representations, not equivalent DOM markup.
   assert.equal(replayDecodedHistory(records,completeHistory,cov,fingerprints),true);
   assert.equal(replayDecodedHistory(sevenRecords,seven,sevenCoverage,sevenResult.boundedSemanticFingerprints),true);
@@ -696,7 +724,7 @@ if (process.argv.includes('--self-test')) {
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V13',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V14',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
