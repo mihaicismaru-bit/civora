@@ -358,7 +358,7 @@ function diagnosticManifest(records, coverage, runId, runAttempt, fingerprints) 
   if(totalBytes>=MAX_DIAGNOSTIC_BYTES||previous.last!==coverage.observedRows||
     previous.total!==coverage.totalRows)return null;
   const manifest={schema:'MYSMIS_DECODED_OBSERVATION_MANIFEST_V3',canonicalUrl:URL0,runId,runAttempt,
-    parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V14',sourceFamily:'ROMANIA_MIPE_MYSMIS',
+    parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V15',sourceFamily:'ROMANIA_MIPE_MYSMIS',
     programmeFamily:'ROMANIA_MULTI_PROGRAMME',authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',
     observationState:'PROTOCOL_DISCOVERY_ONLY',pages,totalDecodedBytes:totalBytes,
     observedRows:coverage.observedRows,totalRows:coverage.totalRows,
@@ -394,15 +394,19 @@ function replayDecodedHistory(records,history,coverage,fingerprints) {
     ['identitySetSha256','uniqueIdentityCount','materialSha256','operationalSha256'].every(
       k=>fingerprints[k]===replay.boundedSemanticFingerprints[k]);
 }
+function cachedResponse(response) {
+  return !!(response?.fromDiskCache||response?.fromServiceWorker||response?.fromPrefetchCache);
+}
 function singleAjaxExchange(counters,requestCount,matchedCount) {
   return requestCount===1&&matchedCount===1&&counters.sameOriginPosts===1&&
     counters.officialAjaxPosts===1&&counters.officialAjax200===1&&
     counters.officialAjaxFinished===1&&counters.redirects===0&&
-    counters.officialAjaxNon200===0&&counters.officialAjaxFailed===0;
+    counters.officialAjaxNon200===0&&counters.officialAjaxFailed===0&&counters.officialAjaxCached===0;
 }
 // Fixed vocabulary only; no request IDs, URLs, raw errors or response contents.
 function ajaxObservation(counters,requestCount,matchedCount,rangeObserved) {
   if(counters.redirects||counters.sameOriginPosts>1||counters.officialAjaxPosts>1||requestCount>1)return 'AMBIGUOUS_EXCHANGE';
+  if(counters.officialAjaxCached)return 'OFFICIAL_AJAX_CACHE_OR_SERVICE_WORKER';
   if(counters.officialAjaxNon200)return 'HTTP_NON_200';
   if(counters.officialAjaxFailed)return 'NETWORK_LOADING_FAILED';
   if(counters.officialAjaxPosts===0)return 'OFFICIAL_POST_UNOBSERVED';
@@ -505,7 +509,7 @@ if (process.argv.includes('--self-test')) {
   assert.equal(confirmedNativeFocus(initial,[boundFocus,{...boundFocus,focused:false},boundFocus]),false);
   assert.equal(confirmedNativeFocus(initial,[boundFocus,{...boundFocus,controlIdentity:{report:2,action:next.pagination}},boundFocus]),false);
   assert.equal(confirmedNativeFocus(initial,[boundFocus,{...boundFocus,focusTarget:{...boundFocus.focusTarget,index:1}},boundFocus]),false);
-  const counts={sameOriginPosts:1,officialAjaxPosts:1,officialAjax200:1,officialAjaxFinished:1,redirects:0,officialAjaxNon200:0,officialAjaxFailed:0};
+  const counts={sameOriginPosts:1,officialAjaxPosts:1,officialAjax200:1,officialAjaxFinished:1,redirects:0,officialAjaxNon200:0,officialAjaxFailed:0,officialAjaxCached:0};
   assert.equal(singleAjaxExchange(counts,1,1),true);
   for(const key of Object.keys(counts))assert.equal(singleAjaxExchange({...counts,[key]:counts[key]+1},1,1),false);
   assert.equal(singleAjaxExchange(counts,2,1),false);
@@ -516,6 +520,11 @@ if (process.argv.includes('--self-test')) {
   assert.equal(ajaxObservation({...counts,officialAjaxFinished:0},1,0,true),'HTTP_COMPLETION_UNOBSERVED');
   assert.equal(ajaxObservation({...counts,officialAjaxNon200:1},1,0,false),'HTTP_NON_200');
   assert.equal(ajaxObservation({...counts,officialAjaxFailed:1},1,0,false),'NETWORK_LOADING_FAILED');
+  assert.equal(ajaxObservation({...counts,officialAjaxCached:1},1,1,true),'OFFICIAL_AJAX_CACHE_OR_SERVICE_WORKER');
+  assert.equal(singleAjaxExchange({...counts,officialAjaxCached:1},1,1),false);
+  assert.equal(cachedResponse({}),false);
+  assert.equal(cachedResponse({fromDiskCache:false,fromServiceWorker:false,fromPrefetchCache:false}),false);
+  for(const key of ['fromDiskCache','fromServiceWorker','fromPrefetchCache'])assert.equal(cachedResponse({[key]:true}),true);
   assert.equal(ajaxObservation({...counts,officialAjaxPosts:2},2,1,true),'AMBIGUOUS_EXCHANGE');
   assert.equal(ajaxObservation({...counts,redirects:1},1,1,true),'AMBIGUOUS_EXCHANGE');
   assert.equal(ajaxObservation({...counts,officialAjaxPosts:0,officialAjax200:0,officialAjaxFinished:0},0,0,false),'OFFICIAL_POST_UNOBSERVED');
@@ -724,7 +733,7 @@ if (process.argv.includes('--self-test')) {
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V14',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V15',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
@@ -732,7 +741,7 @@ const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
   publicationEffect:'NONE'};
 let status='NOT_STARTED', activationAttempted=null, activeTransition=null;
 const browserStartup={polls:0,maxPolls:STARTUP_POLLS,intervalMs:STARTUP_INTERVAL_MS,elapsedMs:null,spawnError:false,exited:false,portReady:false};
-const counters={sameOriginPosts:0,officialAjaxPosts:0,officialAjax200:0,officialAjaxFinished:0,redirects:0,officialAjaxNon200:0,officialAjaxFailed:0};
+const counters={sameOriginPosts:0,officialAjaxPosts:0,officialAjax200:0,officialAjaxFinished:0,redirects:0,officialAjaxNon200:0,officialAjaxFailed:0,officialAjaxCached:0};
 let exchangeObservation=null, rangeObserved=false;
 try {
   dir=await mkdtemp(join(tmpdir(),'mysmis-public-ui-'));
@@ -798,7 +807,9 @@ try {
         try {if(new URL(p.request.url).origin===origin)counters.sameOriginPosts++;}catch{}
         if(officialAjax(p.request.url)){requests.set(p.requestId,true);counters.officialAjaxPosts++;}
       }
+      if(m.method==='Network.requestServedFromCache' && requests.has(p.requestId))counters.officialAjaxCached++;
       if(m.method==='Network.responseReceived' && requests.has(p.requestId) && officialAjax(p.response?.url)){
+        if(cachedResponse(p.response))counters.officialAjaxCached++;
         if(p.response.status===200){responses.set(p.requestId,{mimeType:String(p.response.mimeType||'').split(';')[0]});counters.officialAjax200++;}
         else counters.officialAjaxNon200++;
       }
@@ -986,7 +997,7 @@ try {
     rangeObserved=s?.url===URL0&&nextRange(first,b);
     exchangeObservation=ajaxObservation(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length,rangeObserved);
     if(exchangeObservation==='EXCHANGE_AND_RANGE_OBSERVED'){second=b;break;}
-    if(['AMBIGUOUS_EXCHANGE','HTTP_NON_200','NETWORK_LOADING_FAILED'].includes(exchangeObservation))break;
+    if(['AMBIGUOUS_EXCHANGE','HTTP_NON_200','NETWORK_LOADING_FAILED','OFFICIAL_AJAX_CACHE_OR_SERVICE_WORKER'].includes(exchangeObservation))break;
     await sleep(250);
   }
   if(!second)throw new Error('completed official exchange and contiguous next range not jointly observed');
