@@ -75,6 +75,31 @@ def main():
         assert index["summary"]["materialFactsAutopromoted"] == 0
         assert index["summary"]["recordCount"] == 3
         assert "MIPE_CORPUS" in index["summary"]["unavailableT1Sources"]
+        failed_mipe = next(row for row in index["sources"] if row["id"] == "MIPE_CORPUS")
+        assert failed_mipe["lastAttemptFreshness"]["status"] == "CURRENT"
+        assert failed_mipe["freshness"]["status"] == "UNKNOWN"
+        assert "MIPE_CORPUS" in index["summary"]["materialStaleOrUnknownSources"]
+
+        # A fresh attempt, an available-but-degraded source, and a stale
+        # successful response must never turn LKG into current evidence.
+        for status, available, observed, expected, decision in (
+            ("OK", True, "2026-08-12T08:00:00Z", "CURRENT", "OFFICIAL_EVIDENCE_INDEX"),
+            ("OK", False, "2026-08-12T08:00:00Z", "UNKNOWN", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
+            ("DEGRADED_LAST_KNOWN_GOOD_PRESERVED", True, "2026-08-12T08:00:00Z", "UNKNOWN", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
+            ("OK", "false", "2026-08-12T08:00:00Z", "UNKNOWN", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
+            ("OK", True, "2026-08-11T08:00:00Z", "STALE", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
+        ):
+            state = {
+                "status": status,
+                "lastRun": {"observedAt": observed, "sourceAvailable": available},
+                "items": [{"url": "https://mfe.gov.ro/ghid/sample", "title": "Sample"}],
+            }
+            source, records = mod.mipe_records(state, reference, {"freshnessSlaHours": 4})
+            assert source["freshness"]["status"] == expected, source
+            assert records[0]["freshness"] == expected
+            assert records[0]["decisionUse"] == decision
+            assert records[0]["publishMaterialFacts"] is False
+            assert records[0]["observedAt"] == observed
         material = next(row for row in index["records"] if row.get("materialChangeCandidate"))
         assert material["materialFactAction"] == "RESOLUTION_REQUIRED"
         assert material["publishMaterialFacts"] is False
