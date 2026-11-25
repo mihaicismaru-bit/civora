@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// At most two public, anonymous UI pagination clicks. Diagnostic only: no session
+// At most four public, anonymous UI pagination activations. Diagnostic only: no session
 // material, request values, HTML or reconstructed DOM is logged or persisted.
 // This is NOT an immutable raw receipt or an acquisition adapter.
 import { spawn, spawnSync } from 'node:child_process';
@@ -17,6 +17,7 @@ const sha = s => createHash('sha256').update(s).digest('hex');
 // Startup is local and passive; a slow runner is not evidence of source failure.
 // Keep the existing outer workflow timeout and never restart or navigate here.
 const STARTUP_POLLS=60, STARTUP_INTERVAL_MS=250;
+const MAX_TRANSITIONS=4, MAX_DIAGNOSTIC_BYTES=8000000;
 function parseDevToolsPort(contents) {
   const first=String(contents).split(/\r?\n/)[0];
   if(!/^[1-9]\d{0,4}$/.test(first))return null;
@@ -194,16 +195,50 @@ if match:
             combined["firstPageDuplicateDiagnostic"] = duplicates(first_rows)
             combined["crossPageIdentityOverlapCount"] = len({r[0] for r in first_rows} & {r[0] for r in a})
             out["twoPageDuplicateDiagnostic"] = combined
+    history = payload.get("history")
+    if history is not None:
+        accumulated = []
+        valid = True
+        for page in history:
+            prior_rows, _ = summary(page["html"])
+            if prior_rows is None or len(prior_rows) != page["expected"]:
+                valid = False
+                break
+            accumulated.extend(prior_rows)
+        if valid:
+            cumulative = duplicates(accumulated + a)
+            cumulative["pageCount"] = len(history) + 1
+            cumulative["crossHistoryIdentityOverlapCount"] = len({r[0] for r in accumulated} & {r[0] for r in a})
+            out["cumulativeDuplicateDiagnostic"] = cumulative
 print(json.dumps(out))
 `;
-function compareDecodedTable(body,dom,expected,firstDom=null,firstExpected=null) {
+// History contains only bounded in-memory observations, contiguous from row 1.
+// It is not proof of source-wide temporal consistency or immutable raw bytes.
+function validDiagnosticHistory(history, currentRange) {
+  if(!Array.isArray(history)||history.length<1||history.length>MAX_TRANSITIONS||
+      history[0]?.range?.first!==1)return false;
+  let totalBytes=0;
+  for(let i=0;i<history.length;i++){
+    const page=history[i], r=page?.range;
+    if(!r||![r.first,r.last,r.total].every(Number.isSafeInteger)||
+        r.first<1||r.last<r.first||r.last>r.total||
+        typeof page.html!=='string'||!page.html.length||
+        Buffer.byteLength(page.html)>=2000000||
+        (i>0&&!nextRange(history[i-1].range,r)))return false;
+    totalBytes+=Buffer.byteLength(page.html);
+  }
+  return totalBytes<MAX_DIAGNOSTIC_BYTES&&nextRange(history.at(-1).range,currentRange);
+}
+function compareDecodedTable(body,dom,expected,firstDom=null,firstExpected=null,history=null,currentRange=null) {
   if(typeof body!=='string'||typeof dom!=='string'||!Number.isSafeInteger(expected)||expected<1||
       Buffer.byteLength(body)>=2000000||Buffer.byteLength(dom)>=2000000||
       (firstDom!==null&&(typeof firstDom!=='string'||Buffer.byteLength(firstDom)>=2000000||
-        !Number.isSafeInteger(firstExpected)||firstExpected<1)))
+        !Number.isSafeInteger(firstExpected)||firstExpected<1))||
+      (history!==null&&(!validDiagnosticHistory(history,currentRange)||
+        expected!==currentRange.last-currentRange.first+1)))
     return {status:'TABLE_COMPARISON_UNAVAILABLE'};
   const result=spawnSync('python',['-c',tableCheckPython,fileURLToPath(new URL('../ingest',import.meta.url))],
-    {input:JSON.stringify({body,dom,expected,firstDom,firstExpected}),encoding:'utf8',timeout:5000,maxBuffer:16000});
+    {input:JSON.stringify({body,dom,expected,firstDom,firstExpected,history:history?.map(p=>({html:p.html,expected:p.range.last-p.range.first+1}))??null}),encoding:'utf8',timeout:5000,maxBuffer:16000});
   if(result.status!==0)return {status:'TABLE_COMPARISON_UNAVAILABLE'};
   try {
     const parsed=JSON.parse(result.stdout);
@@ -370,12 +405,29 @@ if (process.argv.includes('--self-test')) {
   assert.equal(previousPageConcordance(repeated,fixture,2),false);
   assert.equal(previousPageConcordance(null,fixture,1),false);
   assert.equal(previousPageConcordance(fixture,fixture,0),false);
-  console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit, native focus, decoded table and prior-page concordance guards');
+  const r1={first:1,last:1,total:5},r2={first:2,last:2,total:5},r3={first:3,last:3,total:5},r4={first:4,last:4,total:5};
+  const distinct=n=>fixture.replace(href,href.replace('PRT%2F1','PRT%2F'+n));
+  const history=[{range:r1,html:fixture},{range:r2,html:distinct(2)},{range:r3,html:distinct(3)}];
+  assert.equal(validDiagnosticHistory(history,r4),true);
+  assert.equal(validDiagnosticHistory(history,r3),false);
+  assert.equal(validDiagnosticHistory(history.slice(1),r4),false);
+  assert.equal(validDiagnosticHistory([history[0],history[2]],r4),false);
+  assert.equal(validDiagnosticHistory(history,{...r4,total:6}),false);
+  assert.equal(validDiagnosticHistory([{...history[0],html:''}],r2),false);
+  assert.equal(validDiagnosticHistory([{...history[0],html:'x'.repeat(2000000)}],r2),false);
+  const full=compareDecodedTable(distinct(4),distinct(4),1,null,null,history,r4).cumulativeDuplicateDiagnostic;
+  assert.deepEqual(full,{rowCount:4,uniqueIdentityCount:4,mirroredDuplicateRowCount:0,conflictingDuplicateRowCount:0,exactIdentityComplete:true,pageCount:4,crossHistoryIdentityOverlapCount:0});
+  assert.equal(compareDecodedTable(fixture,fixture,1,null,null,history,r4).cumulativeDuplicateDiagnostic.mirroredDuplicateRowCount,1);
+  const distantConflict=fixture.replace('<td>S</td>','<td>X</td>');
+  assert.equal(compareDecodedTable(distantConflict,distantConflict,1,null,null,history,r4).cumulativeDuplicateDiagnostic.exactIdentityComplete,false);
+  assert.equal(compareDecodedTable(distinct(4),distinct(4),1,null,null,[history[0],{...history[1],html:'<html></html>'},history[2]],r4).cumulativeDuplicateDiagnostic,undefined);
+  assert.equal(compareDecodedTable(distinct(4),distinct(4),1,null,null,history,r3).status,'TABLE_COMPARISON_UNAVAILABLE');
+  console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit, native focus, decoded table, prior-page and cumulative concordance guards');
   process.exit(0);
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V5',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V6',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
@@ -465,11 +517,12 @@ try {
   console.log(JSON.stringify({...base,status:'UI_FIRST_PAGE_READINESS_ONLY',fetchedAt:new Date().toISOString(),firstPoll,paginationProtocolConfirmed:false}));
   if(!first||first.first!==1||first.last>=first.total)throw new Error('first page range missing');
   status='FIRST_PAGE_CONFIRMED';
-  // Bounded repeatability experiment: second transition only after the first
-  // has exact ordered concordance and no conflicting duplicates. Each exchange
+  // Bounded repeatability experiment: each transition requires exact ordered
+  // concordance and no conflicting duplicates across all observed pages. Each exchange
   // gets its own counters; no request values, HTML, or identities are emitted.
   let reportOrdinal=null, initialDom=null, initialRange=first, previousBody=null;
-  for(let transition=1;transition<=2 && first.last<first.total;transition++){
+  const history=[];
+  for(let transition=1;transition<=MAX_TRANSITIONS && first.last<first.total;transition++){
   capture=false;
   requests.clear();responses.clear();finished.clear();
   for(const key of Object.keys(counters))counters[key]=0;
@@ -535,7 +588,7 @@ try {
     typeof firstRendered.html==='string'&&Buffer.byteLength(firstRendered.html)<2000000
     ? firstRendered.html : null;
   if(firstDom===null)throw new Error('first table unavailable');
-  if(transition===1)initialDom=firstDom;
+  if(transition===1){initialDom=firstDom;history.push({range:first,html:firstDom});}
   if(transition>1){
     status='PRIOR_PAGE_REOBSERVATION';
     const previousPageStillConcordant=previousPageConcordance(previousBody,firstDom,first.last-first.first+1);
@@ -600,7 +653,7 @@ try {
   const rendered=await observeReportTable(before.controlIdentity.report);
   const observedRange=range(rendered?.text);
   const concordance=rendered?.url===URL0&&JSON.stringify(observedRange)===JSON.stringify(second)&&mime==='text/html'
-    ? compareDecodedTable(bytes.toString('utf8'),rendered.html,second.last-second.first+1,firstDom,first.last-first.first+1)
+    ? compareDecodedTable(bytes.toString('utf8'),rendered.html,second.last-second.first+1,firstDom,first.last-first.first+1,history,second)
     : {status:'TABLE_COMPARISON_UNAVAILABLE'};
   if(!singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))throw new Error('ambiguous late official ajax exchange');
   // Also compare page 3 against page 1, not merely its immediate predecessor.
@@ -617,10 +670,14 @@ try {
     nonAdjacentDuplicateDiagnostic:nonAdjacent?.twoPageDuplicateDiagnostic??null,
     rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
   if(!concordance.orderedExactRowsMatch||!concordance.twoPageDuplicateDiagnostic?.exactIdentityComplete||
+    !concordance.cumulativeDuplicateDiagnostic?.exactIdentityComplete||
+    concordance.cumulativeDuplicateDiagnostic.rowCount!==second.last||
+    concordance.cumulativeDuplicateDiagnostic.pageCount!==transition+1||
     (transition===2&&!nonAdjacent?.twoPageDuplicateDiagnostic?.exactIdentityComplete))
     throw new Error('transition semantic guard failed');
   // Retain only the bounded decoded fragment for the next observation.
   previousBody=bytes.toString('utf8');
+  history.push({range:second,html:previousBody});
   capture=false;
   first=second;
   }
