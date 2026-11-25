@@ -116,9 +116,9 @@ function confirmedNativeFocus(initial,samples) {
 // table parser and strict Info-link resolver; never print rows, links or HTML.
 // A decoded AJAX fragment and a rendered DOM are not immutable raw receipts.
 const tableCheckPython = String.raw`
-import json, re, sys
+import hashlib, json, re, sys
 sys.path.insert(0, sys.argv[1])
-from mysmis_call_inventory_scout import ReportTableParser, HEADER_ALIASES, MATERIAL_FIELDS, OPERATIONAL_FIELDS, key_text, replay_info_code, decode_js_unicode, clean
+from mysmis_call_inventory_scout import ReportTableParser, HEADER_ALIASES, MATERIAL_FIELDS, OPERATIONAL_FIELDS, key_text, replay_info_code, decode_js_unicode, clean, semantic_sha
 payload = json.load(sys.stdin)
 required = ("programme", "callType", "callTitle", "status", "callBudgetRon", "info")
 def extract(raw):
@@ -176,6 +176,20 @@ def duplicates(rows):
             seen[code] = fingerprint
     return {"rowCount":len(rows),"uniqueIdentityCount":len(seen),"mirroredDuplicateRowCount":mirrored,
             "conflictingDuplicateRowCount":conflicts,"exactIdentityComplete":conflicts == 0}
+# A scoped fingerprint over exact normalized rows, not the volatile APEX
+# response/session wrapper. Deduplicate only identical rows, never conflicts.
+# Keep raw text and identities in memory; only aggregate digests may leave.
+def scoped_fingerprints(rows):
+    if not duplicates(rows)["exactIdentityComplete"]:
+        return None
+    unique = {}
+    for code, pairs in rows:
+        fields = dict(pairs)
+        unique[code] = {"callCode":code, **{n:clean(fields.get(n, "")) for n in (*MATERIAL_FIELDS[1:], *OPERATIONAL_FIELDS)}}
+    ordered = [unique[code] for code in sorted(unique)]
+    operational = [{n:r[n] for n in ("callCode", *OPERATIONAL_FIELDS)} for r in ordered]
+    digest = hashlib.sha256(json.dumps(operational, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    return {"materialSha256":semantic_sha(ordered),"operationalSha256":digest}
 body, dom = payload["body"], payload["dom"]
 a, sa = summary(body)
 b, sb = summary(dom)
@@ -210,6 +224,8 @@ if match:
             cumulative["pageCount"] = len(history) + 1
             cumulative["crossHistoryIdentityOverlapCount"] = len({r[0] for r in accumulated} & {r[0] for r in a})
             out["cumulativeDuplicateDiagnostic"] = cumulative
+            if cumulative["exactIdentityComplete"]:
+                out["boundedSemanticFingerprints"] = scoped_fingerprints(accumulated + a)
 print(json.dumps(out))
 `;
 // History contains only bounded in-memory observations, contiguous from row 1.
@@ -304,10 +320,11 @@ function terminalCoverage(history, last, diagnostic, terminalStable, initialDocu
 // immutable raw handoff: the decoded entity might have been re-encoded by CDP.
 // It binds all accepted observations to one run attempt without retaining
 // HTML, request values, session identifiers or arbitrary server URLs.
-function diagnosticManifest(records, coverage, runId, runAttempt) {
+function diagnosticManifest(records, coverage, runId, runAttempt, fingerprints) {
   if(!Array.isArray(records)||records.length<2||records.length>MAX_TRANSITIONS+1||
     coverage?.pageCount!==records.length||coverage.initialPageObservation!=='CDP_DECODED_DOCUMENT_CONCORDANT'||
     coverage.terminalPageStillConcordant!==true||coverage.fullInventoryProven!==false||
+    !fingerprints||!['materialSha256','operationalSha256'].every(k=>typeof fingerprints[k]==='string'&&/^[a-f0-9]{64}$/.test(fingerprints[k]))||
     typeof runId!=='string'||!(/^(?:[1-9]\d*|local)$/).test(runId)||
     typeof runAttempt!=='string'||!(/^[1-9]\d*$/).test(runAttempt))return null;
   const pages=[],seen=new Set();
@@ -336,11 +353,14 @@ function diagnosticManifest(records, coverage, runId, runAttempt) {
   }
   if(totalBytes>=MAX_DIAGNOSTIC_BYTES||previous.last!==coverage.observedRows||
     previous.total!==coverage.totalRows)return null;
-  const manifest={schema:'MYSMIS_DECODED_OBSERVATION_MANIFEST_V1',canonicalUrl:URL0,runId,runAttempt,
-    parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V10',sourceFamily:'ROMANIA_MIPE_MYSMIS',
+  const manifest={schema:'MYSMIS_DECODED_OBSERVATION_MANIFEST_V2',canonicalUrl:URL0,runId,runAttempt,
+    parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V11',sourceFamily:'ROMANIA_MIPE_MYSMIS',
     programmeFamily:'ROMANIA_MULTI_PROGRAMME',authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',
     observationState:'PROTOCOL_DISCOVERY_ONLY',pages,totalDecodedBytes:totalBytes,
     observedRows:coverage.observedRows,totalRows:coverage.totalRows,
+    boundedSemanticFingerprints:{schema:'MYSMIS_BOUNDED_NORMALIZED_FINGERPRINTS_V1',
+      scope:'OBSERVED_EXACT_ID_SET_ONLY',materialSha256:fingerprints.materialSha256,
+      operationalSha256:fingerprints.operationalSha256},
     rawPersisted:false,rawByteIdentityProven:false,immutableReceipt:false,fullInventoryProven:false,
     materialFactUse:false,publishAuthorized:false,openCallAuthorized:false,deadlineAuthorized:false,
     budgetAuthorized:false,eligibilityAuthorized:false,publicationEffect:'NONE'};
@@ -567,33 +587,53 @@ if (process.argv.includes('--self-test')) {
     method:i?'POST':'GET',endpointClass:i?'SAME_ORIGIN_WWV_FLOW_AJAX':'EXACT_CANONICAL_DOCUMENT',
     httpStatus:200,contentType:'text/html',cdpDecodedBodySha256:sha(p.html),
     decodedBodyBytes:Buffer.byteLength(p.html),representation:'CDP_TEXT_UTF8_REENCODED',orderedExactRowsMatch:true}));
-  const manifest=diagnosticManifest(records,cov,'123','1');
+  const bounded=(body,prior)=>compareDecodedTable(body,body,1,null,null,prior,r4).boundedSemanticFingerprints;
+  const fingerprints=bounded(distinct(4),history);
+  assert.match(fingerprints.materialSha256,/^[a-f0-9]{64}$/);
+  assert.match(fingerprints.operationalSha256,/^[a-f0-9]{64}$/);
+  assert.deepEqual(bounded('<html><body>'+distinct(4)+'</body></html>',history),fingerprints);
+  // Changes in row order must not change the scoped ID-set hash.
+  const reordered=history.map((p,i)=>({...p,html:history[2-i].html}));
+  assert.deepEqual(bounded(distinct(4),reordered),fingerprints);
+  const materialChange=bounded(distinct(4).replace('<td>S</td>','<td>X</td>'),history);
+  assert.notEqual(materialChange.materialSha256,fingerprints.materialSha256);
+  assert.equal(materialChange.operationalSha256,fingerprints.operationalSha256);
+  const withCounter=(html,value)=>html.replace('<th>Info</th>','<th>Nr contracte</th><th>Info</th>').replace('<td><a href=','<td>'+value+'</td><td><a href=');
+  const operationalChange=bounded(withCounter(distinct(4),'2'),history);
+  assert.equal(operationalChange.materialSha256,fingerprints.materialSha256);
+  assert.notEqual(operationalChange.operationalSha256,fingerprints.operationalSha256);
+  assert.equal(bounded(distantConflict,history),undefined);
+  const manifest=diagnosticManifest(records,cov,'123','1',fingerprints);
   assert.ok(manifest);
   const {manifestSha256,...manifestBody}=manifest;
   assert.equal(manifestSha256,sha(JSON.stringify(manifestBody)));
-  assert.deepEqual(diagnosticManifest(records,cov,'123','1'),manifest);
-  assert.notEqual(diagnosticManifest(records,cov,'123','2').manifestSha256,manifestSha256);
+  assert.deepEqual(diagnosticManifest(records,cov,'123','1',fingerprints),manifest);
+  assert.notEqual(diagnosticManifest(records,cov,'123','2',fingerprints).manifestSha256,manifestSha256);
   assert.equal(manifest.immutableReceipt,false);
   assert.equal(manifest.openCallAuthorized,false);
   assert.equal(manifest.pages.length,4);
-  assert.equal(diagnosticManifest(records.slice(1),cov,'123','1'),null);
-  assert.equal(diagnosticManifest([records[0],records[2],records[1],records[3]],cov,'123','1'),null);
+  assert.equal(diagnosticManifest(records.slice(1),cov,'123','1',fingerprints),null);
+  assert.equal(diagnosticManifest([records[0],records[2],records[1],records[3]],cov,'123','1',fingerprints),null);
   const bad=(i,patch)=>records.map((p,j)=>i===j?{...p,...patch}:p);
   for(const patch of [{method:'GET'},{endpointClass:'OTHER'},{httpStatus:302},{contentType:'text/plain'},
     {cdpDecodedBodySha256:records[0].cdpDecodedBodySha256},{decodedBodyBytes:2000000},
     {representation:'RAW'},{orderedExactRowsMatch:false},{fetchedAt:'2026-11-25T07:59:00.000Z'},
     {fetchedAt:'2026-02-30T08:00:00.000Z'}])
-    assert.equal(diagnosticManifest(bad(1,patch),cov,'123','1'),null);
-  assert.equal(diagnosticManifest(records,{...cov,observedRows:99},'123','1'),null);
-  assert.equal(diagnosticManifest(records,{...cov,fullInventoryProven:true},'123','1'),null);
-  assert.equal(diagnosticManifest(records,cov,'123','0'),null);
-  assert.equal(diagnosticManifest(bad(1,{sessionToken:'do-not-emit'}),cov,'123','1').manifestSha256,manifestSha256);
+    assert.equal(diagnosticManifest(bad(1,patch),cov,'123','1',fingerprints),null);
+  assert.equal(diagnosticManifest(records,{...cov,observedRows:99},'123','1',fingerprints),null);
+  assert.equal(diagnosticManifest(records,{...cov,fullInventoryProven:true},'123','1',fingerprints),null);
+  assert.equal(diagnosticManifest(records,cov,'123','0',fingerprints),null);
+  assert.equal(diagnosticManifest(bad(1,{sessionToken:'do-not-emit'}),cov,'123','1',fingerprints).manifestSha256,manifestSha256);
+  assert.equal(diagnosticManifest(records,cov,'123','1',null),null);
+  assert.equal(diagnosticManifest(records,cov,'123','1',{...fingerprints,materialSha256:'invalid'}),null);
+  assert.notEqual(diagnosticManifest(records,cov,'123','1',materialChange).manifestSha256,manifestSha256);
+  assert.equal(manifest.boundedSemanticFingerprints.scope,'OBSERVED_EXACT_ID_SET_ONLY');
   console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit, native focus, decoded table, prior-page, cumulative and terminal concordance guards');
   process.exit(0);
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V10',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V11',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
@@ -912,7 +952,7 @@ try {
     const coverage=terminalCoverage(history,second,concordance.cumulativeDuplicateDiagnostic,stable,true);
     if(!coverage||!singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))
       throw new Error('terminal coverage or exchange unverified');
-    const manifest=diagnosticManifest(diagnosticRecords,coverage,base.runId,process.env.GITHUB_RUN_ATTEMPT||'1');
+    const manifest=diagnosticManifest(diagnosticRecords,coverage,base.runId,process.env.GITHUB_RUN_ATTEMPT||'1',concordance.boundedSemanticFingerprints);
     if(!manifest)throw new Error('ordered diagnostic manifest unverified');
     console.log(JSON.stringify({...base,status:'UI_BOUNDED_DIAGNOSTIC_COMPLETE',fetchedAt:new Date().toISOString(),
       coverage,diagnosticManifest:manifest,rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
