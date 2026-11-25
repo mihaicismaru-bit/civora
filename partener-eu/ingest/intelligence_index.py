@@ -158,7 +158,9 @@ def afir_records(
             "observedAt": observed_at,
             "freshness": source["freshness"]["status"],
             "textExtracted": bool(row.get("textExtracted")),
-            "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+            "decisionUse": ("OFFICIAL_EVIDENCE_INDEX"
+                            if source["status"] == "PASS" and source["freshness"]["status"] == "CURRENT"
+                            else "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
             "materialChangeCandidate": material_candidate,
             "materialFactAction": "RESOLUTION_REQUIRED" if material_candidate else "NO_AUTO_PROMOTION",
             "publishMaterialFacts": False,
