@@ -181,6 +181,14 @@ function compareDecodedTable(body,dom,expected,firstDom=null,firstExpected=null)
     return {status:parsed.orderedExactRowsMatch?'DECODED_TABLE_CONCORDANT':'DECODED_TABLE_UNVERIFIED',...parsed};
   } catch { return {status:'TABLE_COMPARISON_UNAVAILABLE'}; }
 }
+// A later DOM observation of the previous range must still agree with its
+// previously captured decoded response. Matching range/count alone is not
+// a snapshot guarantee. Keep the prior fragment in memory only.
+function previousPageConcordance(previousBody,currentDom,expected) {
+  const proof=compareDecodedTable(previousBody,currentDom,expected);
+  return proof.orderedExactRowsMatch===true &&
+    proof.secondPageDuplicateDiagnostic?.exactIdentityComplete===true;
+}
 function singleAjaxExchange(counters,requestCount,matchedCount) {
   return requestCount===1&&matchedCount===1&&counters.sameOriginPosts===1&&
     counters.officialAjaxPosts===1&&counters.officialAjax200===1&&
@@ -291,12 +299,20 @@ if (process.argv.includes('--self-test')) {
   assert.equal(compareDecodedTable(fixture,fixture,1,'<html></html>',1).firstPageDiagnostic.exactRowCountMatch,false);
   assert.equal(compareDecodedTable(fixture,fixture.replace('<td>S</td>','<td>X</td>'),1,fixture,1).twoPageDuplicateDiagnostic,undefined);
   assert.equal(compareDecodedTable(fixture,fixture,1,fixture,0).status,'TABLE_COMPARISON_UNAVAILABLE');
-  console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit, native focus and decoded table concordance guards');
+  assert.equal(previousPageConcordance(fixture,document,1),true);
+  assert.equal(previousPageConcordance(fixture,document.replace('<td>S</td>','<td>X</td>'),1),false);
+  assert.equal(previousPageConcordance(fixture,document.replace(href,href.replace('PRT%2F1','PRT%2F2')),1),false);
+  assert.equal(previousPageConcordance(repeated,repeated,2),true);
+  assert.equal(previousPageConcordance(conflicting,conflicting,2),false);
+  assert.equal(previousPageConcordance(repeated,fixture,2),false);
+  assert.equal(previousPageConcordance(null,fixture,1),false);
+  assert.equal(previousPageConcordance(fixture,fixture,0),false);
+  console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit, native focus, decoded table and prior-page concordance guards');
   process.exit(0);
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V2',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V3',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
@@ -394,7 +410,7 @@ try {
   // Bounded repeatability experiment: second transition only after the first
   // has exact ordered concordance and no conflicting duplicates. Each exchange
   // gets its own counters; no request values, HTML, or identities are emitted.
-  let reportOrdinal=null, initialDom=null, initialRange=first;
+  let reportOrdinal=null, initialDom=null, initialRange=first, previousBody=null;
   for(let transition=1;transition<=2 && first.last<first.total;transition++){
   capture=false;
   requests.clear();responses.clear();finished.clear();
@@ -461,6 +477,13 @@ try {
     ? firstRendered.html : null;
   if(firstDom===null)throw new Error('first table unavailable');
   if(transition===1)initialDom=firstDom;
+  if(transition>1){
+    status='PRIOR_PAGE_REOBSERVATION';
+    const previousPageStillConcordant=previousPageConcordance(previousBody,firstDom,first.last-first.first+1);
+    console.log(JSON.stringify({...base,status:'UI_PRIOR_PAGE_CONCORDANCE_ONLY',transition,
+      fetchedAt:new Date().toISOString(),firstRange:first,previousPageStillConcordant,paginationProtocolConfirmed:false}));
+    if(!previousPageStillConcordant)throw new Error('prior page drift or unavailable proof');
+  }
   let previous=null,after=before,confirmed=false;
   const hitPoll={attempts:0,hittable:0,stablePairs:0,ambiguous:0};
   for(let i=0;i<12;i++){
@@ -543,6 +566,8 @@ try {
   if(!concordance.orderedExactRowsMatch||!concordance.twoPageDuplicateDiagnostic?.exactIdentityComplete||
     (transition===2&&!nonAdjacent?.twoPageDuplicateDiagnostic?.exactIdentityComplete))
     throw new Error('transition semantic guard failed');
+  // Retain only the bounded decoded fragment for the next observation.
+  previousBody=bytes.toString('utf8');
   capture=false;
   first=second;
   }
