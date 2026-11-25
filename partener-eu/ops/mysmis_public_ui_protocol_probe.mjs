@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// At most four public, anonymous UI pagination activations. Diagnostic only: no session
+// At most six public, anonymous UI pagination activations. Diagnostic only: no session
 // material, request values, HTML or reconstructed DOM is logged or persisted.
 // This is NOT an immutable raw receipt or an acquisition adapter.
 import { spawn, spawnSync } from 'node:child_process';
@@ -17,7 +17,7 @@ const sha = s => createHash('sha256').update(s).digest('hex');
 // Startup is local and passive; a slow runner is not evidence of source failure.
 // Keep the existing outer workflow timeout and never restart or navigate here.
 const STARTUP_POLLS=60, STARTUP_INTERVAL_MS=250;
-const MAX_TRANSITIONS=4, MAX_DIAGNOSTIC_BYTES=8000000;
+const MAX_TRANSITIONS=6, MAX_DIAGNOSTIC_BYTES=8000000;
 function parseDevToolsPort(contents) {
   const first=String(contents).split(/\r?\n/)[0];
   if(!/^[1-9]\d{0,4}$/.test(first))return null;
@@ -189,7 +189,9 @@ def scoped_fingerprints(rows):
     ordered = [unique[code] for code in sorted(unique)]
     operational = [{n:r[n] for n in ("callCode", *OPERATIONAL_FIELDS)} for r in ordered]
     digest = hashlib.sha256(json.dumps(operational, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
-    return {"materialSha256":semantic_sha(ordered),"operationalSha256":digest}
+    identity_digest = hashlib.sha256(json.dumps(sorted(unique), ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest()
+    return {"identitySetSha256":identity_digest,"uniqueIdentityCount":len(unique),
+            "materialSha256":semantic_sha(ordered),"operationalSha256":digest}
 body, dom = payload["body"], payload["dom"]
 a, sa = summary(body)
 b, sb = summary(dom)
@@ -324,7 +326,9 @@ function diagnosticManifest(records, coverage, runId, runAttempt, fingerprints) 
   if(!Array.isArray(records)||records.length<2||records.length>MAX_TRANSITIONS+1||
     coverage?.pageCount!==records.length||coverage.initialPageObservation!=='CDP_DECODED_DOCUMENT_CONCORDANT'||
     coverage.terminalPageStillConcordant!==true||coverage.fullInventoryProven!==false||
-    !fingerprints||!['materialSha256','operationalSha256'].every(k=>typeof fingerprints[k]==='string'&&/^[a-f0-9]{64}$/.test(fingerprints[k]))||
+    !fingerprints||!['identitySetSha256','materialSha256','operationalSha256'].every(k=>typeof fingerprints[k]==='string'&&/^[a-f0-9]{64}$/.test(fingerprints[k]))||
+    !Number.isSafeInteger(fingerprints.uniqueIdentityCount)||fingerprints.uniqueIdentityCount<1||
+    fingerprints.uniqueIdentityCount!==coverage.uniqueIdentityCount||
     typeof runId!=='string'||!(/^(?:[1-9]\d*|local)$/).test(runId)||
     typeof runAttempt!=='string'||!(/^[1-9]\d*$/).test(runAttempt))return null;
   const pages=[],seen=new Set();
@@ -353,13 +357,14 @@ function diagnosticManifest(records, coverage, runId, runAttempt, fingerprints) 
   }
   if(totalBytes>=MAX_DIAGNOSTIC_BYTES||previous.last!==coverage.observedRows||
     previous.total!==coverage.totalRows)return null;
-  const manifest={schema:'MYSMIS_DECODED_OBSERVATION_MANIFEST_V2',canonicalUrl:URL0,runId,runAttempt,
-    parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V11',sourceFamily:'ROMANIA_MIPE_MYSMIS',
+  const manifest={schema:'MYSMIS_DECODED_OBSERVATION_MANIFEST_V3',canonicalUrl:URL0,runId,runAttempt,
+    parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V12',sourceFamily:'ROMANIA_MIPE_MYSMIS',
     programmeFamily:'ROMANIA_MULTI_PROGRAMME',authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',
     observationState:'PROTOCOL_DISCOVERY_ONLY',pages,totalDecodedBytes:totalBytes,
     observedRows:coverage.observedRows,totalRows:coverage.totalRows,
-    boundedSemanticFingerprints:{schema:'MYSMIS_BOUNDED_NORMALIZED_FINGERPRINTS_V1',
-      scope:'OBSERVED_EXACT_ID_SET_ONLY',materialSha256:fingerprints.materialSha256,
+    boundedSemanticFingerprints:{schema:'MYSMIS_BOUNDED_NORMALIZED_FINGERPRINTS_V2',
+      scope:'OBSERVED_EXACT_ID_SET_ONLY',identitySetSha256:fingerprints.identitySetSha256,
+      uniqueIdentityCount:fingerprints.uniqueIdentityCount,materialSha256:fingerprints.materialSha256,
       operationalSha256:fingerprints.operationalSha256},
     rawPersisted:false,rawByteIdentityProven:false,immutableReceipt:false,fullInventoryProven:false,
     materialFactUse:false,publishAuthorized:false,openCallAuthorized:false,deadlineAuthorized:false,
@@ -589,6 +594,8 @@ if (process.argv.includes('--self-test')) {
     decodedBodyBytes:Buffer.byteLength(p.html),representation:'CDP_TEXT_UTF8_REENCODED',orderedExactRowsMatch:true}));
   const bounded=(body,prior)=>compareDecodedTable(body,body,1,null,null,prior,r4).boundedSemanticFingerprints;
   const fingerprints=bounded(distinct(4),history);
+  assert.match(fingerprints.identitySetSha256,/^[a-f0-9]{64}$/);
+  assert.equal(fingerprints.uniqueIdentityCount,4);
   assert.match(fingerprints.materialSha256,/^[a-f0-9]{64}$/);
   assert.match(fingerprints.operationalSha256,/^[a-f0-9]{64}$/);
   assert.deepEqual(bounded('<html><body>'+distinct(4)+'</body></html>',history),fingerprints);
@@ -598,10 +605,15 @@ if (process.argv.includes('--self-test')) {
   const materialChange=bounded(distinct(4).replace('<td>S</td>','<td>X</td>'),history);
   assert.notEqual(materialChange.materialSha256,fingerprints.materialSha256);
   assert.equal(materialChange.operationalSha256,fingerprints.operationalSha256);
+  assert.equal(materialChange.identitySetSha256,fingerprints.identitySetSha256);
+  const membershipChange=bounded(distinct(5),history);
+  assert.equal(membershipChange.uniqueIdentityCount,fingerprints.uniqueIdentityCount);
+  assert.notEqual(membershipChange.identitySetSha256,fingerprints.identitySetSha256);
   const withCounter=(html,value)=>html.replace('<th>Info</th>','<th>Nr contracte</th><th>Info</th>').replace('<td><a href=','<td>'+value+'</td><td><a href=');
   const operationalChange=bounded(withCounter(distinct(4),'2'),history);
   assert.equal(operationalChange.materialSha256,fingerprints.materialSha256);
   assert.notEqual(operationalChange.operationalSha256,fingerprints.operationalSha256);
+  assert.equal(operationalChange.identitySetSha256,fingerprints.identitySetSha256);
   assert.equal(bounded(distantConflict,history),undefined);
   const manifest=diagnosticManifest(records,cov,'123','1',fingerprints);
   assert.ok(manifest);
@@ -628,12 +640,27 @@ if (process.argv.includes('--self-test')) {
   assert.equal(diagnosticManifest(records,cov,'123','1',{...fingerprints,materialSha256:'invalid'}),null);
   assert.notEqual(diagnosticManifest(records,cov,'123','1',materialChange).manifestSha256,manifestSha256);
   assert.equal(manifest.boundedSemanticFingerprints.scope,'OBSERVED_EXACT_ID_SET_ONLY');
+  assert.equal(manifest.boundedSemanticFingerprints.identitySetSha256,fingerprints.identitySetSha256);
+  assert.equal(diagnosticManifest(records,cov,'123','1',{...fingerprints,identitySetSha256:'invalid'}),null);
+  assert.equal(diagnosticManifest(records,cov,'123','1',{...fingerprints,uniqueIdentityCount:5}),null);
+  assert.notEqual(diagnosticManifest(records,cov,'123','1',membershipChange).manifestSha256,manifestSha256);
+  // Expanded bounded coverage: six transitions, seven pages; no full inventory claim.
+  const seven=Array.from({length:7},(_,i)=>({range:{first:i+1,last:i+1,total:8},html:distinct(i+1)}));
+  const seventh=seven.at(-1), six=seven.slice(0,-1);
+  const sevenResult=compareDecodedTable(seventh.html,seventh.html,1,null,null,six,seventh.range);
+  assert.equal(sevenResult.cumulativeDuplicateDiagnostic.uniqueIdentityCount,7);
+  const sevenCoverage=terminalCoverage(seven,seventh.range,sevenResult.cumulativeDuplicateDiagnostic,true,true);
+  assert.equal(sevenCoverage.observedRows,7);
+  assert.equal(sevenCoverage.fullInventoryProven,false);
+  const sevenRecords=seven.map((p,i)=>({...records[0],range:p.range,fetchedAt:'2026-11-25T08:00:0'+i+'.000Z',method:i?'POST':'GET',endpointClass:i?'SAME_ORIGIN_WWV_FLOW_AJAX':'EXACT_CANONICAL_DOCUMENT',cdpDecodedBodySha256:sha(p.html),decodedBodyBytes:Buffer.byteLength(p.html)}));
+  assert.equal(diagnosticManifest(sevenRecords,sevenCoverage,'123','1',sevenResult.boundedSemanticFingerprints).pages.length,7);
+  assert.equal(validDiagnosticHistory(seven,{first:8,last:8,total:8}),false);
   console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit, native focus, decoded table, prior-page, cumulative and terminal concordance guards');
   process.exit(0);
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V11',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V12',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
