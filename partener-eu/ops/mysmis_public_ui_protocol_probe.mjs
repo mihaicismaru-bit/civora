@@ -253,6 +253,36 @@ function previousPageConcordance(previousBody,currentDom,expected) {
   return proof.orderedExactRowsMatch===true &&
     proof.secondPageDuplicateDiagnostic?.exactIdentityComplete===true;
 }
+// A transition is a diagnostic observation only after all semantic gates pass.
+function acceptedTransition(concordance, second, transition, nonAdjacent) {
+  const c=concordance?.cumulativeDuplicateDiagnostic;
+  return concordance?.orderedExactRowsMatch===true &&
+    concordance.twoPageDuplicateDiagnostic?.exactIdentityComplete===true &&
+    c?.exactIdentityComplete===true && c.rowCount===second.last &&
+    c.pageCount===transition+1 &&
+    (transition!==2||nonAdjacent?.twoPageDuplicateDiagnostic?.exactIdentityComplete===true);
+}
+// Terminal summaries are deliberately not full-inventory or immutable-receipt claims.
+// The initial page is a DOM observation; subsequent pages are decoded fragments.
+function terminalCoverage(history, last, diagnostic, terminalStable) {
+  if(!terminalStable||!Array.isArray(history)||history.length<2||
+    !last||JSON.stringify(history.at(-1)?.range)!==JSON.stringify(last)||
+    !validDiagnosticHistory(history.slice(0,-1),last)||
+    typeof history.at(-1)?.html!=='string'||!history.at(-1).html.length||
+    Buffer.byteLength(history.at(-1).html)>=2000000||
+    history.reduce((n,p)=>n+Buffer.byteLength(p.html),0)>=MAX_DIAGNOSTIC_BYTES||
+    diagnostic?.exactIdentityComplete!==true||diagnostic.pageCount!==history.length||
+    diagnostic.rowCount!==last.last||
+    !Number.isSafeInteger(diagnostic.uniqueIdentityCount)||diagnostic.uniqueIdentityCount<1||
+    !Number.isSafeInteger(diagnostic.mirroredDuplicateRowCount)||diagnostic.mirroredDuplicateRowCount<0||
+    diagnostic.uniqueIdentityCount+diagnostic.mirroredDuplicateRowCount!==diagnostic.rowCount||
+    diagnostic.conflictingDuplicateRowCount!==0)return null;
+  return {pageCount:history.length,observedRows:last.last,totalRows:last.total,
+    uniqueIdentityCount:diagnostic.uniqueIdentityCount,mirroredDuplicateRowCount:diagnostic.mirroredDuplicateRowCount,
+    conflictingDuplicateRowCount:0,initialPageObservation:'DOM_ONLY',
+    decodedAjaxFragmentCount:history.length-1,terminalPageStillConcordant:true,
+    sourceRangeExhausted:last.last===last.total,fullInventoryProven:false};
+}
 function singleAjaxExchange(counters,requestCount,matchedCount) {
   return requestCount===1&&matchedCount===1&&counters.sameOriginPosts===1&&
     counters.officialAjaxPosts===1&&counters.officialAjax200===1&&
@@ -442,12 +472,26 @@ if (process.argv.includes('--self-test')) {
   assert.equal(compareDecodedTable(distantConflict,distantConflict,1,null,null,history,r4).cumulativeDuplicateDiagnostic.exactIdentityComplete,false);
   assert.equal(compareDecodedTable(distinct(4),distinct(4),1,null,null,[history[0],{...history[1],html:'<html></html>'},history[2]],r4).cumulativeDuplicateDiagnostic,undefined);
   assert.equal(compareDecodedTable(distinct(4),distinct(4),1,null,null,history,r3).status,'TABLE_COMPARISON_UNAVAILABLE');
-  console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit, native focus, decoded table, prior-page and cumulative concordance guards');
+  const accepted={orderedExactRowsMatch:true,twoPageDuplicateDiagnostic:{exactIdentityComplete:true},cumulativeDuplicateDiagnostic:full};
+  assert.equal(acceptedTransition(accepted,r4,3,null),true);
+  assert.equal(acceptedTransition({...accepted,orderedExactRowsMatch:false},r4,3,null),false);
+  assert.equal(acceptedTransition(accepted,r4,2,null),false);
+  assert.equal(acceptedTransition({...accepted,cumulativeDuplicateDiagnostic:{...full,pageCount:3,rowCount:3}},r3,2,null),false);
+  const completeHistory=[...history,{range:r4,html:distinct(4)}];
+  assert.deepEqual(terminalCoverage(completeHistory,r4,full,true),{pageCount:4,observedRows:4,totalRows:5,
+    uniqueIdentityCount:4,mirroredDuplicateRowCount:0,conflictingDuplicateRowCount:0,initialPageObservation:'DOM_ONLY',
+    decodedAjaxFragmentCount:3,terminalPageStillConcordant:true,sourceRangeExhausted:false,fullInventoryProven:false});
+  assert.equal(terminalCoverage(completeHistory,r4,full,false),null);
+  assert.equal(terminalCoverage(completeHistory,r4,{...full,uniqueIdentityCount:5},true),null);
+  assert.equal(terminalCoverage(completeHistory,r4,{...full,conflictingDuplicateRowCount:1},true),null);
+  assert.equal(terminalCoverage(completeHistory,r3,full,true),null);
+  assert.equal(terminalCoverage([history[0],history[2],completeHistory.at(-1)],r4,full,true),null);
+  console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit, native focus, decoded table, prior-page, cumulative and terminal concordance guards');
   process.exit(0);
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V7',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V8',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
@@ -695,6 +739,8 @@ try {
     ? compareDecodedTable(bytes.toString('utf8'),rendered.html,second.last-second.first+1,
         initialDom,initialRange.last-initialRange.first+1) : null;
   if(!singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))throw new Error('ambiguous late official ajax exchange');
+  if(!acceptedTransition(concordance,second,transition,nonAdjacent))
+    throw new Error('transition semantic guard failed');
   console.log(JSON.stringify({...base,status:'UI_NEXT_RANGE_AND_OFFICIAL_AJAX_OBSERVED',transition,counters,
     fetchedAt:new Date().toISOString(),firstRange:first,secondRange:second,
     activation,endpointClass:'SAME_ORIGIN_WWV_FLOW_AJAX',method:'POST',httpStatus:200,
@@ -703,15 +749,20 @@ try {
     decodedTableConcordance:concordance,
     nonAdjacentDuplicateDiagnostic:nonAdjacent?.twoPageDuplicateDiagnostic??null,
     rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
-  if(!concordance.orderedExactRowsMatch||!concordance.twoPageDuplicateDiagnostic?.exactIdentityComplete||
-    !concordance.cumulativeDuplicateDiagnostic?.exactIdentityComplete||
-    concordance.cumulativeDuplicateDiagnostic.rowCount!==second.last||
-    concordance.cumulativeDuplicateDiagnostic.pageCount!==transition+1||
-    (transition===2&&!nonAdjacent?.twoPageDuplicateDiagnostic?.exactIdentityComplete))
-    throw new Error('transition semantic guard failed');
   // Retain only the bounded decoded fragment for the next observation.
   previousBody=bytes.toString('utf8');
   history.push({range:second,html:previousBody});
+  if(transition===MAX_TRANSITIONS||second.last===second.total){
+    status='TERMINAL_PAGE_REOBSERVATION';
+    const terminal=await observeReportTable(before.controlIdentity.report);
+    const stable=terminal?.url===URL0&&JSON.stringify(range(terminal?.text))===JSON.stringify(second)&&
+      previousPageConcordance(previousBody,terminal.html,second.last-second.first+1);
+    const coverage=terminalCoverage(history,second,concordance.cumulativeDuplicateDiagnostic,stable);
+    if(!coverage||!singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))
+      throw new Error('terminal coverage or exchange unverified');
+    console.log(JSON.stringify({...base,status:'UI_BOUNDED_DIAGNOSTIC_COMPLETE',fetchedAt:new Date().toISOString(),
+      coverage,rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
+  }
   capture=false;
   first=second;
   }
