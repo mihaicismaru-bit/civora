@@ -74,13 +74,22 @@ function stableTarget(a,b) {
     [x.x,x.y,y.x,y.y].every(Number.isFinite)&&
     Math.abs(x.x-y.x)<=0.5&&Math.abs(x.y-y.y)<=0.5;
 }
-// Keyboard activation is a native browser fallback, never a synthetic DOM click.
+// Keyboard activation is native, never a synthetic DOM click.
 function stableFocus(a,b) {
   if(!a?.unambiguous||!b?.unambiguous||!a.focused||!b.focused||
      !a.focusTarget||!b.focusTarget||a.matchingNext!==b.matchingNext)return false;
   const x=a.focusTarget,y=b.focusTarget;
   return x.index===y.index&&x.report===y.report&&x.action===y.action&&
     x.nativeButton===true&&y.nativeButton===true;
+}
+// Exactly three independent focus observations must also bind the focused
+// native control to the initial report/action, not merely to each other.
+function confirmedNativeFocus(initial,samples) {
+  return samples.length===3 && samples.every(f=>sameControlIdentity(initial,f) &&
+    f.focused===true && f.focusTarget?.nativeButton===true &&
+    f.focusTarget.report===initial.controlIdentity.report &&
+    f.focusTarget.action===initial.controlIdentity.action) &&
+    stableFocus(samples[0],samples[1]) && stableFocus(samples[1],samples[2]);
 }
 // In-memory response/DOM concordance only. Reuse the existing Python
 // table parser and strict Info-link resolver; never print rows, links or HTML.
@@ -255,6 +264,17 @@ if (process.argv.includes('--self-test')) {
   for(const delta of [{index:1},{report:2},{action:'other'},{nativeButton:false}])
     assert.equal(stableFocus(focus,{...focus,focusTarget:{...focus.focusTarget,...delta}}),false);
   assert.equal(stableFocus(null,focus),false);
+  const boundFocus={...focus,controlIdentity:initial.controlIdentity};
+  assert.equal(confirmedNativeFocus(initial,[boundFocus,boundFocus,boundFocus]),true);
+  assert.equal(confirmedNativeFocus(initial,[boundFocus,boundFocus]),false);
+  assert.equal(confirmedNativeFocus(initial,[boundFocus,boundFocus,boundFocus,boundFocus]),false);
+  for(const delta of [{report:2},{action:'other'},{nativeButton:false}]) {
+    const changed={...boundFocus,focusTarget:{...boundFocus.focusTarget,...delta}};
+    assert.equal(confirmedNativeFocus(initial,[changed,changed,changed]),false);
+  }
+  assert.equal(confirmedNativeFocus(initial,[boundFocus,{...boundFocus,focused:false},boundFocus]),false);
+  assert.equal(confirmedNativeFocus(initial,[boundFocus,{...boundFocus,controlIdentity:{report:2,action:next.pagination}},boundFocus]),false);
+  assert.equal(confirmedNativeFocus(initial,[boundFocus,{...boundFocus,focusTarget:{...boundFocus.focusTarget,index:1}},boundFocus]),false);
   const counts={sameOriginPosts:1,officialAjaxPosts:1,officialAjax200:1,officialAjaxFinished:1,redirects:0};
   assert.equal(singleAjaxExchange(counts,1,1),true);
   for(const key of Object.keys(counts))assert.equal(singleAjaxExchange({...counts,[key]:counts[key]+1},1,1),false);
@@ -312,13 +332,13 @@ if (process.argv.includes('--self-test')) {
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V3',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V4',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
   openCallAuthorized:false,deadlineAuthorized:false,budgetAuthorized:false,eligibilityAuthorized:false,
   publicationEffect:'NONE'};
-let status='NOT_STARTED';
+let status='NOT_STARTED', activationAttempted=null, activeTransition=null;
 const browserStartup={polls:0,spawnError:false,exited:false,portReady:false};
 const counters={sameOriginPosts:0,officialAjaxPosts:0,officialAjax200:0,officialAjaxFinished:0,redirects:0};
 try {
@@ -415,6 +435,7 @@ try {
   capture=false;
   requests.clear();responses.clear();finished.clear();
   for(const key of Object.keys(counters))counters[key]=0;
+   activationAttempted=null;activeTransition=transition;
   // Do not click a generic enabled button. Require an explicit accessible
   // next label, then verify the hit target after scrolling into view.
   // Report only bounded structural counts, never attributes, labels or session data.
@@ -498,34 +519,28 @@ try {
   console.log(JSON.stringify({...base,status:'UI_CONTROL_SHAPE_ONLY',fetchedAt:new Date().toISOString(),
     firstRange:first,controlCounts:{enabled:before.enabled,explicitNext:before.explicitNext,hasPaginationData:before.hasPaginationData,rowSelects:before.rowSelects,matchingNext:before.matchingNext,unambiguous:before.unambiguous},
     beforeHittable:before.hittable,afterHittable:!!after?.hittable,hitPoll,paginationProtocolConfirmed:false}));
-  const target=after?.target;
-  let activation='NATIVE_MOUSE';
-  if(!confirmed||!target){
-    // No fallback after ambiguity. A single native Enter is permitted only
-    // when the same exact report/action remains focused over passive samples.
-    if(hitPoll.ambiguous||!after?.unambiguous)throw new Error('ambiguous next button');
-    const f0=await inspectTarget(false,true);
-    await sleep(150);
-    const f1=await inspectTarget(false);
-    await sleep(150);
-    const f2=await inspectTarget(false);
-    const focusConfirmed=[f0,f1,f2].every(f=>sameControlIdentity(before,f))&&stableFocus(f0,f1)&&stableFocus(f1,f2);
-    console.log(JSON.stringify({...base,status:'UI_NATIVE_FOCUS_ONLY',fetchedAt:new Date().toISOString(),
-      focusedSamples:[f0,f1,f2].filter(f=>f?.focused).length,focusConfirmed,paginationProtocolConfirmed:false}));
-    if(!focusConfirmed)throw new Error('no stable native focused next button');
-    activation='NATIVE_KEYBOARD_ENTER';
-    status='NEXT_TARGET_CONFIRMED';
-    capture=true;
-    await cdp('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,nativeVirtualKeyCode:13,text:'\r'});
-    await cdp('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,nativeVirtualKeyCode:13});
-  }else{
-    status='NEXT_TARGET_CONFIRMED';
-    capture=true;
-    await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',x:target.x,y:target.y});
-    await cdp('Input.dispatchMouseEvent',{type:'mousePressed',x:target.x,y:target.y,button:'left',buttons:1,clickCount:1});
-    await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',x:target.x,y:target.y,button:'left',buttons:0,clickCount:1});
-  }
-  status='NEXT_CLICKED';
+  // Controlled diagnostic: only the previously observed successful native
+   // keyboard path. Mouse hit geometry remains observational; do not send
+   // mouse events, nor retry after any ambiguous exchange. The observed
+   // double POST after a stable hit does not establish its cause.
+   if(hitPoll.ambiguous||!after?.unambiguous)throw new Error('ambiguous next button');
+   const f0=await inspectTarget(false,true);
+   await sleep(150);
+   const f1=await inspectTarget(false);
+   await sleep(150);
+   const f2=await inspectTarget(false);
+   const focusConfirmed=confirmedNativeFocus(before,[f0,f1,f2]);
+   console.log(JSON.stringify({...base,status:'UI_NATIVE_FOCUS_ONLY',transition,fetchedAt:new Date().toISOString(),
+     focusedSamples:[f0,f1,f2].filter(f=>f?.focused).length,focusConfirmed,paginationProtocolConfirmed:false}));
+   if(!focusConfirmed)throw new Error('no stable native focused next button');
+   const activation='NATIVE_KEYBOARD_ENTER';
+   status='NEXT_TARGET_CONFIRMED';
+   activationAttempted=activation;
+   activeTransition=transition;
+   capture=true;
+   await cdp('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,nativeVirtualKeyCode:13,text:'\r'});
+   await cdp('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,nativeVirtualKeyCode:13});
+   status='NEXT_CLICKED';
   let second;
   for(let i=0;i<80;i++){const s=await snapshot();const b=range(s?.text);if(s?.url===URL0&&nextRange(first,b)){second=b;break;}await sleep(250);}
   if(!second)throw new Error('contiguous next range not observed');
@@ -573,7 +588,7 @@ try {
   }
 } catch(e) {
   // No exception messages or arbitrary server values: could contain session data.
-  console.log(JSON.stringify({...base,status:'UI_PROTOCOL_DIAGNOSTIC_FAIL_CLOSED',stage:status,counters,browserStartup,
+  console.log(JSON.stringify({...base,status:'UI_PROTOCOL_DIAGNOSTIC_FAIL_CLOSED',stage:status,counters,browserStartup,activationAttempted,activeTransition,
     fetchedAt:new Date().toISOString(),paginationProtocolConfirmed:false}));
   process.exitCode=2;
 } finally {
