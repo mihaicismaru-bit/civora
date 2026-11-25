@@ -358,7 +358,7 @@ function diagnosticManifest(records, coverage, runId, runAttempt, fingerprints) 
   if(totalBytes>=MAX_DIAGNOSTIC_BYTES||previous.last!==coverage.observedRows||
     previous.total!==coverage.totalRows)return null;
   const manifest={schema:'MYSMIS_DECODED_OBSERVATION_MANIFEST_V3',canonicalUrl:URL0,runId,runAttempt,
-    parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V12',sourceFamily:'ROMANIA_MIPE_MYSMIS',
+    parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V13',sourceFamily:'ROMANIA_MIPE_MYSMIS',
     programmeFamily:'ROMANIA_MULTI_PROGRAMME',authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',
     observationState:'PROTOCOL_DISCOVERY_ONLY',pages,totalDecodedBytes:totalBytes,
     observedRows:coverage.observedRows,totalRows:coverage.totalRows,
@@ -370,6 +370,29 @@ function diagnosticManifest(records, coverage, runId, runAttempt, fingerprints) 
     materialFactUse:false,publishAuthorized:false,openCallAuthorized:false,deadlineAuthorized:false,
     budgetAuthorized:false,eligibilityAuthorized:false,publicationEffect:'NONE'};
   return {...manifest,manifestSha256:sha(JSON.stringify(manifest))};
+}
+// Replay the exact decoded entity representations in memory before emitting
+// the diagnostic manifest. This is not wire-byte proof or persistent handoff.
+// A text re-encoding that changes bytes (including a stripped BOM) fails closed.
+function replayDecodedHistory(records,history,coverage,fingerprints) {
+  if(!Array.isArray(records)||!Array.isArray(history)||records.length!==history.length||
+    records.length<2||records.length>MAX_TRANSITIONS+1)return false;
+  for(let i=0;i<records.length;i++){
+    const p=records[i],item=history[i];
+    if(!item||typeof item.html!=='string'||!p||
+      JSON.stringify(p.range)!==JSON.stringify(item.range)||
+      Buffer.byteLength(item.html)!==p.decodedBodyBytes||
+      sha(item.html)!==p.cdpDecodedBodySha256)return false;
+  }
+  const last=history.at(-1);
+  const replay=compareDecodedTable(last.html,last.html,last.range.last-last.range.first+1,
+    null,null,history.slice(0,-1),last.range);
+  const recomputed=terminalCoverage(history,last.range,replay.cumulativeDuplicateDiagnostic,true,true);
+  return replay.orderedExactRowsMatch===true&&recomputed!==null&&
+    JSON.stringify(recomputed)===JSON.stringify(coverage)&&
+    !!fingerprints&&!!replay.boundedSemanticFingerprints&&
+    ['identitySetSha256','uniqueIdentityCount','materialSha256','operationalSha256'].every(
+      k=>fingerprints[k]===replay.boundedSemanticFingerprints[k]);
 }
 function singleAjaxExchange(counters,requestCount,matchedCount) {
   return requestCount===1&&matchedCount===1&&counters.sameOriginPosts===1&&
@@ -655,12 +678,25 @@ if (process.argv.includes('--self-test')) {
   const sevenRecords=seven.map((p,i)=>({...records[0],range:p.range,fetchedAt:'2026-11-25T08:00:0'+i+'.000Z',method:i?'POST':'GET',endpointClass:i?'SAME_ORIGIN_WWV_FLOW_AJAX':'EXACT_CANONICAL_DOCUMENT',cdpDecodedBodySha256:sha(p.html),decodedBodyBytes:Buffer.byteLength(p.html)}));
   assert.equal(diagnosticManifest(sevenRecords,sevenCoverage,'123','1',sevenResult.boundedSemanticFingerprints).pages.length,7);
   assert.equal(validDiagnosticHistory(seven,{first:8,last:8,total:8}),false);
+  // Replay must bind original decoded representations, not equivalent DOM markup.
+  assert.equal(replayDecodedHistory(records,completeHistory,cov,fingerprints),true);
+  assert.equal(replayDecodedHistory(sevenRecords,seven,sevenCoverage,sevenResult.boundedSemanticFingerprints),true);
+  assert.equal(replayDecodedHistory(records,completeHistory.slice(1),cov,fingerprints),false);
+  const tamperedHistory=[{...completeHistory[0],html:'<html><body>'+completeHistory[0].html+'</body></html>'},...completeHistory.slice(1)];
+  assert.equal(replayDecodedHistory(records,tamperedHistory,cov,fingerprints),false);
+  assert.equal(replayDecodedHistory(records.map((p,i)=>i===0?{...p,decodedBodyBytes:p.decodedBodyBytes+1}:p),completeHistory,cov,fingerprints),false);
+  assert.equal(replayDecodedHistory(records.map((p,i)=>i===0?{...p,cdpDecodedBodySha256:'0'.repeat(64)}:p),completeHistory,cov,fingerprints),false);
+  assert.equal(replayDecodedHistory([records[1],records[0],...records.slice(2)],completeHistory,cov,fingerprints),false);
+  assert.equal(replayDecodedHistory(records,completeHistory,{...cov,uniqueIdentityCount:5},fingerprints),false);
+  assert.equal(replayDecodedHistory(records,completeHistory,cov,materialChange),false);
+  assert.equal(replayDecodedHistory(records,completeHistory,cov,membershipChange),false);
+  assert.equal(replayDecodedHistory(records,completeHistory,cov,operationalChange),false);
   console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit, native focus, decoded table, prior-page, cumulative and terminal concordance guards');
   process.exit(0);
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V12',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V13',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
@@ -869,7 +905,7 @@ try {
     diagnosticRecords.push(initialRecord);
     console.log(JSON.stringify({...base,...initialRecord,status:'UI_INITIAL_DECODED_DOCUMENT_CONCORDANT',
       firstRange:first,rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
-    initialDom=firstDom;history.push({range:first,html:firstDom});
+    initialDom=firstDom;history.push({range:first,html:documentText});
   }
   if(transition>1){
     status='PRIOR_PAGE_REOBSERVATION';
@@ -979,10 +1015,14 @@ try {
     const coverage=terminalCoverage(history,second,concordance.cumulativeDuplicateDiagnostic,stable,true);
     if(!coverage||!singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))
       throw new Error('terminal coverage or exchange unverified');
+    status='DECODED_HISTORY_REPLAY';
+    if(!replayDecodedHistory(diagnosticRecords,history,coverage,concordance.boundedSemanticFingerprints)||
+      !singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))
+      throw new Error('decoded history replay unverified');
     const manifest=diagnosticManifest(diagnosticRecords,coverage,base.runId,process.env.GITHUB_RUN_ATTEMPT||'1',concordance.boundedSemanticFingerprints);
     if(!manifest)throw new Error('ordered diagnostic manifest unverified');
     console.log(JSON.stringify({...base,status:'UI_BOUNDED_DIAGNOSTIC_COMPLETE',fetchedAt:new Date().toISOString(),
-      coverage,diagnosticManifest:manifest,rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
+      coverage,diagnosticManifest:manifest,decodedHistoryReplayVerified:true,rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
   }
   capture=false;
   first=second;
