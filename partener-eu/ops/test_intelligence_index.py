@@ -100,6 +100,29 @@ def main():
             assert records[0]["decisionUse"] == decision
             assert records[0]["publishMaterialFacts"] is False
             assert records[0]["observedAt"] == observed
+        # AFIR LKG must remain searchable but cannot be labelled current evidence.
+        # The corpus timestamp and material resolution candidate are preserved.
+        for status, observed, expected, decision in (
+            ("PASS", "2026-08-12T08:00:00Z", "CURRENT", "OFFICIAL_EVIDENCE_INDEX"),
+            ("PASS", "2026-08-11T08:00:00Z", "STALE", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
+            ("FAIL", "2026-08-12T08:00:00Z", "CURRENT", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
+            ("DEGRADED_LAST_KNOWN_GOOD_PRESERVED", "2026-08-12T08:00:00Z", "CURRENT", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
+            ("PASS", None, "UNKNOWN", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
+        ):
+            source, records = mod.afir_records({
+                "status": status, "generatedAt": observed,
+                "items": [{"url": "https://www.afir.ro/doc/test.pdf",
+                           "sha256": "preserved", "materialChangeCandidate": True}],
+            }, reference, {"freshnessSlaHours": 4})
+            assert source["freshness"]["status"] == expected
+            assert len(records) == 1
+            row = records[0]
+            assert row["decisionUse"] == decision
+            assert row["observedAt"] == observed
+            assert row["fingerprint"] == "preserved"
+            assert row["materialFactAction"] == "RESOLUTION_REQUIRED"
+            assert row["publishMaterialFacts"] is False
+
         material = next(row for row in index["records"] if row.get("materialChangeCandidate"))
         assert material["materialFactAction"] == "RESOLUTION_REQUIRED"
         assert material["publishMaterialFacts"] is False
