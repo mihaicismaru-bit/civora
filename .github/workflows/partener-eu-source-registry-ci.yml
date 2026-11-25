@@ -163,12 +163,21 @@ jobs:
           node --check partener-eu/ops/mysmis_public_ui_protocol_probe.mjs
           node partener-eu/ops/mysmis_public_ui_protocol_probe.mjs --self-test
 
-      - name: Observe one public MySMIS next-page UI request (draft diagnostic only)
+      - name: Observe bounded public MySMIS page range (draft diagnostic only)
         if: github.event_name == 'pull_request' && github.head_ref == 'partener/mysmis-paginated-replay-1429'
         continue-on-error: true
         timeout-minutes: 2
         run: |
-          timeout --kill-after=5s 70s node partener-eu/ops/mysmis_public_ui_protocol_probe.mjs
+          # V15 reached 750/1002 rows at the 70s outer deadline. Allow a
+          # bounded 105s single session, with kill grace inside the 2m step.
+          # No additional transitions, retries or canonical authorization.
+          set +e
+          timeout --kill-after=5s 105s node partener-eu/ops/mysmis_public_ui_protocol_probe.mjs
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+            printf '{"status":"UI_DIAGNOSTIC_PROCESS_FAILED_CLOSED","exitCode":%s,"rawPersisted":false,"immutableReceipt":false,"materialFactUse":false,"publishAuthorized":false,"openCallAuthorized":false,"publicationEffect":"NONE"}\n' "$rc"
+          fi
+          exit "$rc"
 
       - name: Validate low-information fail-closed behavior
         run: python partener-eu/ops/test_source_registry_low_info.py
