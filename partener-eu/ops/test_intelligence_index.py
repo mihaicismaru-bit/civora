@@ -21,9 +21,9 @@ def fixture_state(root):
         "schemaVersion": 1, "status": "PASS", "generatedAt": "2026-08-12T08:00:00Z",
         "policy": {"failClosed": True, "materialFactsAutoPromoted": False},
         "items": [
-            {"url": "https://www.afir.ro/finantare/test/", "title": "Test AFIR", "sha256": "a", "contentType": "text/html", "textExtracted": True, "materialChangeCandidate": False, "materialFactAction": "NONE"},
-            {"url": "https://afir.ro/finantare/test", "title": "Duplicate", "sha256": "a", "contentType": "text/html", "textExtracted": True, "materialChangeCandidate": False, "materialFactAction": "NONE"},
-            {"url": "https://www.afir.ro/doc/test.pdf", "title": "Ghid", "sha256": "b", "contentType": "application/pdf", "textExtracted": True, "materialChangeCandidate": True, "materialFactAction": "RESOLUTION_TASK_ONLY"},
+            {"url": "https://www.afir.ro/finantare/test/", "title": "Test AFIR", "observedAt": "2026-08-12T08:00:00Z", "sha256": "a", "contentType": "text/html", "textExtracted": True, "materialChangeCandidate": False, "materialFactAction": "NONE"},
+            {"url": "https://afir.ro/finantare/test", "title": "Duplicate", "observedAt": "2026-08-12T08:00:00Z", "sha256": "a", "contentType": "text/html", "textExtracted": True, "materialChangeCandidate": False, "materialFactAction": "NONE"},
+            {"url": "https://www.afir.ro/doc/test.pdf", "title": "Ghid", "observedAt": "2026-08-12T08:00:00Z", "sha256": "b", "contentType": "application/pdf", "textExtracted": True, "materialChangeCandidate": True, "materialFactAction": "RESOLUTION_TASK_ONLY"},
         ],
     })
     write(root / "peo_calendar_state.json", {
@@ -107,7 +107,7 @@ def main():
             state = {
                 "status": status,
                 "lastRun": {"observedAt": observed, "sourceAvailable": available},
-                "items": [{"url": "https://mfe.gov.ro/ghid/sample", "title": "Sample"}],
+                "items": [{"url": "https://mfe.gov.ro/ghid/sample", "title": "Sample", "observedAt": observed}],
             }
             source, records = mod.mipe_records(state, reference, {"freshnessSlaHours": 4})
             assert source["freshness"]["status"] == expected, source
@@ -128,7 +128,7 @@ def main():
             source, records = mod.afir_records({
                 "status": status, "generatedAt": observed,
                 "items": [{"url": "https://www.afir.ro/doc/test.pdf",
-                           "sha256": "preserved", "materialChangeCandidate": True}],
+                           "sha256": "preserved", "observedAt": observed, "materialChangeCandidate": True}],
             }, reference, {"freshnessSlaHours": 4})
             assert source["freshness"]["status"] == expected
             assert len(records) == 1
@@ -138,6 +138,42 @@ def main():
             assert row["fingerprint"] == "preserved"
             assert row["materialFactAction"] == "RESOLUTION_REQUIRED"
             assert row["publishMaterialFacts"] is False
+
+        # A successful fresh corpus cannot refresh stale, future, malformed,
+        # or missing per-item observations. Preserve the actual observation.
+        for timestamp, expected in (
+            ("2026-08-12T08:30:00Z", "CURRENT"),
+            ("2026-08-12T06:00:00Z", "CURRENT"),
+            ("2026-08-12T05:59:59Z", "STALE"),
+            ("2026-08-12T10:00:01Z", "UNKNOWN"),
+            ("invalid", "UNKNOWN"),
+            (None, "UNKNOWN"),
+        ):
+            for family, build, state, url in (
+                ("AFIR", mod.afir_records,
+                 {"status": "PASS", "generatedAt": "2026-08-12T09:00:00Z"},
+                 "https://afir.ro/doc/sample.pdf"),
+                ("MIPE", mod.mipe_records,
+                 {"status": "OK", "lastRun": {"sourceAvailable": True,
+                                               "observedAt": "2026-08-12T09:00:00Z"}},
+                 "https://mfe.gov.ro/ghid/sample"),
+            ):
+                item = {"url": url, "title": "Sample", "sha256": "preserved"}
+                if timestamp is not None:
+                    item["observedAt"] = timestamp
+                state["items"] = [item]
+                source, records = build(state, reference, {"freshnessSlaHours": 4})
+                assert source["freshness"]["status"] == "CURRENT", family
+                assert len(records) == 1
+                row = records[0]
+                assert row["observedAt"] == timestamp
+                assert row["freshness"] == expected, (family, row)
+                assert row["decisionUse"] == (
+                    "OFFICIAL_EVIDENCE_INDEX" if expected == "CURRENT"
+                    else "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+                )
+                assert row["fingerprint"] == "preserved"
+                assert row["publishMaterialFacts"] is False
 
         material = next(row for row in index["records"] if row.get("materialChangeCandidate"))
         assert material["materialFactAction"] == "RESOLUTION_REQUIRED"

@@ -118,6 +118,17 @@ def freshness(observed_at: Any, reference: dt.datetime, max_age_hours: int) -> D
     }
 
 
+def evidence_record_freshness(
+    source: Dict[str, Any], observed_at: Any, reference: dt.datetime, sla: int
+) -> str:
+    """A current corpus does not refresh a retained or unobserved item."""
+    source_status = source["freshness"]["status"]
+    item_status = freshness(observed_at, reference, sla)["status"]
+    if "UNKNOWN" in (source_status, item_status):
+        return "UNKNOWN"
+    return "STALE" if "STALE" in (source_status, item_status) else "CURRENT"
+
+
 def afir_records(
     state: Dict[str, Any], reference: dt.datetime, config: Dict[str, Any]
 ) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
@@ -141,6 +152,8 @@ def afir_records(
         url = canonical_url(row.get("url"))
         if not url or urllib.parse.urlparse(url).hostname != "afir.ro":
             continue
+        item_observed_at = row.get("observedAt")
+        item_freshness = evidence_record_freshness(source, item_observed_at, reference, sla)
         material_candidate = bool(row.get("materialChangeCandidate"))
         content_type = str(row.get("contentType") or "").lower()
         path = urllib.parse.urlparse(url).path.lower()
@@ -156,11 +169,11 @@ def afir_records(
             "programme": "AFIR / PS PAC 2023-2027",
             "canonicalUrl": url,
             "fingerprint": row.get("sha256"),
-            "observedAt": observed_at,
-            "freshness": source["freshness"]["status"],
+            "observedAt": item_observed_at,
+            "freshness": item_freshness,
             "textExtracted": bool(row.get("textExtracted")),
             "decisionUse": ("OFFICIAL_EVIDENCE_INDEX"
-                            if source["status"] == "PASS" and source["freshness"]["status"] == "CURRENT"
+                            if source["status"] == "PASS" and item_freshness == "CURRENT"
                             else "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
             "materialChangeCandidate": material_candidate,
             "materialFactAction": "RESOLUTION_REQUIRED" if material_candidate else "NO_AUTO_PROMOTION",
@@ -254,12 +267,13 @@ def mipe_records(
         "lastKnownGoodPreserved": "LAST_KNOWN_GOOD_PRESERVED" in str(state.get("status") or ""),
         "failClosed": True,
     }
-    evidence_current = verified and evidence_freshness["status"] == "CURRENT"
     records = []
     for row in state.get("items") or []:
         url = canonical_url(row.get("url") or row.get("sourceUrl"))
         if not url or urllib.parse.urlparse(url).hostname != "mfe.gov.ro":
             continue
+        item_observed_at = row.get("observedAt")
+        item_freshness = evidence_record_freshness(source, item_observed_at, reference, sla)
         records.append({
             "id": stable_id("mipe", url),
             "sourceId": source["id"],
@@ -269,9 +283,9 @@ def mipe_records(
             "programme": row.get("programme") or "MIPE",
             "canonicalUrl": url,
             "fingerprint": row.get("sha256") or row.get("contentHash"),
-            "observedAt": row.get("observedAt") or observed_at,
-            "freshness": source["freshness"]["status"],
-            "decisionUse": "OFFICIAL_EVIDENCE_INDEX" if evidence_current else "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+            "observedAt": item_observed_at,
+            "freshness": item_freshness,
+            "decisionUse": "OFFICIAL_EVIDENCE_INDEX" if verified and item_freshness == "CURRENT" else "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
             "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
             "publishMaterialFacts": False,
             "blockedFactClasses": MATERIAL_FACT_CLASSES,
