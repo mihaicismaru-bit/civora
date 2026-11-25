@@ -107,9 +107,10 @@ def canonical_url(value: Any) -> Optional[str]:
 
 def freshness(observed_at: Any, reference: dt.datetime, max_age_hours: int) -> Dict[str, Any]:
     observed = parse_time(observed_at)
-    if not observed:
+    # A receipt from the future cannot establish freshness at this replay time.
+    if not observed or observed > reference:
         return {"status": "UNKNOWN", "ageHours": None, "maxAgeHours": max_age_hours}
-    age = max(0.0, (reference - observed).total_seconds() / 3600)
+    age = (reference - observed).total_seconds() / 3600
     return {
         "status": "CURRENT" if age <= max_age_hours else "STALE",
         "ageHours": round(age, 2),
