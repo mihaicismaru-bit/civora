@@ -14,6 +14,26 @@ const URL0 = 'https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/fin
 const origin = new URL(URL0).origin;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const sha = s => createHash('sha256').update(s).digest('hex');
+// Startup is local and passive; a slow runner is not evidence of source failure.
+// Keep the existing outer workflow timeout and never restart or navigate here.
+const STARTUP_POLLS=60, STARTUP_INTERVAL_MS=250;
+function parseDevToolsPort(contents) {
+  const first=String(contents).split(/\r?\n/)[0];
+  if(!/^[1-9]\d{0,4}$/.test(first))return null;
+  const port=Number(first);
+  return port<=65535?port:null;
+}
+async function pollDevToolsPort(readPort,pause,state) {
+  for(let i=0;i<STARTUP_POLLS&&!state.spawnError&&!state.exited;i++){
+    state.polls++;
+    let port=null;
+    try{port=parseDevToolsPort(await readPort());}catch{}
+    if(state.spawnError||state.exited)return null;
+    if(port)return port;
+    if(i+1<STARTUP_POLLS)await pause(STARTUP_INTERVAL_MS);
+  }
+  return null;
+}
 function range(s) {
   const matches = [...String(s).matchAll(/\b(\d[\d,.]*)\s*[-–]\s*(\d[\d,.]*)\s+of\s+(\d[\d,.]*)\b/gi)];
   const values = [...new Set(matches.map(m => JSON.stringify(m.slice(1).map(x=>Number(x.replace(/[,.]/g,''))))))];
@@ -204,6 +224,29 @@ function singleAjaxExchange(counters,requestCount,matchedCount) {
     counters.officialAjaxFinished===1&&counters.redirects===0;
 }
 if (process.argv.includes('--self-test')) {
+  assert.equal(parseDevToolsPort('9222\n/devtools/browser/example'),9222);
+  assert.equal(parseDevToolsPort('65535\r\n/path'),65535);
+  for(const invalid of ['','0','65536','1e3',' 9222','9222.5','-1'])
+    assert.equal(parseDevToolsPort(invalid),null);
+  const startupState=()=>({polls:0,spawnError:false,exited:false});
+  let startup=startupState(), waits=0;
+  assert.equal(await pollDevToolsPort(async()=>startup.polls===45?'9222\n/path':'',
+    async ms=>{assert.equal(ms,250);waits++;},startup),9222);
+  assert.equal(startup.polls,45);
+  assert.equal(waits,44);
+  startup=startupState();waits=0;
+  assert.equal(await pollDevToolsPort(async()=>{throw Error('not ready');},
+    async()=>{waits++;},startup),null);
+  assert.equal(startup.polls,60);
+  assert.equal(waits,59);
+  startup=startupState();
+  assert.equal(await pollDevToolsPort(async()=>{startup.exited=true;return '9222';},
+    async()=>{throw Error('must not wait');},startup),null);
+  assert.equal(startup.polls,1);
+  startup=startupState();startup.spawnError=true;
+  assert.equal(await pollDevToolsPort(async()=>{throw Error('must not read');},
+    async()=>{throw Error('must not wait');},startup),null);
+  assert.equal(startup.polls,0);
   assert.deepEqual(range('1 - 50 of 1,002'),{first:1,last:50,total:1002});
   assert.equal(range('1 - 50 of 1002 51 - 100 of 1002'),null);
   assert.equal(range('1 - 50 of 10'),null);
@@ -332,14 +375,14 @@ if (process.argv.includes('--self-test')) {
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V4',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V5',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
   openCallAuthorized:false,deadlineAuthorized:false,budgetAuthorized:false,eligibilityAuthorized:false,
   publicationEffect:'NONE'};
 let status='NOT_STARTED', activationAttempted=null, activeTransition=null;
-const browserStartup={polls:0,spawnError:false,exited:false,portReady:false};
+const browserStartup={polls:0,maxPolls:STARTUP_POLLS,intervalMs:STARTUP_INTERVAL_MS,elapsedMs:null,spawnError:false,exited:false,portReady:false};
 const counters={sameOriginPosts:0,officialAjaxPosts:0,officialAjax200:0,officialAjaxFinished:0,redirects:0};
 try {
   dir=await mkdtemp(join(tmpdir(),'mysmis-public-ui-'));
@@ -352,18 +395,13 @@ try {
   status='BROWSER_SPAWN_REQUESTED';
   chrome.on('error',()=>{browserStartup.spawnError=true;});
   chrome.on('exit',()=>{browserStartup.exited=true;});
-  let port;
-  for(let i=0;i<40&&!port&&!browserStartup.spawnError&&!browserStartup.exited;i++){
-    browserStartup.polls++;
-    try {
-      const p=Number((await readFile(join(dir,'DevToolsActivePort'),'utf8')).split('\n')[0]);
-      if(Number.isInteger(p)&&p>0&&p<=65535)port=p;
-    }catch{}
-    if(!port) await sleep(250);
-  }
+  const startupStarted=performance.now();
+  const port=await pollDevToolsPort(()=>readFile(join(dir,'DevToolsActivePort'),'utf8'),sleep,browserStartup);
+  browserStartup.elapsedMs=Math.round(performance.now()-startupStarted);
   browserStartup.portReady=!!port;
   if(!port||browserStartup.spawnError||browserStartup.exited) throw new Error('browser unavailable');
   status='DEVTOOLS_PORT_READY';
+  console.log(JSON.stringify({...base,status:'UI_BROWSER_STARTUP_ONLY',browserStartup,fetchedAt:new Date().toISOString(),paginationProtocolConfirmed:false}));
   const tabs=await (await fetch('http://127.0.0.1:'+port+'/json/list',{signal:AbortSignal.timeout(3000)})).json();
   const tab=tabs.find(t=>t.type==='page');
   if(!tab?.webSocketDebuggerUrl) throw new Error('no page');
