@@ -256,7 +256,18 @@ function previousPageConcordance(previousBody,currentDom,expected) {
 function singleAjaxExchange(counters,requestCount,matchedCount) {
   return requestCount===1&&matchedCount===1&&counters.sameOriginPosts===1&&
     counters.officialAjaxPosts===1&&counters.officialAjax200===1&&
-    counters.officialAjaxFinished===1&&counters.redirects===0;
+    counters.officialAjaxFinished===1&&counters.redirects===0&&
+    counters.officialAjaxNon200===0&&counters.officialAjaxFailed===0;
+}
+// Fixed vocabulary only; no request IDs, URLs, raw errors or response contents.
+function ajaxObservation(counters,requestCount,matchedCount,rangeObserved) {
+  if(counters.redirects||counters.sameOriginPosts>1||counters.officialAjaxPosts>1||requestCount>1)return 'AMBIGUOUS_EXCHANGE';
+  if(counters.officialAjaxNon200)return 'HTTP_NON_200';
+  if(counters.officialAjaxFailed)return 'NETWORK_LOADING_FAILED';
+  if(counters.officialAjaxPosts===0)return 'OFFICIAL_POST_UNOBSERVED';
+  if(counters.officialAjax200===0)return 'HTTP_RESPONSE_UNOBSERVED';
+  if(!singleAjaxExchange(counters,requestCount,matchedCount))return 'HTTP_COMPLETION_UNOBSERVED';
+  return rangeObserved?'EXCHANGE_AND_RANGE_OBSERVED':'DOM_RANGE_UNOBSERVED';
 }
 if (process.argv.includes('--self-test')) {
   assert.equal(parseDevToolsPort('9222\n/devtools/browser/example'),9222);
@@ -353,11 +364,20 @@ if (process.argv.includes('--self-test')) {
   assert.equal(confirmedNativeFocus(initial,[boundFocus,{...boundFocus,focused:false},boundFocus]),false);
   assert.equal(confirmedNativeFocus(initial,[boundFocus,{...boundFocus,controlIdentity:{report:2,action:next.pagination}},boundFocus]),false);
   assert.equal(confirmedNativeFocus(initial,[boundFocus,{...boundFocus,focusTarget:{...boundFocus.focusTarget,index:1}},boundFocus]),false);
-  const counts={sameOriginPosts:1,officialAjaxPosts:1,officialAjax200:1,officialAjaxFinished:1,redirects:0};
+  const counts={sameOriginPosts:1,officialAjaxPosts:1,officialAjax200:1,officialAjaxFinished:1,redirects:0,officialAjaxNon200:0,officialAjaxFailed:0};
   assert.equal(singleAjaxExchange(counts,1,1),true);
   for(const key of Object.keys(counts))assert.equal(singleAjaxExchange({...counts,[key]:counts[key]+1},1,1),false);
   assert.equal(singleAjaxExchange(counts,2,1),false);
   assert.equal(singleAjaxExchange(counts,1,0),false);
+  assert.equal(ajaxObservation(counts,1,1,true),'EXCHANGE_AND_RANGE_OBSERVED');
+  assert.equal(ajaxObservation(counts,1,1,false),'DOM_RANGE_UNOBSERVED');
+  assert.equal(ajaxObservation({...counts,officialAjax200:0,officialAjaxFinished:0},1,0,false),'HTTP_RESPONSE_UNOBSERVED');
+  assert.equal(ajaxObservation({...counts,officialAjaxFinished:0},1,0,true),'HTTP_COMPLETION_UNOBSERVED');
+  assert.equal(ajaxObservation({...counts,officialAjaxNon200:1},1,0,false),'HTTP_NON_200');
+  assert.equal(ajaxObservation({...counts,officialAjaxFailed:1},1,0,false),'NETWORK_LOADING_FAILED');
+  assert.equal(ajaxObservation({...counts,officialAjaxPosts:2},2,1,true),'AMBIGUOUS_EXCHANGE');
+  assert.equal(ajaxObservation({...counts,redirects:1},1,1,true),'AMBIGUOUS_EXCHANGE');
+  assert.equal(ajaxObservation({...counts,officialAjaxPosts:0,officialAjax200:0,officialAjaxFinished:0},0,0,false),'OFFICIAL_POST_UNOBSERVED');
   const href='/ords/repo_bo/r/mysmis-2021/detaliu-apel?p201_cod_apel=PRT%2F1';
   const fixture='<table><tr>'+['Program operațional','Tip apel','Apel','Stare apel','Buget nerambursabil apel','Info'].map(x=>'<th>'+x+'</th>').join('')+'</tr><tr><td>P</td><td>T</td><td>A</td><td>S</td><td>1</td><td><a href="'+href+'">i</a></td></tr></table>';
   const document='<html><body>'+fixture+'</body></html>';
@@ -427,7 +447,7 @@ if (process.argv.includes('--self-test')) {
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V6',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V7',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
@@ -435,7 +455,8 @@ const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
   publicationEffect:'NONE'};
 let status='NOT_STARTED', activationAttempted=null, activeTransition=null;
 const browserStartup={polls:0,maxPolls:STARTUP_POLLS,intervalMs:STARTUP_INTERVAL_MS,elapsedMs:null,spawnError:false,exited:false,portReady:false};
-const counters={sameOriginPosts:0,officialAjaxPosts:0,officialAjax200:0,officialAjaxFinished:0,redirects:0};
+const counters={sameOriginPosts:0,officialAjaxPosts:0,officialAjax200:0,officialAjaxFinished:0,redirects:0,officialAjaxNon200:0,officialAjaxFailed:0};
+let exchangeObservation=null, rangeObserved=false;
 try {
   dir=await mkdtemp(join(tmpdir(),'mysmis-public-ui-'));
   status='PROFILE_CREATED';
@@ -478,7 +499,11 @@ try {
         try {if(new URL(p.request.url).origin===origin)counters.sameOriginPosts++;}catch{}
         if(officialAjax(p.request.url)){requests.set(p.requestId,true);counters.officialAjaxPosts++;}
       }
-      if(m.method==='Network.responseReceived' && requests.has(p.requestId) && officialAjax(p.response?.url) && p.response.status===200){responses.set(p.requestId,{mimeType:String(p.response.mimeType||'').split(';')[0]});counters.officialAjax200++;}
+      if(m.method==='Network.responseReceived' && requests.has(p.requestId) && officialAjax(p.response?.url)){
+        if(p.response.status===200){responses.set(p.requestId,{mimeType:String(p.response.mimeType||'').split(';')[0]});counters.officialAjax200++;}
+        else counters.officialAjaxNon200++;
+      }
+      if(m.method==='Network.loadingFailed' && requests.has(p.requestId))counters.officialAjaxFailed++;
       if(m.method==='Network.loadingFinished' && requests.has(p.requestId)){finished.add(p.requestId);counters.officialAjaxFinished++;}
     } catch {}
   });
@@ -526,7 +551,7 @@ try {
   capture=false;
   requests.clear();responses.clear();finished.clear();
   for(const key of Object.keys(counters))counters[key]=0;
-   activationAttempted=null;activeTransition=transition;
+   activationAttempted=null;activeTransition=transition;exchangeObservation=null;rangeObserved=false;
   // Do not click a generic enabled button. Require an explicit accessible
   // next label, then verify the hit target after scrolling into view.
   // Report only bounded structural counts, never attributes, labels or session data.
@@ -633,8 +658,17 @@ try {
    await cdp('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,nativeVirtualKeyCode:13});
    status='NEXT_CLICKED';
   let second;
-  for(let i=0;i<80;i++){const s=await snapshot();const b=range(s?.text);if(s?.url===URL0&&nextRange(first,b)){second=b;break;}await sleep(250);}
-  if(!second)throw new Error('contiguous next range not observed');
+  // Wait passively for both the current DOM range and the completed exchange.
+  // No repeated activation, no enlarged polling budget, no status promotion.
+  for(let i=0;i<80;i++){
+    const s=await snapshot();const b=range(s?.text);
+    rangeObserved=s?.url===URL0&&nextRange(first,b);
+    exchangeObservation=ajaxObservation(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length,rangeObserved);
+    if(exchangeObservation==='EXCHANGE_AND_RANGE_OBSERVED'){second=b;break;}
+    if(['AMBIGUOUS_EXCHANGE','HTTP_NON_200','NETWORK_LOADING_FAILED'].includes(exchangeObservation))break;
+    await sleep(250);
+  }
+  if(!second)throw new Error('completed official exchange and contiguous next range not jointly observed');
   status='NEXT_RANGE_CONFIRMED';
   await sleep(500);
   const ids=[...responses.keys()].filter(k=>finished.has(k));
@@ -683,7 +717,7 @@ try {
   }
 } catch(e) {
   // No exception messages or arbitrary server values: could contain session data.
-  console.log(JSON.stringify({...base,status:'UI_PROTOCOL_DIAGNOSTIC_FAIL_CLOSED',stage:status,counters,browserStartup,activationAttempted,activeTransition,
+  console.log(JSON.stringify({...base,status:'UI_PROTOCOL_DIAGNOSTIC_FAIL_CLOSED',stage:status,counters,browserStartup,activationAttempted,activeTransition,exchangeObservation,
     fetchedAt:new Date().toISOString(),paginationProtocolConfirmed:false}));
   process.exitCode=2;
 } finally {
