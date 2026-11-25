@@ -80,6 +80,20 @@ def main():
         assert failed_mipe["freshness"]["status"] == "UNKNOWN"
         assert "MIPE_CORPUS" in index["summary"]["materialStaleOrUnknownSources"]
 
+        # Future-dated receipts must not be clamped to a current zero age.
+        for timestamp, expected, age in (
+            ("2026-08-12T10:00:01Z", "UNKNOWN", None),
+            ("2026-08-12T13:00:00+02:00", "UNKNOWN", None),
+            ("2026-08-12T10:00:00Z", "CURRENT", 0),
+            ("2026-08-12T06:00:00Z", "CURRENT", 4),
+            ("2026-08-12T05:59:59Z", "STALE", 4),
+            ("invalid", "UNKNOWN", None),
+            (None, "UNKNOWN", None),
+        ):
+            assert mod.freshness(timestamp, reference, 4) == {
+                "status": expected, "ageHours": age, "maxAgeHours": 4,
+            }
+
         # A fresh attempt, an available-but-degraded source, and a stale
         # successful response must never turn LKG into current evidence.
         for status, available, observed, expected, decision in (
@@ -88,6 +102,7 @@ def main():
             ("DEGRADED_LAST_KNOWN_GOOD_PRESERVED", True, "2026-08-12T08:00:00Z", "UNKNOWN", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
             ("OK", "false", "2026-08-12T08:00:00Z", "UNKNOWN", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
             ("OK", True, "2026-08-11T08:00:00Z", "STALE", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
+            ("OK", True, "2026-08-12T10:00:01Z", "UNKNOWN", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
         ):
             state = {
                 "status": status,
@@ -108,6 +123,7 @@ def main():
             ("FAIL", "2026-08-12T08:00:00Z", "CURRENT", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
             ("DEGRADED_LAST_KNOWN_GOOD_PRESERVED", "2026-08-12T08:00:00Z", "CURRENT", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
             ("PASS", None, "UNKNOWN", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
+            ("PASS", "2026-08-12T10:00:01Z", "UNKNOWN", "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
         ):
             source, records = mod.afir_records({
                 "status": status, "generatedAt": observed,
