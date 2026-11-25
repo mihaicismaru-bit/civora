@@ -253,6 +253,22 @@ function previousPageConcordance(previousBody,currentDom,expected) {
   return proof.orderedExactRowsMatch===true &&
     proof.secondPageDuplicateDiagnostic?.exactIdentityComplete===true;
 }
+// Bind initial network document to the actual top-level navigation.
+// No session values leave memory.
+function initialDocumentId(documents,navigation) {
+  if(!navigation?.frameId||!navigation?.loaderId)return null;
+  const candidates=[...documents.entries()].filter(([,d])=>d.frameId===navigation.frameId&&d.loaderId===navigation.loaderId);
+  if(candidates.length!==1)return null;
+  const [id,d]=candidates[0];
+  return d.requestCount===1&&d.requestExact===true&&d.method==='GET'&&
+    d.responseCount===1&&d.responseExact===true&&d.status===200&&
+    d.mimeType==='text/html'&&d.finishedCount===1&&!d.failed&&!d.redirected&&!d.cached?id:null;
+}
+function initialDocumentConcordance(body,dom,expected) {
+  const proof=compareDecodedTable(body,dom,expected);
+  return proof.responseShape==='FULL_HTML_DOCUMENT'&&proof.orderedExactRowsMatch===true&&
+    proof.secondPageDuplicateDiagnostic?.exactIdentityComplete===true;
+}
 // A transition is a diagnostic observation only after all semantic gates pass.
 function acceptedTransition(concordance, second, transition, nonAdjacent) {
   const c=concordance?.cumulativeDuplicateDiagnostic;
@@ -263,8 +279,9 @@ function acceptedTransition(concordance, second, transition, nonAdjacent) {
     (transition!==2||nonAdjacent?.twoPageDuplicateDiagnostic?.exactIdentityComplete===true);
 }
 // Terminal summaries are deliberately not full-inventory or immutable-receipt claims.
-// The initial page is a DOM observation; subsequent pages are decoded fragments.
-function terminalCoverage(history, last, diagnostic, terminalStable) {
+// The initial page may have a separately bound decoded document observation.
+// Neither that representation nor later fragments proves raw-byte identity.
+function terminalCoverage(history, last, diagnostic, terminalStable, initialDocumentVerified=false) {
   if(!terminalStable||!Array.isArray(history)||history.length<2||
     !last||JSON.stringify(history.at(-1)?.range)!==JSON.stringify(last)||
     !validDiagnosticHistory(history.slice(0,-1),last)||
@@ -279,7 +296,7 @@ function terminalCoverage(history, last, diagnostic, terminalStable) {
     diagnostic.conflictingDuplicateRowCount!==0)return null;
   return {pageCount:history.length,observedRows:last.last,totalRows:last.total,
     uniqueIdentityCount:diagnostic.uniqueIdentityCount,mirroredDuplicateRowCount:diagnostic.mirroredDuplicateRowCount,
-    conflictingDuplicateRowCount:0,initialPageObservation:'DOM_ONLY',
+    conflictingDuplicateRowCount:0,initialPageObservation:initialDocumentVerified?'CDP_DECODED_DOCUMENT_CONCORDANT':'DOM_ONLY',
     decodedAjaxFragmentCount:history.length-1,terminalPageStillConcordant:true,
     sourceRangeExhausted:last.last===last.total,fullInventoryProven:false};
 }
@@ -411,6 +428,18 @@ if (process.argv.includes('--self-test')) {
   const href='/ords/repo_bo/r/mysmis-2021/detaliu-apel?p201_cod_apel=PRT%2F1';
   const fixture='<table><tr>'+['Program operațional','Tip apel','Apel','Stare apel','Buget nerambursabil apel','Info'].map(x=>'<th>'+x+'</th>').join('')+'</tr><tr><td>P</td><td>T</td><td>A</td><td>S</td><td>1</td><td><a href="'+href+'">i</a></td></tr></table>';
   const document='<html><body>'+fixture+'</body></html>';
+  const nav={frameId:'main',loaderId:'loader'};
+  const docMeta={...nav,requestCount:1,requestExact:true,method:'GET',responseCount:1,responseExact:true,status:200,mimeType:'text/html',finishedCount:1,failed:false,redirected:false,cached:false};
+  const docs=d=>new Map([['request',d]]);
+  assert.equal(initialDocumentId(docs(docMeta),nav),'request');
+  for(const delta of [{frameId:'iframe'},{loaderId:'other'},{requestCount:2},{requestExact:false},{method:'POST'},{responseCount:2},{responseExact:false},{status:302},{mimeType:'application/json'},{finishedCount:0},{failed:true},{redirected:true},{cached:true}])
+    assert.equal(initialDocumentId(docs({...docMeta,...delta}),nav),null);
+  assert.equal(initialDocumentId(new Map([['one',docMeta],['two',docMeta]]),nav),null);
+  assert.equal(initialDocumentId(docs(docMeta),{frameId:'main'}),null);
+  assert.equal(initialDocumentConcordance(document,fixture,1),true);
+  assert.equal(initialDocumentConcordance(fixture,fixture,1),false);
+  assert.equal(initialDocumentConcordance(document,fixture.replace('<td>S</td>','<td>X</td>'),1),false);
+  assert.equal(initialDocumentConcordance(document,fixture,2),false);
   const good=compareDecodedTable(fixture,document,1);
   assert.equal(good.status,'DECODED_TABLE_CONCORDANT');
   assert.equal(good.responseShape,'HTML_FRAGMENT_OR_OTHER');
@@ -481,6 +510,7 @@ if (process.argv.includes('--self-test')) {
   assert.deepEqual(terminalCoverage(completeHistory,r4,full,true),{pageCount:4,observedRows:4,totalRows:5,
     uniqueIdentityCount:4,mirroredDuplicateRowCount:0,conflictingDuplicateRowCount:0,initialPageObservation:'DOM_ONLY',
     decodedAjaxFragmentCount:3,terminalPageStillConcordant:true,sourceRangeExhausted:false,fullInventoryProven:false});
+  assert.equal(terminalCoverage(completeHistory,r4,full,true,true).initialPageObservation,'CDP_DECODED_DOCUMENT_CONCORDANT');
   assert.equal(terminalCoverage(completeHistory,r4,full,false),null);
   assert.equal(terminalCoverage(completeHistory,r4,{...full,uniqueIdentityCount:5},true),null);
   assert.equal(terminalCoverage(completeHistory,r4,{...full,conflictingDuplicateRowCount:1},true),null);
@@ -491,7 +521,7 @@ if (process.argv.includes('--self-test')) {
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V8',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V9',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
@@ -532,12 +562,34 @@ try {
   status='DEVTOOLS_CONNECTED';
   let id=0, capture=false;
   const pending=new Map(), requests=new Map(), responses=new Map(), finished=new Set();
+  const documents=new Map();let documentCapture=true,documentOverflow=false;
   ws.addEventListener('message',e=>{
     try {
       const m=JSON.parse(e.data);
       if(m.id){const p=pending.get(m.id);if(p){pending.delete(m.id);m.error?p.reject(new Error('CDP error')):p.resolve(m.result);}return;}
-      if(!capture)return;
       const p=m.params||{};
+      if(documentCapture){
+        if(m.method==='Network.requestWillBeSent'&&p.type==='Document'){
+          if(!documents.has(p.requestId)&&documents.size>=16)documentOverflow=true;
+          else {
+            const d=documents.get(p.requestId)||{requestCount:0,responseCount:0,finishedCount:0};
+            Object.assign(d,{frameId:p.frameId,loaderId:p.loaderId,requestExact:p.request?.url===URL0,method:p.request?.method,
+              requestCount:d.requestCount+1,redirected:!!d.redirected||!!p.redirectResponse});
+            documents.set(p.requestId,d);
+          }
+        }
+        const d=documents.get(p.requestId);
+        if(d&&m.method==='Network.responseReceived'){
+          d.responseCount++;
+          Object.assign(d,{responseExact:p.response?.url===URL0,status:p.response?.status,
+            mimeType:String(p.response?.mimeType||'').split(';')[0].toLowerCase(),
+            cached:!!d.cached||!!p.response?.fromDiskCache||!!p.response?.fromServiceWorker||!!p.response?.fromPrefetchCache});
+        }
+        if(d&&m.method==='Network.requestServedFromCache')d.cached=true;
+        if(d&&m.method==='Network.loadingFinished')d.finishedCount++;
+        if(d&&m.method==='Network.loadingFailed')d.failed=true;
+      }
+      if(!capture)return;
       if(m.method==='Network.requestWillBeSent' && p.redirectResponse && (requests.has(p.requestId)||officialAjax(p.request?.url)))counters.redirects++;
       if(m.method==='Network.requestWillBeSent' && p.request?.method==='POST') {
         try {if(new URL(p.request.url).origin===origin)counters.sameOriginPosts++;}catch{}
@@ -657,7 +709,26 @@ try {
     typeof firstRendered.html==='string'&&Buffer.byteLength(firstRendered.html)<2000000
     ? firstRendered.html : null;
   if(firstDom===null)throw new Error('first table unavailable');
-  if(transition===1){initialDom=firstDom;history.push({range:first,html:firstDom});}
+  if(transition===1){
+    status='INITIAL_DOCUMENT_CONCORDANCE';
+    const documentId=documentOverflow?null:initialDocumentId(documents,navigation);
+    if(!documentId)throw new Error('initial document transport unverified');
+    const decoded=await cdp('Network.getResponseBody',{requestId:documentId});
+    if(typeof decoded?.body!=='string'||typeof decoded.base64Encoded!=='boolean')throw new Error('initial body unavailable');
+    const documentBytes=decoded.base64Encoded?Buffer.from(decoded.body,'base64'):Buffer.from(decoded.body,'utf8');
+    const documentText=new TextDecoder('utf-8',{fatal:true}).decode(documentBytes);
+    if(!documentBytes.length||documentBytes.length>=2000000||
+      !initialDocumentConcordance(documentText,firstDom,first.last-first.first+1)||
+      documentOverflow||initialDocumentId(documents,navigation)!==documentId)
+      throw new Error('initial document semantic guard failed');
+    documentCapture=false;documents.clear();
+    console.log(JSON.stringify({...base,status:'UI_INITIAL_DECODED_DOCUMENT_CONCORDANT',
+      fetchedAt:new Date().toISOString(),firstRange:first,method:'GET',httpStatus:200,contentType:'text/html',
+      cdpDecodedBodySha256:sha(documentBytes),decodedBodyBytes:documentBytes.length,
+      representation:decoded.base64Encoded?'CDP_BASE64_DECODED_ENTITY':'CDP_TEXT_UTF8_REENCODED',
+      orderedExactRowsMatch:true,rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
+    initialDom=firstDom;history.push({range:first,html:firstDom});
+  }
   if(transition>1){
     status='PRIOR_PAGE_REOBSERVATION';
     const previousPageStillConcordant=previousPageConcordance(previousBody,firstDom,first.last-first.first+1);
@@ -757,7 +828,7 @@ try {
     const terminal=await observeReportTable(before.controlIdentity.report);
     const stable=terminal?.url===URL0&&JSON.stringify(range(terminal?.text))===JSON.stringify(second)&&
       previousPageConcordance(previousBody,terminal.html,second.last-second.first+1);
-    const coverage=terminalCoverage(history,second,concordance.cumulativeDuplicateDiagnostic,stable);
+    const coverage=terminalCoverage(history,second,concordance.cumulativeDuplicateDiagnostic,stable,true);
     if(!coverage||!singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))
       throw new Error('terminal coverage or exchange unverified');
     console.log(JSON.stringify({...base,status:'UI_BOUNDED_DIAGNOSTIC_COMPLETE',fetchedAt:new Date().toISOString(),
