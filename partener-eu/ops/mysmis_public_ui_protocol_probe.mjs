@@ -300,6 +300,52 @@ function terminalCoverage(history, last, diagnostic, terminalStable, initialDocu
     decodedAjaxFragmentCount:history.length-1,terminalPageStillConcordant:true,
     sourceRangeExhausted:last.last===last.total,fullInventoryProven:false};
 }
+// Ordered, hash-only diagnostic manifest. This is deliberately NOT the V1
+// immutable raw handoff: the decoded entity might have been re-encoded by CDP.
+// It binds all accepted observations to one run attempt without retaining
+// HTML, request values, session identifiers or arbitrary server URLs.
+function diagnosticManifest(records, coverage, runId, runAttempt) {
+  if(!Array.isArray(records)||records.length<2||records.length>MAX_TRANSITIONS+1||
+    coverage?.pageCount!==records.length||coverage.initialPageObservation!=='CDP_DECODED_DOCUMENT_CONCORDANT'||
+    coverage.terminalPageStillConcordant!==true||coverage.fullInventoryProven!==false||
+    typeof runId!=='string'||!(/^(?:[1-9]\d*|local)$/).test(runId)||
+    typeof runAttempt!=='string'||!(/^[1-9]\d*$/).test(runAttempt))return null;
+  const pages=[],seen=new Set();
+  let previous=null,previousTime='',totalBytes=0;
+  for(let i=0;i<records.length;i++){
+    const p=records[i],r=p?.range;
+    if(!r||![r.first,r.last,r.total].every(Number.isSafeInteger)||
+      r.first<1||r.last<r.first||r.last>r.total||
+      (i===0?r.first!==1:!nextRange(previous,r))||
+      typeof p.fetchedAt!=='string'||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(p.fetchedAt)||
+      !Number.isFinite(Date.parse(p.fetchedAt))||new Date(p.fetchedAt).toISOString()!==p.fetchedAt||
+      p.fetchedAt<previousTime||
+      typeof p.cdpDecodedBodySha256!=='string'||!/^[a-f0-9]{64}$/.test(p.cdpDecodedBodySha256)||
+      seen.has(p.cdpDecodedBodySha256)||!Number.isSafeInteger(p.decodedBodyBytes)||
+      p.decodedBodyBytes<1||p.decodedBodyBytes>=2000000||
+      !['CDP_BASE64_DECODED_ENTITY','CDP_TEXT_UTF8_REENCODED'].includes(p.representation)||
+      p.method!==(i===0?'GET':'POST')||
+      p.endpointClass!==(i===0?'EXACT_CANONICAL_DOCUMENT':'SAME_ORIGIN_WWV_FLOW_AJAX')||
+      p.httpStatus!==200||p.contentType!=='text/html'||p.orderedExactRowsMatch!==true)return null;
+    seen.add(p.cdpDecodedBodySha256); totalBytes+=p.decodedBodyBytes;
+    pages.push({pageOrdinal:i+1,range:{first:r.first,last:r.last,total:r.total},
+      fetchedAt:p.fetchedAt,method:p.method,endpointClass:p.endpointClass,httpStatus:200,
+      contentType:'text/html',cdpDecodedBodySha256:p.cdpDecodedBodySha256,
+      decodedBodyBytes:p.decodedBodyBytes,representation:p.representation,orderedExactRowsMatch:true});
+    previous=r;previousTime=p.fetchedAt;
+  }
+  if(totalBytes>=MAX_DIAGNOSTIC_BYTES||previous.last!==coverage.observedRows||
+    previous.total!==coverage.totalRows)return null;
+  const manifest={schema:'MYSMIS_DECODED_OBSERVATION_MANIFEST_V1',canonicalUrl:URL0,runId,runAttempt,
+    parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V10',sourceFamily:'ROMANIA_MIPE_MYSMIS',
+    programmeFamily:'ROMANIA_MULTI_PROGRAMME',authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',
+    observationState:'PROTOCOL_DISCOVERY_ONLY',pages,totalDecodedBytes:totalBytes,
+    observedRows:coverage.observedRows,totalRows:coverage.totalRows,
+    rawPersisted:false,rawByteIdentityProven:false,immutableReceipt:false,fullInventoryProven:false,
+    materialFactUse:false,publishAuthorized:false,openCallAuthorized:false,deadlineAuthorized:false,
+    budgetAuthorized:false,eligibilityAuthorized:false,publicationEffect:'NONE'};
+  return {...manifest,manifestSha256:sha(JSON.stringify(manifest))};
+}
 function singleAjaxExchange(counters,requestCount,matchedCount) {
   return requestCount===1&&matchedCount===1&&counters.sameOriginPosts===1&&
     counters.officialAjaxPosts===1&&counters.officialAjax200===1&&
@@ -516,12 +562,38 @@ if (process.argv.includes('--self-test')) {
   assert.equal(terminalCoverage(completeHistory,r4,{...full,conflictingDuplicateRowCount:1},true),null);
   assert.equal(terminalCoverage(completeHistory,r3,full,true),null);
   assert.equal(terminalCoverage([history[0],history[2],completeHistory.at(-1)],r4,full,true),null);
+  const cov=terminalCoverage(completeHistory,r4,full,true,true);
+  const records=completeHistory.map((p,i)=>({range:p.range,fetchedAt:'2026-11-25T08:00:0'+i+'.000Z',
+    method:i?'POST':'GET',endpointClass:i?'SAME_ORIGIN_WWV_FLOW_AJAX':'EXACT_CANONICAL_DOCUMENT',
+    httpStatus:200,contentType:'text/html',cdpDecodedBodySha256:sha(p.html),
+    decodedBodyBytes:Buffer.byteLength(p.html),representation:'CDP_TEXT_UTF8_REENCODED',orderedExactRowsMatch:true}));
+  const manifest=diagnosticManifest(records,cov,'123','1');
+  assert.ok(manifest);
+  const {manifestSha256,...manifestBody}=manifest;
+  assert.equal(manifestSha256,sha(JSON.stringify(manifestBody)));
+  assert.deepEqual(diagnosticManifest(records,cov,'123','1'),manifest);
+  assert.notEqual(diagnosticManifest(records,cov,'123','2').manifestSha256,manifestSha256);
+  assert.equal(manifest.immutableReceipt,false);
+  assert.equal(manifest.openCallAuthorized,false);
+  assert.equal(manifest.pages.length,4);
+  assert.equal(diagnosticManifest(records.slice(1),cov,'123','1'),null);
+  assert.equal(diagnosticManifest([records[0],records[2],records[1],records[3]],cov,'123','1'),null);
+  const bad=(i,patch)=>records.map((p,j)=>i===j?{...p,...patch}:p);
+  for(const patch of [{method:'GET'},{endpointClass:'OTHER'},{httpStatus:302},{contentType:'text/plain'},
+    {cdpDecodedBodySha256:records[0].cdpDecodedBodySha256},{decodedBodyBytes:2000000},
+    {representation:'RAW'},{orderedExactRowsMatch:false},{fetchedAt:'2026-11-25T07:59:00.000Z'},
+    {fetchedAt:'2026-02-30T08:00:00.000Z'}])
+    assert.equal(diagnosticManifest(bad(1,patch),cov,'123','1'),null);
+  assert.equal(diagnosticManifest(records,{...cov,observedRows:99},'123','1'),null);
+  assert.equal(diagnosticManifest(records,{...cov,fullInventoryProven:true},'123','1'),null);
+  assert.equal(diagnosticManifest(records,cov,'123','0'),null);
+  assert.equal(diagnosticManifest(bad(1,{sessionToken:'do-not-emit'}),cov,'123','1').manifestSha256,manifestSha256);
   console.log('PASS: public UI protocol diagnostic range, endpoint, native-control equivalence, stable hit, native focus, decoded table, prior-page, cumulative and terminal concordance guards');
   process.exit(0);
 }
 let dir, chrome, ws;
 const base = {schema:'MYSMIS_UI_PROTOCOL_DISCOVERY_V1',canonicalUrl:URL0,
-  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V9',
+  runId:process.env.GITHUB_RUN_ID || 'local',parserVersion:'MYSMIS_UI_PROTOCOL_DISCOVERY_V10',
   sourceFamily:'ROMANIA_MIPE_MYSMIS',programmeFamily:'ROMANIA_MULTI_PROGRAMME',
   authorityClass:'T1_OFFICIAL_MYSMIS_REPORTING',observationState:'PROTOCOL_DISCOVERY_ONLY',
   rawPersisted:false,immutableReceipt:false,materialFactUse:false,publishAuthorized:false,
@@ -642,7 +714,7 @@ try {
   // concordance and no conflicting duplicates across all observed pages. Each exchange
   // gets its own counters; no request values, HTML, or identities are emitted.
   let reportOrdinal=null, initialDom=null, initialRange=first, previousBody=null;
-  const history=[];
+  const history=[],diagnosticRecords=[];
   for(let transition=1;transition<=MAX_TRANSITIONS && first.last<first.total;transition++){
   capture=false;
   requests.clear();responses.clear();finished.clear();
@@ -722,11 +794,14 @@ try {
       documentOverflow||initialDocumentId(documents,navigation)!==documentId)
       throw new Error('initial document semantic guard failed');
     documentCapture=false;documents.clear();
-    console.log(JSON.stringify({...base,status:'UI_INITIAL_DECODED_DOCUMENT_CONCORDANT',
-      fetchedAt:new Date().toISOString(),firstRange:first,method:'GET',httpStatus:200,contentType:'text/html',
+    const initialRecord={range:first,fetchedAt:new Date().toISOString(),method:'GET',
+      endpointClass:'EXACT_CANONICAL_DOCUMENT',httpStatus:200,contentType:'text/html',
       cdpDecodedBodySha256:sha(documentBytes),decodedBodyBytes:documentBytes.length,
       representation:decoded.base64Encoded?'CDP_BASE64_DECODED_ENTITY':'CDP_TEXT_UTF8_REENCODED',
-      orderedExactRowsMatch:true,rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
+      orderedExactRowsMatch:true};
+    diagnosticRecords.push(initialRecord);
+    console.log(JSON.stringify({...base,...initialRecord,status:'UI_INITIAL_DECODED_DOCUMENT_CONCORDANT',
+      firstRange:first,rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
     initialDom=firstDom;history.push({range:first,html:firstDom});
   }
   if(transition>1){
@@ -789,8 +864,10 @@ try {
   const ids=[...responses.keys()].filter(k=>finished.has(k));
   if(!singleAjaxExchange(counters,requests.size,ids.length))throw new Error('ambiguous official ajax exchange');
   const response=await cdp('Network.getResponseBody',{requestId:ids[0]});
+  if(typeof response?.body!=='string'||typeof response.base64Encoded!=='boolean')throw new Error('response body unavailable');
   const bytes=response.base64Encoded?Buffer.from(response.body,'base64'):Buffer.from(response.body,'utf8');
   if(!bytes.length||bytes.length>=2000000)throw new Error('response size outside diagnostic bound');
+  const decodedText=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
   const mime=responses.get(ids[0]).mimeType.toLowerCase();
   if(!['text/html','application/json','text/plain'].includes(mime))throw new Error('unrecognized response media');
   // The rendered document is observed independently from the decoded response,
@@ -802,26 +879,30 @@ try {
   const rendered=await observeReportTable(before.controlIdentity.report);
   const observedRange=range(rendered?.text);
   const concordance=rendered?.url===URL0&&JSON.stringify(observedRange)===JSON.stringify(second)&&mime==='text/html'
-    ? compareDecodedTable(bytes.toString('utf8'),rendered.html,second.last-second.first+1,firstDom,first.last-first.first+1,history,second)
+    ? compareDecodedTable(decodedText,rendered.html,second.last-second.first+1,firstDom,first.last-first.first+1,history,second)
     : {status:'TABLE_COMPARISON_UNAVAILABLE'};
   if(!singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))throw new Error('ambiguous late official ajax exchange');
   // Also compare page 3 against page 1, not merely its immediate predecessor.
   const nonAdjacent=transition===2&&concordance.orderedExactRowsMatch
-    ? compareDecodedTable(bytes.toString('utf8'),rendered.html,second.last-second.first+1,
+    ? compareDecodedTable(decodedText,rendered.html,second.last-second.first+1,
         initialDom,initialRange.last-initialRange.first+1) : null;
   if(!singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))throw new Error('ambiguous late official ajax exchange');
   if(!acceptedTransition(concordance,second,transition,nonAdjacent))
     throw new Error('transition semantic guard failed');
-  console.log(JSON.stringify({...base,status:'UI_NEXT_RANGE_AND_OFFICIAL_AJAX_OBSERVED',transition,counters,
-    fetchedAt:new Date().toISOString(),firstRange:first,secondRange:second,
-    activation,endpointClass:'SAME_ORIGIN_WWV_FLOW_AJAX',method:'POST',httpStatus:200,
-    contentType:mime,cdpDecodedBodySha256:sha(bytes),decodedBodyBytes:bytes.length,
+  const nextRecord={range:second,fetchedAt:new Date().toISOString(),method:'POST',
+    endpointClass:'SAME_ORIGIN_WWV_FLOW_AJAX',httpStatus:200,contentType:mime,
+    cdpDecodedBodySha256:sha(bytes),decodedBodyBytes:bytes.length,
+    representation:response.base64Encoded?'CDP_BASE64_DECODED_ENTITY':'CDP_TEXT_UTF8_REENCODED',
+    orderedExactRowsMatch:true};
+  diagnosticRecords.push(nextRecord);
+  console.log(JSON.stringify({...base,...nextRecord,status:'UI_NEXT_RANGE_AND_OFFICIAL_AJAX_OBSERVED',transition,counters,
+    firstRange:first,secondRange:second,activation,
     renderedTableScope:{reportCount:rendered?.reportCount??0,tableCount:rendered?.tableCount??0,dataTableCount:rendered?.dataTableCount??0},
     decodedTableConcordance:concordance,
     nonAdjacentDuplicateDiagnostic:nonAdjacent?.twoPageDuplicateDiagnostic??null,
     rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
   // Retain only the bounded decoded fragment for the next observation.
-  previousBody=bytes.toString('utf8');
+  previousBody=decodedText;
   history.push({range:second,html:previousBody});
   if(transition===MAX_TRANSITIONS||second.last===second.total){
     status='TERMINAL_PAGE_REOBSERVATION';
@@ -831,8 +912,10 @@ try {
     const coverage=terminalCoverage(history,second,concordance.cumulativeDuplicateDiagnostic,stable,true);
     if(!coverage||!singleAjaxExchange(counters,requests.size,[...responses.keys()].filter(k=>finished.has(k)).length))
       throw new Error('terminal coverage or exchange unverified');
+    const manifest=diagnosticManifest(diagnosticRecords,coverage,base.runId,process.env.GITHUB_RUN_ATTEMPT||'1');
+    if(!manifest)throw new Error('ordered diagnostic manifest unverified');
     console.log(JSON.stringify({...base,status:'UI_BOUNDED_DIAGNOSTIC_COMPLETE',fetchedAt:new Date().toISOString(),
-      coverage,rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
+      coverage,diagnosticManifest:manifest,rawByteIdentityProven:false,paginationProtocolConfirmed:false}));
   }
   capture=false;
   first=second;
