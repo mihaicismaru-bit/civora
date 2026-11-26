@@ -42,8 +42,8 @@ def fixture_state(root):
         "observed_at": "2026-08-12T08:00:00Z",
         "summary": {"total": 3, "fail": 1, "resolution_tasks_required": 1},
         "sources": [
-            {"id": "SRC-MYSMIS-CALLS", "tier": "T1", "health": "PASS", "semantic_hash_changed": False, "resolution_task_required": False, "semantic_sha256": "b" * 64, "raw_sha256": "a" * 64, "ok": True, "content_quality_ok": True, "quarantined": False},
-            {"id": "SRC-OIRVEST-PEO", "tier": "T1B", "health": "PASS", "semantic_hash_changed": True, "resolution_task_required": True, "semantic_sha256": "d" * 64, "raw_sha256": "c" * 64, "ok": True, "content_quality_ok": True, "quarantined": False},
+            {"id": "SRC-MYSMIS-CALLS", "url": "https://resurse.mysmis2021.gov.ro/calls", "selected_url": "https://resurse.mysmis2021.gov.ro/calls", "final_url": "https://resurse.mysmis2021.gov.ro/calls", "tier": "T1", "health": "PASS", "semantic_hash_changed": False, "resolution_task_required": False, "semantic_sha256": "b" * 64, "raw_sha256": "a" * 64, "ok": True, "content_quality_ok": True, "quarantined": False},
+            {"id": "SRC-OIRVEST-PEO", "url": "https://oirvest.ro/peo-2021-2027/", "selected_url": "https://oirvest.ro/peo-2021-2027/", "final_url": "https://oirvest.ro/peo-2021-2027/", "tier": "T1B", "health": "PASS", "semantic_hash_changed": True, "resolution_task_required": True, "semantic_sha256": "d" * 64, "raw_sha256": "c" * 64, "ok": True, "content_quality_ok": True, "quarantined": False},
             {"id": "SRC-DISCOVERY-ONLY", "tier": "T1", "health": "FAIL", "semantic_hash_changed": False, "resolution_task_required": False},
         ],
     })
@@ -234,12 +234,16 @@ def main():
         ]
         registry_fixture = {"sources": [
             {"id": source_id, "class": kind, "source_families": tags,
-             "tier": "T1", "material_fact_use": True}
+             "tier": "T1", "material_fact_use": True,
+             "url": "https://official.example/" + source_id}
             for source_id, kind, tags, _ in definitions
         ]}
         health_fixture = {"sources": [
             {"id": source_id, "health": "PASS", "ok": True, "content_quality_ok": True,
-             "quarantined": False, "raw_sha256": "a" * 64, "semantic_sha256": "b" * 64}
+             "quarantined": False, "raw_sha256": "a" * 64, "semantic_sha256": "b" * 64,
+             "url": "https://official.example/" + source_id,
+             "selected_url": "https://official.example/" + source_id,
+             "final_url": "https://official.example/" + source_id}
             for source_id, _, _, _ in definitions
         ]}
         inventory = mod.build_source_inventory(
@@ -265,12 +269,24 @@ def main():
         # A current registry batch is not evidence freshness for each row.
         # Failed, low-information, quarantined, contradictory and missing
         # observations must never inherit a current evidence timestamp.
+        primary = "https://official.example/SRC-MYSMIS-TEST"
+        alias = "https://official.example/mysmis-alias"
+        definition = next(row for row in registry_fixture["sources"] if row["id"] == "SRC-MYSMIS-TEST")
+        definition["canonical_aliases"] = [alias]
         valid_health = {"id": "SRC-MYSMIS-TEST", "health": "PASS", "ok": True,
+                        "url": primary, "selected_url": primary, "final_url": primary,
                         "content_quality_ok": True, "quarantined": False,
                         "raw_sha256": "a" * 64, "semantic_sha256": "b" * 64}
         verified_at = "2026-08-12T08:00:00Z"
         for row_health, expected, availability in (
             (valid_health, "CURRENT", "AVAILABLE"),
+            (dict(valid_health, selected_url=alias, final_url=alias), "CURRENT", "AVAILABLE"),
+            (dict(valid_health, final_url=alias), "CURRENT", "AVAILABLE"),
+            (dict(valid_health, url=alias), "UNKNOWN", "UNKNOWN"),
+            (dict(valid_health, selected_url="https://other.example/calls"), "UNKNOWN", "UNKNOWN"),
+            (dict(valid_health, final_url="https://other.example/calls"), "UNKNOWN", "UNKNOWN"),
+            (dict(valid_health, final_url=None), "UNKNOWN", "UNKNOWN"),
+            (dict(valid_health, selected_url=[]), "UNKNOWN", "UNKNOWN"),
             (dict(valid_health, health="FAIL"), "UNKNOWN", "UNAVAILABLE_LAST_KNOWN_GOOD"),
             (dict(valid_health, health="DEGRADED"), "UNKNOWN", "DEGRADED_LAST_KNOWN_GOOD"),
             (dict(valid_health, ok=False), "UNKNOWN", "UNKNOWN"),
@@ -299,6 +315,17 @@ def main():
                 "RECONCILIATION_REQUIRED" if expected == "CURRENT" else "BLOCKED_SOURCE_DEPENDENCIES"
             ), gate
             assert gate["publishMaterialFacts"] is False
+        assert not mod.registry_endpoint_bound(dict(definition, url=alias), valid_health)
+        assert not mod.registry_endpoint_bound(dict(definition, canonical_aliases=alias),
+                                               dict(valid_health, selected_url=alias, final_url=alias))
+        duplicate = mod.build_source_inventory(
+            [{"id": "VERIFIED_SOURCE_REGISTRY", "freshness": {"status": "CURRENT"}}],
+            registry_fixture, {"observed_at": verified_at, "sources": [valid_health, valid_health]}, {}, {}
+        )
+        row = next(item for item in duplicate if item["id"] == "SRC-MYSMIS-TEST")
+        assert row["endpointBinding"] == "AMBIGUOUS"
+        assert row["freshness"]["status"] == "UNKNOWN"
+        assert mod.dependency_gate(row)["materialFactGate"] == "BLOCKED_SOURCE_DEPENDENCIES"
         inventory = {row["id"]: row for row in index["dataPlane"]["sourceInventory"]}
         assert inventory["SRC-DISCOVERY-ONLY"]["freshness"]["status"] == "UNKNOWN"
         assert inventory["SRC-DISCOVERY-ONLY"]["lastAttemptFreshness"]["status"] == "CURRENT"

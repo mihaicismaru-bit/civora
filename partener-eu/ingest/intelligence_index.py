@@ -480,6 +480,18 @@ def dependency_gate(source: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def registry_endpoint_bound(definition: Dict[str, Any], health: Dict[str, Any]) -> bool:
+    """Bind health to the exact current registry identity and declared HTTPS endpoints."""
+    primary = definition.get("url")
+    aliases = definition.get("canonical_aliases")
+    allowed = [primary, *(aliases if isinstance(aliases, list) else [])]
+    allowed = {url for url in allowed if isinstance(url, str) and url.startswith("https://")}
+    return (isinstance(primary, str) and primary in allowed
+            and health.get("url") == primary
+            and isinstance(health.get("selected_url"), str) and health["selected_url"] in allowed
+            and isinstance(health.get("final_url"), str) and health["final_url"] in allowed)
+
+
 def build_source_inventory(
     corpus_sources: List[Dict[str, Any]],
     source_registry: Dict[str, Any],
@@ -500,7 +512,9 @@ def build_source_inventory(
         })
         inventory.append(row)
 
-    health_by_id = {str(row.get("id")): row for row in registry_health.get("sources") or []}
+    health_rows = registry_health.get("sources") or []
+    health_by_id = {str(row.get("id")): row for row in health_rows}
+    health_counts = Counter(str(row.get("id")) for row in health_rows)
     registry_freshness = next(
         (row.get("freshness") for row in corpus_sources if row.get("id") == "VERIFIED_SOURCE_REGISTRY"),
         {"status": "UNKNOWN", "ageHours": None, "maxAgeHours": None},
@@ -514,7 +528,12 @@ def build_source_inventory(
         unknown_freshness = {"status": "UNKNOWN", "ageHours": None,
                              "maxAgeHours": registry_freshness.get("maxAgeHours")}
         attempt_freshness = registry_freshness if health else unknown_freshness
-        verified = registry_observation_verified(health)
+        endpoint_binding = (
+            "MISSING" if not health else
+            "AMBIGUOUS" if health_counts[source_id] != 1 else
+            "MATCHED" if registry_endpoint_bound(definition, health) else "MISMATCH"
+        )
+        verified = endpoint_binding == "MATCHED" and registry_observation_verified(health)
         inventory.append({
             "id": source_id,
             "kind": "REGISTERED_OFFICIAL_SOURCE",
@@ -527,6 +546,7 @@ def build_source_inventory(
             "owner": definition.get("owner"),
             "canonicalUrl": canonical_url(definition.get("url")),
             "status": health.get("health") or "UNKNOWN",
+            "endpointBinding": endpoint_binding,
             # The health schema has a batch observation time, not a
             # per-document fetched_at. Never use a failed batch row as evidence.
             "observedAt": observed_at if verified else None,
