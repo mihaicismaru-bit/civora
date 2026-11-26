@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/source_registry.json'
+      - 'partener-eu/ingest/intelligence_index.py'
+      - 'partener-eu/ops/test_intelligence_index.py'
       - 'partener-eu/ingest/mysmis_call_inventory_scout.py'
       - 'partener-eu/ops/test_mysmis_call_inventory_scout.py'
       - 'partener-eu/ops/mysmis_public_ui_protocol_probe.mjs'
@@ -97,6 +99,9 @@ jobs:
 
       - name: Validate P10 and canonical source authority compatibility
         run: python partener-eu/ops/test_p10_policy_regression.py
+
+      - name: Validate intelligence index evidence freshness and replay
+        run: python partener-eu/ops/test_intelligence_index.py
 
       - name: Validate MySMIS exact-call inventory and immutable pagination replay
         run: python partener-eu/ops/test_mysmis_call_inventory_scout.py
