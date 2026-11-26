@@ -223,7 +223,10 @@ def retain_pending_resolution(src, row, state, hashes, observed_at):
     row["resolution_task_required"] = True
     row["publish_material_fact_update"] = False
     row["resolution_task_state"] = state
-    if state != "OPEN" or row.get("health") != "PASS":
+    if state != "OPEN":
+        row["semantic_hash_changed"] = False
+        return True
+    if row.get("health") != "PASS":
         return True
     baseline, candidate = hashes
     current = row.get("semantic_sha256")
@@ -369,6 +372,9 @@ def main():
             "source_families": list(src.get("source_families") or []),
         }
         pending_state, pending_hashes = pending_resolution_task(src["id"])
+        if pending_state == "NONE" and old.get("resolution_task_required") and not (TASK_DIR / f"{src['id']}.json").is_file():
+            # A lost ledger cannot turn a previously pending observation into a baseline.
+            pending_state = "INVALID"
         if pending_state == "OPEN":
             baseline_hash = pending_hashes[0]
         elif pending_state == "INVALID":
@@ -400,7 +406,11 @@ def main():
                 row["health"] = "PASS" if row.get("ok") else "FAIL"
                 row["quarantined"] = False
                 if pending_state == "NONE" and row["resolution_task_required"]:
-                    write_resolution_task(src, baseline_hash, new_hash, observed_at)
+                    try:
+                        write_resolution_task(src, baseline_hash, new_hash, observed_at)
+                    except (OSError, ValueError) as exc:
+                        row["resolution_task_state"] = "LEDGER_WRITE_FAILED"
+                        row["resolution_task_error"] = f"{type(exc).__name__}: {exc}"
         except Exception as exc:
             failures = int(old.get("consecutive_failures") or 0) + 1
             row.update({
