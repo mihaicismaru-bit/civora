@@ -38,17 +38,30 @@ def parse_date(value: Any) -> dt.datetime | None:
     except ValueError:
         pass
     months = {"ianuarie": 1, "februarie": 2, "martie": 3, "aprilie": 4, "mai": 5, "iunie": 6, "iulie": 7, "august": 8, "septembrie": 9, "octombrie": 10, "noiembrie": 11, "decembrie": 12}
-    match = re.search(r"\b(\d{1,2})\s+(" + "|".join(months) + r")\s+(20\d{2})(?:\D+(\d{1,2}):(\d{2}))?", fold(raw))
+    normalized = fold(raw)
+    match = re.search(r"\b(\d{1,2})\s+(" + "|".join(months) + r")\s+(20\d{2})\b", normalized)
     if not match:
         return None
     day, month, year = int(match.group(1)), months[match.group(2)], int(match.group(3))
-    hour, minute = int(match.group(4) or 23), int(match.group(5) or 59)
+    tail = normalized[match.end():]
+    # Match the public static renderer: an exact dot clock must not fall
+    # through to end-of-day, and distinct second-level cutoffs must not collide.
+    timed = re.match(
+        r"^\s*,?\s*(?:(?:la\s+)?ora\s*|la\s+)?(\d{1,2})[:.](\d{2})(?::(\d{2}))?\b",
+        tail,
+    )
+    if timed:
+        hour, minute, second = int(timed.group(1)), int(timed.group(2)), int(timed.group(3) or 0)
+    elif re.match(r"^\s*,?\s*(?:(?:la\s+)?ora\b|(?:la\s+)?\d{1,2}[:.])", tail):
+        return None
+    else:
+        hour, minute, second = 23, 59, 59
     # ZoneInfo defaults to fold=0: this silently chooses one of two
     # autumn clock readings and even accepts the missing spring 03:xx hour.
     # A local cutoff without an explicit offset must be unambiguous and real,
     # matching build_public_static_pages.bucharest_datetime_utc.
     try:
-        naive = dt.datetime(year, month, day, hour, minute)
+        naive = dt.datetime(year, month, day, hour, minute, second)
     except ValueError:
         return None
     ro_tz = ZoneInfo("Europe/Bucharest")
