@@ -175,6 +175,35 @@ def main():
                 assert row["fingerprint"] == "preserved"
                 assert row["publishMaterialFacts"] is False
 
+        # The actual MIPE LKG registry lives on the MySMIS reporting host.
+        # Keep the exact index searchable; it is not an exact call endpoint.
+        mysmis_url = ("https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/"
+                      "finantari-programe-2021-2027")
+        for status, available, item_at in (
+            ("DEGRADED_LAST_KNOWN_GOOD_PRESERVED", False, "2026-08-01T08:00:00Z"),
+            ("OK", True, "2026-08-12T08:00:00Z"),
+        ):
+            _, retained = mod.mipe_records({
+                "status": status,
+                "lastRun": {"sourceAvailable": available, "observedAt": "2026-08-12T08:00:00Z"},
+                "items": [
+                    {"url": mysmis_url, "title": "Registry", "observedAt": item_at,
+                     "sha256": "retained"},
+                    {"url": mysmis_url + "?session=123", "title": "Session"},
+                    {"url": mysmis_url + "/other", "title": "Other"},
+                    {"url": mysmis_url.replace(".gov.ro/", ".gov.ro.example.com/"), "title": "Spoof"},
+                ],
+            }, reference, {"freshnessSlaHours": 4})
+            assert len(retained) == 1, retained
+            row = retained[0]
+            assert row["canonicalUrl"] == mysmis_url
+            assert row["observedAt"] == item_at
+            assert row["fingerprint"] == "retained"
+            assert row["programme"] == "MIPE / MySMIS"
+            assert row["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+            assert row["publishMaterialFacts"] is False
+            assert row["provenance"][0]["url"] == mysmis_url
+
         material = next(row for row in index["records"] if row.get("materialChangeCandidate"))
         assert material["materialFactAction"] == "RESOLUTION_REQUIRED"
         assert material["publishMaterialFacts"] is False
