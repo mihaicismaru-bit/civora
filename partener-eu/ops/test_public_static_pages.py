@@ -463,6 +463,34 @@ assert not module.current_open({**cluster_probe, "quickFacts": [
 assert not module.current_open({**cluster_probe, "closesAt": "2026-11-30T16:00:00+02:00"}, before_expiry)
 assert not sync_mod.current_open({**cluster_probe, "closesAt": "2026-11-30T16:00:00+02:00"}, before_expiry)
 assert sync_mod.parse_date("6 noiembrie 2026, ora 12:00") == module.parse_date("2026-11-06T10:00:00Z")
+
+# Regression: the derived projection previously accepted a dot clock as
+# exact, then interpreted it as EOD; it also discarded nonzero seconds.
+clock_after_dot = module.parse_date("2026-11-27T11:00:00Z")
+clock_before_seconds = module.parse_date("2026-11-27T10:00:15Z")
+assert clock_after_dot and clock_before_seconds
+for raw, expected in (
+    ("27 noiembrie 2026, ora 12.00", "2026-11-27T10:00:00Z"),
+    ("27 noiembrie 2026, ora 12:00:30", "2026-11-27T10:00:30Z"),
+    ("27 noiembrie 2026, ora 12.00:45", "2026-11-27T10:00:45Z"),
+):
+    assert sync_mod.parse_date(raw) == module.parse_date(raw) == module.parse_date(expected)
+for parser in (module, sync_mod):
+    assert parser.parse_date("27 noiembrie 2026, ora 12.00:99") is None
+    probe = {
+        "id": "synthetic-exact-clock-parity-only",
+        "status": "OPEN", "publicationState": "PUBLISHABLE",
+        "quickFacts": [
+            {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+            {"label": "Termen", "value": "27 noiembrie 2026, ora 12.00", "confidence": "CONFIRMED"},
+        ],
+    }
+    assert not parser.current_open(probe, clock_after_dot)
+    probe["quickFacts"][1]["value"] = "27 noiembrie 2026, ora 12:00:30"
+    assert parser.current_open(probe, clock_before_seconds)
+    probe["closesAt"] = "27 noiembrie 2026, ora 12:00:45"
+    assert not parser.current_open(probe, clock_before_seconds)
+
 assert not sync_mod.current_open({**cluster_probe, "quickFacts": [
     {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
     {"label": "Termen", "value": "6 noiembrie 2026", "confidence": "CONFIRMED"},
