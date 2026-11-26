@@ -366,7 +366,12 @@ def state_contract_result(
 def registry_families(source: Dict[str, Any]) -> List[str]:
     source_id = str(source.get("id") or "")
     source_class = str(source.get("class") or "").lower()
-    families = []
+    # Registry-declared families are authoritative metadata; preserve them
+    # alongside legacy routing tags instead of dropping EU/EEA/Interreg coverage.
+    declared = source.get("source_families")
+    families = [
+        tag for tag in declared if isinstance(tag, str) and tag and tag == tag.strip()
+    ] if isinstance(declared, list) else []
     if source_id.startswith("SRC-MYSMIS"):
         families.append("MYSMIS")
     if source_id.startswith(("SRC-OIR", "SRC-OI-", "SRC-ADR")) or "intermediate_body" in source_class:
@@ -374,6 +379,19 @@ def registry_families(source: Dict[str, Any]) -> List[str]:
     if "calendar" in source_class:
         families.append("CALENDARS")
     return sorted(set(families))
+
+
+def registry_planning_only(source: Dict[str, Any]) -> bool:
+    source_class = str(source.get("class") or "").lower()
+    return (
+        "calendar" in source_class
+        or source_class in {
+            "official_programming_pipeline",
+            "official_programming_framework",
+            "official_intermediate_body_consultation_index",
+        }
+        or "PROGRAMMING_PIPELINE" in registry_families(source)
+    )
 
 
 def registry_domains(source: Dict[str, Any], contract: Dict[str, Any]) -> List[str]:
@@ -489,7 +507,7 @@ def build_source_inventory(
             "observedAt": observed_at,
             "freshness": registry_freshness,
             "materialFactUse": bool(definition.get("material_fact_use")),
-            "planningOnly": "calendar" in str(definition.get("class") or "").lower(),
+            "planningOnly": registry_planning_only(definition),
             "resolutionTaskRequired": bool(health.get("resolution_task_required")),
             "lastKnownGoodPreserved": bool(
                 health.get("semantic_sha256")
