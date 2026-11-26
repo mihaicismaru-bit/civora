@@ -152,7 +152,8 @@ for marker in [
     "DISCOVERY_ONLY",
     "material_facts_authority",
     "non_material_scope=health_scope != 'MATERIAL_SOURCE'",
-    "material_facts_publishable=bool(material_facts_authority and not quarantined and content_quality_ok)",
+    "material_facts_publishable=False",
+    "publication_permission_scope",
 ]:
     if marker not in validator:
         errors.append(f"source health/authority guard missing: {marker}")
@@ -266,6 +267,54 @@ for marker in ["AUTH_OR_ACCESS_DEPENDENT", "accessDependencies", "AUTH_PATH_MARK
 for marker in ["recover_state", "corrupt_state_checkpoint_recovery"]:
     if marker not in recovery:
         errors.append(f"recovery regression evidence missing: {marker}")
+
+# Execute the actual probe with in-memory persistence: health and semantic
+# observations are evidence, never a publication permit, even after B/B/B.
+from unittest.mock import patch
+import p10_validate as probe
+
+def replay_p10_permission(live, bodies, authority=True, scope="MATERIAL_SOURCE"):
+    src = {"id": "SRC-TEST", "url": "https://example.invalid/call",
+           "material_facts_authority": authority, "health_scope": scope}
+    state = {"sources": {"SRC-TEST": {"semantic_sha256": "a" * 64}},
+             "schema_version": 3}
+    import tempfile
+    with tempfile.TemporaryDirectory() as temp, patch.multiple(
+        probe, HISTORY=Path(temp), recover_state=lambda: (state, False),
+        load_json=lambda *args: {"sources": [src]},
+        static_frontend_checks=lambda: [{"pass": True}],
+        atomic_json=lambda *args: None,
+    ), patch.object(probe, "fetch_source", side_effect=bodies):
+        rows = []
+        for _ in range(len(bodies)):
+            report, _ = probe.run(live=live)
+            rows.append(report["sources"][0])
+    return rows
+
+def observation(digest, ok=True, size=1000, semantic=800):
+    return {"ok": ok, "semantic_sha256": digest, "bytes": size,
+            "semantic_chars": semantic, "raw_sha256": digest,
+            "markers_found": [], "final_url": "https://example.invalid/call"}
+
+scenarios = [
+    (True, [observation("a" * 64)], True, "MATERIAL_SOURCE"),
+    (True, [observation("b" * 64)] * 3, True, "MATERIAL_SOURCE"),
+    (True, [observation(None, False)] * 3, True, "MATERIAL_SOURCE"),
+    (True, [observation("b" * 64, size=5000, semantic=20)], True, "MATERIAL_SOURCE"),
+    (True, [observation("a" * 64)], False, "DISCOVERY_ONLY"),
+    (True, [observation("a" * 64)], False, "TRANSPORT_ONLY"),
+    (False, [None], True, "MATERIAL_SOURCE"),
+]
+for live, observations, authority, scope in scenarios:
+    replay_rows = replay_p10_permission(live, observations, authority, scope)
+    if any(row.get("dependent_material_facts_publishable") is not False
+           or row.get("publication_permission_scope") != "DIAGNOSTIC_ONLY"
+           for row in replay_rows):
+        errors.append("P10 diagnostic probe granted material publication permission")
+    if live and authority and scope == "MATERIAL_SOURCE" and observations[0]["ok"] and observations[0]["semantic_chars"] >= 256:
+        if not all(row["health"] == "PASS" and row["material_facts_authority"] for row in replay_rows):
+            errors.append("P10 publication containment incorrectly suppressed source health/authority metadata")
+
 
 if errors:
     raise SystemExit("FAIL P10 policy regression guard: " + "; ".join(errors))
