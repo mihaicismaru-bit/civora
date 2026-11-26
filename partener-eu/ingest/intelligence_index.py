@@ -270,7 +270,14 @@ def mipe_records(
     records = []
     for row in state.get("items") or []:
         url = canonical_url(row.get("url") or row.get("sourceUrl"))
-        if not url or urllib.parse.urlparse(url).hostname != "mfe.gov.ro":
+        # The MIPE ledger can retain the official MySMIS reporting registry as
+        # discovery. Admit only this exact registry URL, not arbitrary APEX
+        # pages or aliases, and never treat its retained index as call evidence.
+        mysmis_registry = url == (
+            "https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/"
+            "finantari-programe-2021-2027"
+        )
+        if not url or (urllib.parse.urlparse(url).hostname != "mfe.gov.ro" and not mysmis_registry):
             continue
         item_observed_at = row.get("observedAt")
         item_freshness = evidence_record_freshness(source, item_observed_at, reference, sla)
@@ -280,16 +287,19 @@ def mipe_records(
             "sourceTier": source["tier"],
             "recordType": "OFFICIAL_MIPE_ITEM",
             "title": str(row.get("title") or row.get("headline") or url)[:500],
-            "programme": row.get("programme") or "MIPE",
+            "programme": row.get("programme") or ("MIPE / MySMIS" if mysmis_registry else "MIPE"),
             "canonicalUrl": url,
             "fingerprint": row.get("sha256") or row.get("contentHash"),
             "observedAt": item_observed_at,
             "freshness": item_freshness,
-            "decisionUse": "OFFICIAL_EVIDENCE_INDEX" if verified and item_freshness == "CURRENT" else "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+            "decisionUse": ("OFFICIAL_EVIDENCE_INDEX"
+                            if verified and item_freshness == "CURRENT" and not mysmis_registry
+                            else "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
             "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
             "publishMaterialFacts": False,
             "blockedFactClasses": MATERIAL_FACT_CLASSES,
-            "provenance": [{"url": url, "tier": "T1", "label": "MIPE"}],
+            "provenance": [{"url": url, "tier": "T1",
+                            "label": "MIPE / MySMIS registry (discovery only)" if mysmis_registry else "MIPE"}],
         })
     return source, records
 
