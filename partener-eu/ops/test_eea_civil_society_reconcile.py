@@ -180,6 +180,7 @@ def main():
         ({"source_index": {"observation_state": "NO_EXACT_CALL_LINKS"}}, "empty index"),
         ({"source_index": {"observation_state": "DISCOVERY_SHORTFALL"}}, "short index"),
         ({"parser_version": "EEA_CSF_ROMANIA_LIVE_FETCH_V2"}, "V2 missing provenance"),
+        ({"parser_version": "EEA_CSF_ROMANIA_LIVE_FETCH_V3"}, "V3 missing provenance"),
     ]:
         bad = copy.deepcopy(evidence)
         bad.update(patch)
@@ -200,6 +201,10 @@ def main():
     good["stats"]["discovery_shortfall"] = False
     if module.reconcile_live_evidence(good, minimum_calls=2)["stats"]["reconciled_calls"] != 2:
         fail("valid V2 complete non-diagnostic acquisition rejected")
+
+    good["parser_version"] = "EEA_CSF_ROMANIA_LIVE_FETCH_V3"
+    if module.reconcile_live_evidence(good, minimum_calls=2)["stats"]["reconciled_calls"] != 2:
+        fail("valid V3 complete non-diagnostic acquisition rejected")
 
     print("PASS EEA CSF reconciliation: exact authority, semantic integrity, material-field validation, staging-only authorization and fail-closed batch semantics")
 
