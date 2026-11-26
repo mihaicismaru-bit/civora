@@ -221,6 +221,45 @@ def main():
         assert "SRC-DISCOVERY-ONLY" in index["summary"]["operationalUnavailableT1Sources"]
         assert index["dataPlane"]["dependencyIsolation"]["globalStop"] is False
 
+        # Declared family tags survive projection, and programming sources
+        # cannot become material call authorities even if misconfigured.
+        definitions = [
+            ("SRC-EU-TEST", "official_direct_call_registry", ["EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"], False),
+            ("SRC-EEA-TEST", "official_programming_framework", ["EEA_NORWAY", "PROGRAMMING_PIPELINE"], True),
+            ("SRC-INTERREG-TEST", "official_interreg_call_registry", ["INTERREG", "CBC"], False),
+            ("SRC-INTERREG-FUTURE", "official_programming_pipeline", ["INTERREG", "PROGRAMMING_PIPELINE"], True),
+            ("SRC-ADRCENTRU-CONSULT", "official_intermediate_body_consultation_index", [], True),
+            ("SRC-EU-TAGGED-PLAN", "official_direct_programme_gateway", ["PROGRAMMING_PIPELINE"], True),
+            ("SRC-MYSMIS-TEST", "authoritative_call_registry", ["CALL_REGISTRY", "CALL_REGISTRY"], False),
+        ]
+        registry_fixture = {"sources": [
+            {"id": source_id, "class": kind, "source_families": tags,
+             "tier": "T1", "material_fact_use": True}
+            for source_id, kind, tags, _ in definitions
+        ]}
+        health_fixture = {"sources": [
+            {"id": source_id, "health": "PASS"} for source_id, _, _, _ in definitions
+        ]}
+        inventory = mod.build_source_inventory(
+            [{"id": "VERIFIED_SOURCE_REGISTRY", "freshness": {"status": "CURRENT"}}],
+            registry_fixture, health_fixture, {}, {}
+        )
+        by_id = {row["id"]: row for row in inventory}
+        for source_id, _, tags, planning in definitions:
+            row = by_id[source_id]
+            assert set(tags) <= set(row["sourceFamilies"]), row
+            assert row["sourceFamilies"] == sorted(set(row["sourceFamilies"]))
+            assert row["planningOnly"] is planning
+            gate = mod.dependency_gate(row)
+            assert gate["materialFactGate"] == (
+                "PLANNING_ONLY" if planning else "RECONCILIATION_REQUIRED"
+            ), gate
+            assert gate["publishMaterialFacts"] is False
+        assert "MYSMIS" in by_id["SRC-MYSMIS-TEST"]["sourceFamilies"]
+        assert "OI_ADR" in by_id["SRC-ADRCENTRU-CONSULT"]["sourceFamilies"]
+        assert mod.registry_families({"source_families": "PROGRAMMING_PIPELINE"}) == []
+        assert mod.registry_families({"source_families": [None, "", " ", 4, "EEA_NORWAY"]}) == ["EEA_NORWAY"]
+
         # A discovery-only T1 outage must remain visible operationally without
         # degrading material readiness when all material-authority sources are healthy.
         afir = json.loads((root / "afir_corpus.json").read_text(encoding="utf-8"))
