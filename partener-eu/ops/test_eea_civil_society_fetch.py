@@ -130,6 +130,33 @@ def main():
     if page_hashes != expected:
         fail("raw page hashes are not preserved exactly")
 
+    # Index-discovered pages are subject to the same identity checks as seeds.
+    # A real official host/path alone must not attest a different call body.
+    for raw, final_url in [
+        (CALL2_HTML, CALL1),
+        (CALL2_HTML, CALL2),
+        (CALL1_HTML.replace(b"Call number", b"Missing identity"), CALL1),
+        (CALL1_HTML.replace(b"Call #1", b"Call #2"), CALL1),
+        (CALL1_HTML.replace(b"<div>Call number</div><div>1</div>",
+                           b"<div>Call number</div><div>1</div><div>Call number</div><div>2</div>"), CALL1),
+    ]:
+        def mismatched_index_fetch(url):
+            return response(url, INDEX_HTML) if url == INDEX else (
+                response(url, raw, final_url=final_url) if url == CALL1 else response(url, CALL2_HTML)
+            )
+        held_identity = module.collect_live(index_url=INDEX, run_id="TEST-INDEX-IDENTITY",
+            fetched_at=FETCHED, minimum_calls=2, fetcher=mismatched_index_fetch)
+        if held_identity["acquisition_status"] != "INCOMPLETE_DISCOVERY" or len(held_identity["errors"]) != 1:
+            fail("mismatched index-discovered call must be rejected")
+        if {r["call_identifier"] for r in held_identity["records"]} != {"EEA-CSF-RO-CALL-02"}:
+            fail("mismatched call body must not contaminate another identifier")
+
+    # The official Romanian page uses a longer label and Apel in its heading.
+    ro_url = CALL1.replace("/en/", "/ro/")
+    ro_html = CALL1_HTML.decode().replace("Call #1", "Apel #1").replace(
+        "Call number", "Numărul Apelului de proiecte").encode()
+    module._require_exact_call_identity(ro_url, ro_url, ro_html)
+
     # The official index can drop all call-detail links after a deadline.
     # A missing index must yield a provenance receipt, not an exception that
     # prevents the failure artifact from being uploaded.
