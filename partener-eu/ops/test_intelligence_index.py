@@ -42,8 +42,8 @@ def fixture_state(root):
         "observed_at": "2026-08-12T08:00:00Z",
         "summary": {"total": 3, "fail": 1, "resolution_tasks_required": 1},
         "sources": [
-            {"id": "SRC-MYSMIS-CALLS", "tier": "T1", "health": "PASS", "semantic_hash_changed": False, "resolution_task_required": False, "semantic_sha256": "mysmis"},
-            {"id": "SRC-OIRVEST-PEO", "tier": "T1B", "health": "PASS", "semantic_hash_changed": True, "resolution_task_required": True, "semantic_sha256": "oir"},
+            {"id": "SRC-MYSMIS-CALLS", "tier": "T1", "health": "PASS", "semantic_hash_changed": False, "resolution_task_required": False, "semantic_sha256": "b" * 64, "raw_sha256": "a" * 64, "ok": True, "content_quality_ok": True, "quarantined": False},
+            {"id": "SRC-OIRVEST-PEO", "tier": "T1B", "health": "PASS", "semantic_hash_changed": True, "resolution_task_required": True, "semantic_sha256": "d" * 64, "raw_sha256": "c" * 64, "ok": True, "content_quality_ok": True, "quarantined": False},
             {"id": "SRC-DISCOVERY-ONLY", "tier": "T1", "health": "FAIL", "semantic_hash_changed": False, "resolution_task_required": False},
         ],
     })
@@ -238,7 +238,9 @@ def main():
             for source_id, kind, tags, _ in definitions
         ]}
         health_fixture = {"sources": [
-            {"id": source_id, "health": "PASS"} for source_id, _, _, _ in definitions
+            {"id": source_id, "health": "PASS", "ok": True, "content_quality_ok": True,
+             "quarantined": False, "raw_sha256": "a" * 64, "semantic_sha256": "b" * 64}
+            for source_id, _, _, _ in definitions
         ]}
         inventory = mod.build_source_inventory(
             [{"id": "VERIFIED_SOURCE_REGISTRY", "freshness": {"status": "CURRENT"}}],
@@ -259,6 +261,47 @@ def main():
         assert "OI_ADR" in by_id["SRC-ADRCENTRU-CONSULT"]["sourceFamilies"]
         assert mod.registry_families({"source_families": "PROGRAMMING_PIPELINE"}) == []
         assert mod.registry_families({"source_families": [None, "", " ", 4, "EEA_NORWAY"]}) == ["EEA_NORWAY"]
+
+        # A current registry batch is not evidence freshness for each row.
+        # Failed, low-information, quarantined, contradictory and missing
+        # observations must never inherit a current evidence timestamp.
+        valid_health = {"id": "SRC-MYSMIS-TEST", "health": "PASS", "ok": True,
+                        "content_quality_ok": True, "quarantined": False,
+                        "raw_sha256": "a" * 64, "semantic_sha256": "b" * 64}
+        verified_at = "2026-08-12T08:00:00Z"
+        for row_health, expected, availability in (
+            (valid_health, "CURRENT", "AVAILABLE"),
+            (dict(valid_health, health="FAIL"), "UNKNOWN", "UNAVAILABLE_LAST_KNOWN_GOOD"),
+            (dict(valid_health, health="DEGRADED"), "UNKNOWN", "DEGRADED_LAST_KNOWN_GOOD"),
+            (dict(valid_health, ok=False), "UNKNOWN", "UNKNOWN"),
+            (dict(valid_health, ok="true"), "UNKNOWN", "UNKNOWN"),
+            (dict(valid_health, content_quality_ok=False), "UNKNOWN", "UNKNOWN"),
+            (dict(valid_health, quarantined=True), "UNKNOWN", "UNKNOWN"),
+            (dict(valid_health, raw_sha256=None), "UNKNOWN", "UNKNOWN"),
+            (dict(valid_health, raw_sha256="g" * 64), "UNKNOWN", "UNKNOWN"),
+            (dict(valid_health, semantic_sha256="a" * 63), "UNKNOWN", "UNKNOWN"),
+            ({}, "UNKNOWN", "UNKNOWN"),
+        ):
+            fixture = {"observed_at": verified_at, "sources": [row_health] if row_health else []}
+            projected = mod.build_source_inventory(
+                [{"id": "VERIFIED_SOURCE_REGISTRY",
+                  "freshness": {"status": "CURRENT", "ageHours": 2, "maxAgeHours": 4}}],
+                registry_fixture, fixture, {}, {}
+            )
+            row = next(item for item in projected if item["id"] == "SRC-MYSMIS-TEST")
+            assert row["freshness"]["status"] == expected, row
+            assert row["observedAt"] == (verified_at if expected == "CURRENT" else None)
+            assert row["lastAttemptObservedAt"] == (verified_at if row_health else None)
+            assert row["lastAttemptFreshness"]["status"] == ("CURRENT" if row_health else "UNKNOWN")
+            gate = mod.dependency_gate(row)
+            assert gate["availability"] == availability, gate
+            assert gate["materialFactGate"] == (
+                "RECONCILIATION_REQUIRED" if expected == "CURRENT" else "BLOCKED_SOURCE_DEPENDENCIES"
+            ), gate
+            assert gate["publishMaterialFacts"] is False
+        inventory = {row["id"]: row for row in index["dataPlane"]["sourceInventory"]}
+        assert inventory["SRC-DISCOVERY-ONLY"]["freshness"]["status"] == "UNKNOWN"
+        assert inventory["SRC-DISCOVERY-ONLY"]["lastAttemptFreshness"]["status"] == "CURRENT"
 
         # A discovery-only T1 outage must remain visible operationally without
         # degrading material readiness when all material-authority sources are healthy.
