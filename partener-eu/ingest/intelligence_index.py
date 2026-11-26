@@ -406,6 +406,18 @@ def registry_domains(source: Dict[str, Any], contract: Dict[str, Any]) -> List[s
     return sorted(domains)
 
 
+def registry_observation_verified(health: Dict[str, Any]) -> bool:
+    """Only a successful high-information registry response supports evidence recency."""
+    return (
+        health.get("health") == "PASS"
+        and health.get("ok") is True
+        and health.get("content_quality_ok") is True
+        and health.get("quarantined") is False
+        and all(isinstance(health.get(key), str) and re.fullmatch(r"[0-9a-f]{64}", health[key])
+                for key in ("raw_sha256", "semantic_sha256"))
+    )
+
+
 def source_availability(source: Dict[str, Any]) -> str:
     contract_status = (source.get("contract") or {}).get("status")
     if contract_status == "FAIL":
@@ -414,6 +426,13 @@ def source_availability(source: Dict[str, Any]) -> str:
         return "UNAVAILABLE_LAST_KNOWN_GOOD"
     freshness_status = (source.get("freshness") or {}).get("status")
     status = str(source.get("status") or "UNKNOWN").upper()
+    # Retain explicit transport failure diagnostics even when the evidence
+    # timestamp is unknown (the registry batch only establishes attempt time).
+    if source.get("kind") == "REGISTERED_OFFICIAL_SOURCE":
+        if status == "FAIL":
+            return "UNAVAILABLE_LAST_KNOWN_GOOD"
+        if status == "DEGRADED":
+            return "DEGRADED_LAST_KNOWN_GOOD"
     if freshness_status == "STALE":
         return "STALE_LAST_KNOWN_GOOD"
     if freshness_status == "UNKNOWN":
@@ -492,6 +511,10 @@ def build_source_inventory(
         if not source_id:
             continue
         health = health_by_id.get(source_id) or {}
+        unknown_freshness = {"status": "UNKNOWN", "ageHours": None,
+                             "maxAgeHours": registry_freshness.get("maxAgeHours")}
+        attempt_freshness = registry_freshness if health else unknown_freshness
+        verified = registry_observation_verified(health)
         inventory.append({
             "id": source_id,
             "kind": "REGISTERED_OFFICIAL_SOURCE",
@@ -504,15 +527,19 @@ def build_source_inventory(
             "owner": definition.get("owner"),
             "canonicalUrl": canonical_url(definition.get("url")),
             "status": health.get("health") or "UNKNOWN",
-            "observedAt": observed_at,
-            "freshness": registry_freshness,
+            # The health schema has a batch observation time, not a
+            # per-document fetched_at. Never use a failed batch row as evidence.
+            "observedAt": observed_at if verified else None,
+            "freshness": registry_freshness if verified else unknown_freshness,
+            "lastAttemptObservedAt": observed_at if health else None,
+            "lastAttemptFreshness": attempt_freshness,
             "materialFactUse": bool(definition.get("material_fact_use")),
             "planningOnly": registry_planning_only(definition),
             "resolutionTaskRequired": bool(health.get("resolution_task_required")),
             "lastKnownGoodPreserved": bool(
                 health.get("semantic_sha256")
                 or health.get("last_known_semantic_sha256")
-                or health.get("health") == "PASS"
+                or verified
             ),
             "contract": {"status": "PASS", "errors": []},
         })
