@@ -150,12 +150,14 @@ def reconcile_live_evidence(
         "NO_EXACT_CALL_LINKS", "DISCOVERY_SHORTFALL"
     }:
         _fail("official index discovery remains incomplete")
-    if evidence.get("parser_version") == "EEA_CSF_ROMANIA_LIVE_FETCH_V2":
+    if evidence.get("parser_version") in {
+        "EEA_CSF_ROMANIA_LIVE_FETCH_V2", "EEA_CSF_ROMANIA_LIVE_FETCH_V3"
+    }:
         if (acquisition_status != "COMPLETE_INDEX_DISCOVERY"
                 or evidence.get("diagnostic_seed_mode") is not False
                 or not isinstance(index, dict)
                 or index.get("observation_state") != "EXACT_CALL_LINKS_OBSERVED"):
-            _fail("V2 evidence lacks explicit complete non-diagnostic index provenance")
+            _fail("V2/V3 evidence lacks explicit complete non-diagnostic index provenance")
     if evidence.get("errors") or evidence.get("conflicts"):
         _fail("live evidence contains errors/conflicts")
 
