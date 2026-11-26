@@ -103,6 +103,13 @@ with tempfile.TemporaryDirectory() as td:
         assert row["resolution_task_state"] == "REVERSION_REVIEW_REQUIRED"
         assert row["resolution_task_required"] and task_path.read_bytes() == snapshot
 
+        # Missing durable ledger after a previously pending observation fails closed.
+        task_path.unlink()
+        row = observe(c)
+        assert row["resolution_task_required"] and row["publish_material_fact_update"] is False
+        assert row["resolution_task_state"] == "INVALID" and not task_path.exists()
+        task_path.write_bytes(snapshot)
+
         # An inconsistent or malformed task remains visible and is never overwritten.
         task_path.write_text("{", encoding="utf-8")
         row = observe(c)
