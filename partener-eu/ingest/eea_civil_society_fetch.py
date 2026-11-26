@@ -27,7 +27,7 @@ adapter = importlib.util.module_from_spec(spec)
 assert spec and spec.loader
 spec.loader.exec_module(adapter)
 
-PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V2"
+PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V3"
 INDEX_URL = "https://eeagrants.org/en/eea-civil-society-fund-romania/calls"
 OFFICIAL_HOSTS = {"eeagrants.org", "www.eeagrants.org"}
 MAX_BYTES = 4_000_000
@@ -198,6 +198,22 @@ def _call_number_from_url(url: str) -> str | None:
     return number_match.group(1) if number_match else None
 
 
+def _require_exact_call_identity(requested_url: str, final_url: str, raw: bytes) -> None:
+    """Reject a mismatched numbered endpoint, including official redirects."""
+    expected = _call_number_from_url(requested_url)
+    doc = _parse_document(raw)
+    body_numbers = re.findall(
+        r"\b(?:Call number|Numărul Apelului(?: de proiecte)?)\s*:?\s*(\d{1,3})\b",
+        _flat_text(doc), flags=re.IGNORECASE,
+    )
+    title = re.match(r"^(?:Call|Apel)\s*#?\s*(\d{1,3})\b",
+                     " ".join(doc.h1_parts), flags=re.IGNORECASE)
+    if (not expected or _call_number_from_url(final_url) != expected
+            or not body_numbers or set(body_numbers) != {expected}
+            or not title or title.group(1) != expected):
+        raise ValueError("exact-call URL/body/title identity mismatch")
+
+
 def _status_label(flat: str) -> str | None:
     pairs = (
         (r"\bCall for projects\s+Open\b", "Open"),
@@ -305,15 +321,7 @@ def collect_live(
             response = fetcher(requested_url)
             final_url = _official_url(str(response["final_url"]), call_detail=True)
             raw = bytes(response["raw"])
-            if seed_mode:
-                expected_number = _call_number_from_url(requested_url)
-                doc = _parse_document(raw)
-                body_number = _extract_label_value(_flat_text(doc), ("Call number",), r"\d{1,3}\b")
-                title_number = re.search(r"\bCall\s*#?\s*(\d{1,3})\b", " ".join(doc.h1_parts), re.IGNORECASE)
-                if (not expected_number or _call_number_from_url(final_url) != expected_number
-                        or body_number != expected_number or not title_number
-                        or title_number.group(1) != expected_number):
-                    raise ValueError("seed exact-call URL/body/title identity mismatch")
+            _require_exact_call_identity(requested_url, final_url, raw)
             record = parse_call_page(raw, authority_url=final_url)
             normalized = adapter.normalize_record(
                 record,
