@@ -1,0 +1,54 @@
+{
+  "schema_version": "eucons.ai4work_provider_account_role_reconciliation.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-08-29",
+  "status": "FROZEN_DOCUMENTARY_FACTS_LIVE_SERVICE_MAPPING_OPEN",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
+  "purpose": "Reconcile first-party Claus Web customer/billing evidence with the first-party controller/site-ownership determination without conflating domain ownership, billing, hosting-account access or GDPR roles.",
+  "documentary_facts": [
+    {
+      "fact": "Authenticated first-party user determination fixes EUROCONSULT SRL as GDPR controller for AI4WORK research and owner of eucons.ro.",
+      "source_class": "AUTHENTICATED_FIRST_PARTY_DECLARATION_2026_08_28"
+    },
+    {
+      "fact": "Controlled Claus Web correspondence dated 2026-03-20 billed the eucons.ro domain-renewal transaction to FUNDAȚIA ANTREPRENORIAT SOCIAL.",
+      "source_class": "FIRST_PARTY_PROVIDER_CORRESPONDENCE_PRIVATE_REFERENCE"
+    },
+    {
+      "fact": "Controlled Claus Web correspondence dated 2026-03-20 billed the eucons.ro deleted-hosting-account restoration transaction to FUNDAȚIA ANTREPRENORIAT SOCIAL.",
+      "source_class": "FIRST_PARTY_PROVIDER_CORRESPONDENCE_PRIVATE_REFERENCE"
+    },
+    {
+      "fact": "A controlled Claus Web password-reset message dated 2026-08-13 lists separate customer accounts for EUROCONSULT SRL and FUNDAȚIA ANTREPRENORIAT SOCIAL, so customer-account existence alone does not establish which current account carries the eucons.ro live hosting service.",
+      "source_class": "FIRST_PARTY_PROVIDER_CORRESPONDENCE_PRIVATE_REFERENCE"
+    }
+  ],
+  "reconciliation": {
+    "controller": "EUROCONSULT SRL",
+    "domain_owner": "EUROCONSULT SRL",
+    "march_2026_billing_or_restoration_account_entity": "FUNDAȚIA ANTREPRENORIAT SOCIAL",
+    "current_live_hosting_service_account": null,
+    "current_respondent_level_or_log_access_scope": null,
+    "current_controller_to_provider_instruction_binding": null,
+    "conclusion": "The March 2026 billing/restoration evidence is compatible with EUROCONSULT SRL owning eucons.ro and acting as controller, because billing/account administration is not equivalent to domain ownership or controller status. It also means the live processing chain cannot be considered verified until the current service-to-account mapping and access/instruction scope are read back."
+  },
+  "claim_boundaries": [
+    "Do not infer that FUNDAȚIA ANTREPRENORIAT SOCIAL is a controller or joint controller from billing/restoration evidence.",
+    "Do not infer that EUROCONSULT SRL's separate Claus Web customer account carries the current eucons.ro hosting service merely because that account exists.",
+    "Do not infer current respondent-level, log, backup or database access for either customer account without account-specific evidence.",
+    "Do not expose private client IDs, password-reset links, invoice tokens, credentials, addresses or personal-contact data in repository artifacts."
+  ],
+  "required_before_prod": [
+    "read back which current Claus Web service/account carries the eucons.ro AI4WORK endpoint and research-only store",
+    "bind EUROCONSULT SRL controller instructions to the actual processor/service chain",
+    "verify who can access cPanel Raw Access logs, research-only storage, backup and deletion controls",
+    "verify account-specific Annex 5 overrides, if any",
+    "reconcile the verified live path with the dedicated AI4WORK Article 13 notice and public privacy surface"
+  ],
+  "documentary_reconciliation_complete": true,
+  "live_service_mapping_complete": false,
+  "prod_ready": false,
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

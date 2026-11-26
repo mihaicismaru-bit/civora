@@ -1,0 +1,132 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-03T17:33:32+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "branch_parent_head": "ff36b784b5ab4dc4973ae70d109afb3ac6d93cd6",
+  "secondary_evidence_refresh": {
+    "controlled_drive_registry_id": "1ZtyY7QZ8o-BebvFmrcY95QP6ONoWUCQY9wzCwSpSG20",
+    "high_water_mark_before": "S63",
+    "high_water_mark_after": "S66",
+    "dashboard_reconciled_to": "S01-S66",
+    "new_rows": [
+      {
+        "source_id": "S64",
+        "region": "Sud-Vest Oltenia / Dolj",
+        "publisher": "ANOFM / CRFPA Dolj",
+        "title": "Programe de formare profesionala autorizate - readback curent",
+        "observed_at": "2026-09-03",
+        "url": "https://www.anofm.ro/crfpa-dolj/programe-de-formare-profesionala-autorizate/",
+        "observed_facts": {
+          "digital_competence_including_internet_safety_and_cybersecurity_hours": 90,
+          "data_protection_officer_specialisation_hours": 180
+        },
+        "classification": "CURRENT_TRAINING_SUPPLY_CONTEXT_ZERO_H1_H5",
+        "claim_boundary": "The authorised training catalogue maps provider capacity/supply only. It does not measure demand, competence-gap prevalence or AI4WORK need and contributes zero H1-H5 points."
+      },
+      {
+        "source_id": "S65",
+        "region": "Sud-Muntenia / Prahova",
+        "publisher": "ANOFM / AJOFM Prahova",
+        "title": "2.29% - registered unemployment in AJOFM Prahova records, July 2026",
+        "publication_date": "2026-08-13",
+        "reference_period": "2026-07",
+        "url": "https://www.anofm.ro/prahova/categorie/comunicate-de-presa/",
+        "observed_facts": {
+          "registered_unemployment_rate_percent": 2.29
+        },
+        "classification": "CURRENT_LABOUR_MARKET_ADMINISTRATIVE_CONTEXT_ZERO_H1_H5",
+        "claim_boundary": "Registered unemployment is administrative labour-market context, not a measurement of digital/AI skills, skill-gap prevalence or training demand, and contributes zero H1-H5 points."
+      },
+      {
+        "source_id": "S66",
+        "region": "Centru / Mures",
+        "publisher": "ANOFM / AJOFM Mures",
+        "title": "2.86% - registered unemployment in AJOFM Mures records, July 2026",
+        "publication_date": "2026-08-27",
+        "reference_period": "2026-07",
+        "url": "https://www.anofm.ro/mures/286-rata-somajului-inregistrat-in-evidentele-ajofm-mures-in-luna-iulie-2026/",
+        "observed_facts": {
+          "registered_unemployed": 5919,
+          "registered_unemployment_rate_percent": 2.86,
+          "rural": 4373,
+          "urban": 1546,
+          "education_primary_percent": 47.47,
+          "education_gymnasium_percent": 25.87,
+          "education_vocational_percent": 9.87,
+          "education_high_school_percent": 12.06,
+          "education_university_percent": 3.67,
+          "education_postsecondary_percent": 1.06
+        },
+        "classification": "CURRENT_LABOUR_MARKET_EDUCATION_ADMINISTRATIVE_CONTEXT_ZERO_H1_H5",
+        "claim_boundary": "The administrative unemployment/education profile is not a digital/AI competence test and does not measure AI4WORK training-need prevalence. It contributes zero H1-H5 points."
+      }
+    ],
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "training_supply_as_need_prevalence": false,
+    "administrative_unemployment_as_need_prevalence": false
+  },
+  "call_requirements_refresh": {
+    "checked_at": "2026-09-03T17:33:32+03:00",
+    "gmail_query_scope": "after:2026/09/03 OMIPE|MIPE|PEO|Claus Web|Cloudflare|eucons.ro|AI4WORK, excluding GitHub, spam and trash",
+    "non_github_authority_or_provider_messages_observed": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "checked_at": "2026-09-03T17:33:32+03:00",
+    "drive_queries": [
+      "PROD_REAL_EVIDENCE",
+      "AI4WORK_ADULTS_V1"
+    ],
+    "eligible_combined_real_adult_employer_batch_found": false,
+    "source_export_sha256_bound_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "gdpr_and_forms_refresh": {
+    "forms_definition_status": "FROZEN_WEB_DEFINITION_NOT_DEPLOYED",
+    "direct_identifier_fields": false,
+    "analytical_free_text": false,
+    "commercial_tracking": false,
+    "crm_linkage": false,
+    "research_store_separation_required": true,
+    "live_provider_bound_separation_proven": false,
+    "privacy_contact": "privacy@eucons.ro",
+    "privacy_contact_inbound_delivery_independently_verified": false,
+    "raw_access_policy_ceiling_days": 7,
+    "account_specific_raw_access_ceiling_proven": false,
+    "residual_provider_backup_ceiling_days": 92,
+    "account_specific_backup_ceiling_proven": false,
+    "exact_rendered_ai4work_article13_reverified_this_run": false,
+    "public_retrieval_boundary": "The public eucons.ro fetch in this run did not yield an independently usable rendered AI4WORK Article 13 readback. This was not interpreted as proof of outage or absence."
+  },
+  "nf06_and_downstream": {
+    "nf06_preingest_implementation": "PREPARED_FAIL_CLOSED",
+    "nf06_prod_ingest_allowed": false,
+    "need_synthesis_allowed": false,
+    "deterministic_h1_h5_ranking_allowed": false,
+    "adversarial_qa_prod_allowed": false,
+    "needs_analysis_finalisation_allowed": false,
+    "reason": "No eligible immutable schema-valid real adult+employer PROD_REAL_EVIDENCE batch exists."
+  },
+  "remaining_external_blocker": {
+    "class": "LIVE_ACCOUNT_SPECIFIC_PROVIDER_BOUND",
+    "items": [
+      "exact rendered AI4WORK Article 13 readback and independently working privacy/rights inbound channel",
+      "actual eucons.ro cPanel/Cloudflare Raw Access/archive/access/security/retention readback proving the <=7-day policy on the live account",
+      "current service/account mapping and active processor/subprocessor chain",
+      "provider-bound proof that the research-only store is outside webroot and separate from CRM/commercial storage with authorised access only",
+      "account-specific confirmation of no backup override above <=92 days plus deletion/restore semantics that do not silently reintroduce erased/held records",
+      "provider-bound rights-hold/erasure and incident-response smoke evidence in TEST_TWIN_NON_EVIDENCE"
+    ]
+  },
+  "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

@@ -1,0 +1,49 @@
+name: EUCONS AI4WORK DPIA Screening
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/GDPR_DPIA_SCREENING_DRAFT.json'
+      - 'eucons/research/ai4work-step/dpia_screening_control.py'
+      - 'eucons/research/ai4work-step/prod_activation_gate.py'
+      - 'eucons/research/ai4work-step/test_dpia_screening.py'
+      - 'eucons/research/ai4work-step/test_dpia_screening_control.py'
+      - 'eucons/research/ai4work-step/test_prod_activation_dpia_binding.py'
+      - '.github/workflows/eucons-ai4work-dpia-screening.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/GDPR_DPIA_SCREENING_DRAFT.json'
+      - 'eucons/research/ai4work-step/dpia_screening_control.py'
+      - 'eucons/research/ai4work-step/prod_activation_gate.py'
+      - 'eucons/research/ai4work-step/test_dpia_screening.py'
+      - 'eucons/research/ai4work-step/test_dpia_screening_control.py'
+      - 'eucons/research/ai4work-step/test_prod_activation_dpia_binding.py'
+      - '.github/workflows/eucons-ai4work-dpia-screening.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-dpia-screening-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dpia-screening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate DPIA screening fail-closed semantics
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_dpia_screening.py test_dpia_screening_control.py test_prod_activation_dpia_binding.py
+      - name: Enforce current DPIA screening control state
+        working-directory: eucons/research/ai4work-step
+        run: python dpia_screening_control.py
+      - name: Enforce authoritative PROD activation boundary
+        working-directory: eucons/research/ai4work-step
+        run: python prod_activation_gate.py

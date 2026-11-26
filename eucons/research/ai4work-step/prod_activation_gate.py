@@ -1,0 +1,460 @@
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+from pathlib import Path
+from typing import Any
+
+from data_subject_rights_control import data_subject_rights_errors
+from dpia_screening_control import dpia_screening_errors
+from explicit_user_approval_control import explicit_user_approval_errors
+from lawful_basis_lia_control import lawful_basis_lia_errors
+from privacy_notice_nf06_binding_control import binding_errors as privacy_notice_binding_errors
+from retention_evidence_control import retention_attestation_errors
+from security_incident_response_gate import incident_response_errors
+
+HERE = Path(__file__).resolve().parent
+CONTRACT_PATH = HERE / "form_contract.json"
+MANIFEST_PATH = HERE / "PROD_ACTIVATION_MANIFEST_DRAFT.json"
+CONTROLLER_PATH = HERE / "CONTROLLER_DETERMINATION_DRAFT.json"
+COLLECTION_FRAME_PATH = HERE / "COLLECTION_FRAME_DRAFT.json"
+DPIA_SCREENING_PATH = HERE / "GDPR_DPIA_SCREENING_DRAFT.json"
+LIA_PATH = HERE / "GDPR_LIA_DRAFT.json"
+INCIDENT_RESPONSE_PATH = HERE / "GDPR_SECURITY_INCIDENT_RESPONSE_DRAFT.json"
+RIGHTS_PATH = HERE / "GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json"
+ARTICLE13_SNAPSHOT_PATH = HERE / "ARTICLE13_NOTICE_SNAPSHOT_DRAFT.json"
+NF06_CONTRACT_PATH = HERE / "NF06_PREINGEST_CONTRACT.json"
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+APPROVED_EXTERNAL_STATUSES = {"APPROVED", "PASS"}
+DOCUMENTARY_EXTERNAL_STATUSES = {"APPROVED", "PASS", "FROZEN"}
+SEMANTIC_ATTESTATION_STATUSES = {"APPROVED", "PASS"}
+NON_EVIDENCE_MARKERS = ("TEST_TWIN", "NON_EVIDENCE", "SYNTHETIC")
+# A provider-bound TEST TWIN smoke is a control-only go-live prerequisite, never need evidence.
+# It is the sole operational binding that must be synthetic and explicitly NON-EVIDENCE.
+TEST_TWIN_CONTROL_KEYS = {"provider_bound_test_twin_smoke"}
+FROZEN_DOCUMENTARY_KEYS = {
+    "provider_account_role_reconciliation",
+    "live_hosting_service_mapping",
+    "provider_annex_4_5",
+    "provider_server_logging_profile",
+}
+REQUIRED_EXTERNAL_KEYS = {
+    "privacy_notice",
+    "lawful_basis_or_lia",
+    "processor_chain",
+    "provider_account_role_reconciliation",
+    "live_hosting_service_mapping",
+    "live_public_privacy_surface_reconciliation",
+    "provider_annex_4_5",
+    "provider_server_logging_profile",
+    "account_server_logging_binding",
+    "retention_and_deletion",
+    "data_subject_rights_procedure",
+    "dpia_screening_or_completed_dpia",
+    "research_only_store_binding",
+    "provider_bound_test_twin_smoke",
+}
+
+
+class ProductionActivationError(ValueError):
+    pass
+
+
+def _load(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _valid_external_reference(*, key: str, value: Any) -> bool:
+    if not isinstance(value, dict):
+        return False
+    status = value.get("status")
+    reference = value.get("reference")
+    digest = value.get("sha256")
+    allowed_statuses = (
+        DOCUMENTARY_EXTERNAL_STATUSES
+        if key in FROZEN_DOCUMENTARY_KEYS
+        else APPROVED_EXTERNAL_STATUSES
+    )
+    return (
+        status in allowed_statuses
+        and isinstance(reference, str)
+        and bool(reference.strip())
+        and isinstance(digest, str)
+        and bool(SHA256_RE.fullmatch(digest))
+    )
+
+
+def _resolve_local_reference(reference: Any) -> Path | None:
+    if not isinstance(reference, str) or not reference.strip():
+        return None
+    reference = reference.strip()
+    if "://" in reference or reference.startswith(("gdrive:", "gmail:", "http:", "https:")):
+        return None
+    raw = Path(reference)
+    if raw.is_absolute():
+        return None
+    candidate = (HERE / raw).resolve()
+    try:
+        candidate.relative_to(HERE.resolve())
+    except ValueError:
+        return None
+    if not candidate.is_file():
+        return None
+    return candidate
+
+
+def _valid_promoted_local_binding(*, key: str, value: dict[str, Any], research_id: str) -> bool:
+    """Activation itself verifies immutable, semantically relevant gate artifacts.
+
+    A separate CI evidence-binding workflow is defence in depth, but PROD activation
+    must not depend on that workflow having run. Every promoted external/operational gate is
+    therefore re-checked here. FROZEN is accepted only for the explicitly enumerated immutable
+    documentary/provider-context keys. Live operational gates require PASS/APPROVED and a JSON
+    attestation bound to this research run and exact evidence key.
+
+    Empirical/operational evidence keys reject TEST TWIN / NON-EVIDENCE / SYNTHETIC artifacts.
+    The sole exception is the dedicated provider-bound TEST TWIN smoke control: because its
+    purpose is to prove the live path safely before real collection, it MUST be synthetic and
+    explicitly marked TEST_TWIN + NON_EVIDENCE. That narrow control-only exception cannot satisfy
+    any other evidence key and never becomes need evidence.
+    """
+    candidate = _resolve_local_reference(value.get("reference"))
+    digest = value.get("sha256")
+    if candidate is None or not isinstance(digest, str) or not SHA256_RE.fullmatch(digest):
+        return False
+    if hashlib.sha256(candidate.read_bytes()).hexdigest() != digest:
+        return False
+
+    if value.get("status") not in SEMANTIC_ATTESTATION_STATUSES:
+        return key in FROZEN_DOCUMENTARY_KEYS and value.get("status") == "FROZEN"
+    if candidate.suffix.lower() != ".json":
+        return False
+    try:
+        artifact = _load(candidate)
+    except (OSError, json.JSONDecodeError):
+        return False
+    if not isinstance(artifact, dict):
+        return False
+    if artifact.get("research_id") != research_id:
+        return False
+    if artifact.get("evidence_binding_key") != key:
+        return False
+
+    marker_values = [
+        str(artifact.get(field) or "").upper()
+        for field in ("evidence_class", "mode", "artifact_class")
+    ]
+    if key in TEST_TWIN_CONTROL_KEYS:
+        if artifact.get("synthetic") is not True:
+            return False
+        return any(
+            "TEST_TWIN" in marker and "NON_EVIDENCE" in marker
+            for marker in marker_values
+        )
+
+    if artifact.get("synthetic") is True:
+        return False
+    if any(
+        any(non_evidence_marker in marker for non_evidence_marker in NON_EVIDENCE_MARKERS)
+        for marker in marker_values
+    ):
+        return False
+    return True
+
+
+def activation_errors(
+    *,
+    contract: dict[str, Any],
+    manifest: dict[str, Any],
+    controller: dict[str, Any],
+    collection_frame: dict[str, Any],
+    dpia_screening: dict[str, Any],
+    lawful_basis_lia: dict[str, Any] | None = None,
+    incident_response: dict[str, Any] | None = None,
+    data_subject_rights: dict[str, Any] | None = None,
+) -> list[str]:
+    errors: list[str] = []
+    research_ids = {
+        contract.get("research_id"),
+        manifest.get("research_id"),
+        controller.get("research_id"),
+        collection_frame.get("research_id"),
+        dpia_screening.get("research_id"),
+    }
+    if len(research_ids) != 1 or None in research_ids:
+        errors.append("research_id_mismatch")
+    research_id = manifest.get("research_id") if isinstance(manifest.get("research_id"), str) else ""
+
+    if contract.get("production_enabled") is not True:
+        errors.append("form_contract_production_disabled")
+    if contract.get("crm_integration") != "FORBIDDEN":
+        errors.append("crm_integration_not_forbidden")
+    if contract.get("commercial_analytics") != "FORBIDDEN":
+        errors.append("commercial_analytics_not_forbidden")
+
+    if manifest.get("state") != "APPROVED_FOR_PROD":
+        errors.append("activation_manifest_not_approved")
+    if manifest.get("approved_for_prod") is not True:
+        errors.append("activation_manifest_approval_false")
+    if manifest.get("collection_enabled") is not True:
+        errors.append("activation_manifest_collection_disabled")
+    if manifest.get("activation_mode") != "PROD_REAL_EVIDENCE_ONLY":
+        errors.append("activation_mode_not_real_evidence_only")
+    if manifest.get("test_twin_policy") != "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE":
+        errors.append("test_twin_policy_not_fail_closed")
+    errors.extend(explicit_user_approval_errors(manifest=manifest, research_id=research_id))
+    if manifest.get("merge_authorized") is not False:
+        errors.append("merge_authority_must_remain_false_for_collection_activation")
+    if manifest.get("deploy_authorized") is not False:
+        errors.append("deploy_authority_must_remain_false_for_collection_activation")
+    if manifest.get("canonicalization_authorized") is not False:
+        errors.append("canonicalization_authority_must_remain_false_for_collection_activation")
+
+    if controller.get("controller") in (None, ""):
+        errors.append("controller_unresolved")
+    if controller.get("approved") is not True:
+        errors.append("controller_not_approved")
+    if controller.get("collection_enabled") is not True:
+        errors.append("controller_collection_disabled")
+    if controller.get("nf06_reference_eligible") is not True:
+        errors.append("controller_not_nf06_eligible")
+
+    if collection_frame.get("frame_status") != "APPROVED_FOR_PROD":
+        errors.append("collection_frame_not_approved")
+    if collection_frame.get("collection_enabled") is not True:
+        errors.append("collection_frame_collection_disabled")
+    approval = collection_frame.get("approval") or {}
+    if approval.get("approved") is not True or approval.get("approved_for_prod") is not True:
+        errors.append("collection_frame_approval_false")
+    nf06_handoff = collection_frame.get("nf06_handoff") or {}
+    if nf06_handoff.get("eligible_now") is not True:
+        errors.append("collection_frame_not_nf06_eligible")
+
+    if dpia_screening.get("approved") is not True:
+        errors.append("dpia_screening_not_approved")
+    if dpia_screening.get("collection_enabled") is not True:
+        errors.append("dpia_screening_collection_disabled")
+    if dpia_screening.get("screening_conclusion") not in {
+        "DPIA_NOT_REQUIRED_APPROVED",
+        "DPIA_REQUIRED_COMPLETED_AND_APPROVED",
+    }:
+        errors.append("dpia_screening_conclusion_unresolved")
+    mandatory = dpia_screening.get("mandatory_before_prod") or {}
+    if mandatory.get("controller_determination_approved") is not True:
+        errors.append("dpia_controller_determination_not_approved")
+    if not isinstance(mandatory.get("privacy_contact_or_dpo_review_reference"), str) or not mandatory.get("privacy_contact_or_dpo_review_reference", "").strip():
+        errors.append("dpia_privacy_review_reference_missing")
+    if not isinstance(mandatory.get("final_large_scale_assessment"), str) or not mandatory.get("final_large_scale_assessment", "").strip():
+        errors.append("dpia_large_scale_assessment_missing")
+    if mandatory.get("employee_power_imbalance_safeguards_approved") is not True:
+        errors.append("dpia_employee_safeguards_not_approved")
+    if mandatory.get("anspdcp_decision_174_2018_final_check") is not True:
+        errors.append("dpia_anspdcp_check_not_approved")
+    if not isinstance(mandatory.get("final_dpia_decision"), str) or not mandatory.get("final_dpia_decision", "").strip():
+        errors.append("dpia_final_decision_missing")
+    if mandatory.get("if_residual_high_risk_prior_consultation_assessed") is not True:
+        errors.append("dpia_prior_consultation_assessment_missing")
+    if dpia_screening.get("screening_conclusion") == "DPIA_REQUIRED_COMPLETED_AND_APPROVED":
+        completed_ref = mandatory.get("if_dpia_required_completed_dpia_reference")
+        if not isinstance(completed_ref, str) or not completed_ref.strip():
+            errors.append("completed_dpia_reference_missing")
+
+    # DPIA screening is a substantive risk-classification boundary, not a boolean or hash-only
+    # checkbox. Revalidate the exact minimised processing design, EDPB/ANSPDCP trigger assessment,
+    # TEST TWIN non-promotability and controller-acceptance semantics during PROD activation.
+    for dpia_error in dpia_screening_errors(
+        contract=contract,
+        manifest=manifest,
+        controller=controller,
+        screening=dpia_screening,
+    ):
+        errors.append(f"dpia_screening:{dpia_error}")
+
+    # PROD activation must independently validate the lawful-basis/LIA semantics. A generic
+    # SHA/evidence-key binding or a human approval receipt is defence in depth, but neither may
+    # substitute for checking the exact controller identity, Article 6(1)(f) tests and final
+    # controller signoff at the authoritative activation boundary.
+    if lawful_basis_lia is None:
+        try:
+            lawful_basis_lia = _load(LIA_PATH)
+        except (OSError, json.JSONDecodeError):
+            errors.append("lawful_basis_lia_artifact_unreadable")
+            lawful_basis_lia = None
+    if isinstance(lawful_basis_lia, dict):
+        for lia_error in lawful_basis_lia_errors(
+            contract=contract,
+            manifest=manifest,
+            controller=controller,
+            lia=lawful_basis_lia,
+        ):
+            errors.append(f"lawful_basis_lia:{lia_error}")
+    elif lawful_basis_lia is not None:
+        errors.append("lawful_basis_lia_artifact_shape_invalid")
+
+    # PROD activation must independently validate the incident-response procedure semantics.
+    # A green standalone workflow or a SHA-bound human approval receipt is defence in depth,
+    # but neither is allowed to substitute for this activation-time check.
+    if incident_response is None:
+        try:
+            incident_response = _load(INCIDENT_RESPONSE_PATH)
+        except (OSError, json.JSONDecodeError):
+            errors.append("incident_response_artifact_unreadable")
+            incident_response = None
+    if isinstance(incident_response, dict):
+        for incident_error in incident_response_errors(
+            contract=contract,
+            manifest=manifest,
+            procedure=incident_response,
+        ):
+            errors.append(f"incident_response:{incident_error}")
+    elif incident_response is not None:
+        errors.append("incident_response_artifact_shape_invalid")
+
+    # Rights handling is also an operational GDPR boundary, not a documentary checkbox.
+    # Activation must verify Article 11 identification minimisation, receipt-only lookup,
+    # separate privacy-case logging, holds/erasure/rectification safeguards and final
+    # controller-approved rights applicability at the exact activation boundary.
+    if data_subject_rights is None:
+        try:
+            data_subject_rights = _load(RIGHTS_PATH)
+        except (OSError, json.JSONDecodeError):
+            errors.append("data_subject_rights_artifact_unreadable")
+            data_subject_rights = None
+    if isinstance(data_subject_rights, dict):
+        for rights_error in data_subject_rights_errors(
+            contract=contract,
+            manifest=manifest,
+            procedure=data_subject_rights,
+        ):
+            errors.append(f"data_subject_rights:{rights_error}")
+    elif data_subject_rights is not None:
+        errors.append("data_subject_rights_artifact_shape_invalid")
+
+    # The authoritative activation boundary must also validate the exact Article 13 -> NF06
+    # semantics. A generic SHA/evidence-key check or a green standalone workflow is not enough:
+    # activation itself must reject an unapproved notice, frame-version drift, or a notice that
+    # is not the exact frozen snapshot required by NF06.
+    try:
+        privacy_notice_snapshot = _load(ARTICLE13_SNAPSHOT_PATH)
+        nf06_contract = _load(NF06_CONTRACT_PATH)
+        privacy_notice_snapshot_sha256 = hashlib.sha256(ARTICLE13_SNAPSHOT_PATH.read_bytes()).hexdigest()
+    except (OSError, json.JSONDecodeError):
+        errors.append("privacy_notice_binding_artifact_unreadable")
+    else:
+        if not isinstance(privacy_notice_snapshot, dict) or not isinstance(nf06_contract, dict):
+            errors.append("privacy_notice_binding_artifact_shape_invalid")
+        else:
+            for privacy_error in privacy_notice_binding_errors(
+                snapshot=privacy_notice_snapshot,
+                collection_frame=collection_frame,
+                manifest=manifest,
+                nf06_contract=nf06_contract,
+                snapshot_sha256=privacy_notice_snapshot_sha256,
+            ):
+                errors.append(f"privacy_notice_binding:{privacy_error}")
+
+    evidence = manifest.get("required_external_or_operational_evidence")
+    if not isinstance(evidence, dict):
+        errors.append("external_evidence_map_missing")
+    else:
+        missing = REQUIRED_EXTERNAL_KEYS - set(evidence)
+        unexpected = set(evidence) - REQUIRED_EXTERNAL_KEYS
+        if missing:
+            errors.append("external_evidence_keys_missing:" + ",".join(sorted(missing)))
+        if unexpected:
+            errors.append("external_evidence_keys_unexpected:" + ",".join(sorted(unexpected)))
+        for key in sorted(REQUIRED_EXTERNAL_KEYS):
+            value = evidence.get(key)
+            reference_valid = key in evidence and _valid_external_reference(key=key, value=value)
+            if not reference_valid:
+                errors.append(f"external_evidence_status_or_binding_invalid:{key}")
+                continue
+
+            # Retention/deletion is operational evidence, not a documentary checkbox. If it is
+            # promoted, activation itself must evaluate the live attestation semantics. The
+            # dedicated retention workflow remains defence in depth, never a substitute.
+            if key == "retention_and_deletion" and value.get("status") in SEMANTIC_ATTESTATION_STATUSES:
+                candidate = _resolve_local_reference(value.get("reference"))
+                if candidate is None or candidate.suffix.lower() != ".json":
+                    errors.append("retention_semantics:retention_evidence_reference_invalid")
+                else:
+                    try:
+                        retention_artifact = _load(candidate)
+                    except (OSError, json.JSONDecodeError):
+                        errors.append("retention_semantics:retention_evidence_attestation_unreadable")
+                    else:
+                        for retention_error in retention_attestation_errors(retention_artifact):
+                            errors.append(f"retention_semantics:{retention_error}")
+
+            if not _valid_promoted_local_binding(
+                key=key,
+                value=value,
+                research_id=research_id,
+            ):
+                errors.append(f"external_evidence_binding_invalid:{key}")
+
+    if manifest.get("real_collection_authorized") is not True:
+        errors.append("real_collection_not_authorized")
+    return errors
+
+
+def evaluate_repository_activation(
+    *,
+    contract_path: Path = CONTRACT_PATH,
+    manifest_path: Path = MANIFEST_PATH,
+    controller_path: Path = CONTROLLER_PATH,
+    collection_frame_path: Path = COLLECTION_FRAME_PATH,
+    dpia_screening_path: Path = DPIA_SCREENING_PATH,
+    lawful_basis_lia_path: Path = LIA_PATH,
+    incident_response_path: Path = INCIDENT_RESPONSE_PATH,
+    data_subject_rights_path: Path = RIGHTS_PATH,
+) -> tuple[bool, list[str]]:
+    contract = _load(contract_path)
+    manifest = _load(manifest_path)
+    controller = _load(controller_path)
+    collection_frame = _load(collection_frame_path)
+    dpia_screening = _load(dpia_screening_path)
+    lawful_basis_lia = _load(lawful_basis_lia_path)
+    incident_response = _load(incident_response_path)
+    data_subject_rights = _load(data_subject_rights_path)
+    errors = activation_errors(
+        contract=contract,
+        manifest=manifest,
+        controller=controller,
+        collection_frame=collection_frame,
+        dpia_screening=dpia_screening,
+        lawful_basis_lia=lawful_basis_lia,
+        incident_response=incident_response,
+        data_subject_rights=data_subject_rights,
+    )
+    return not errors, errors
+
+
+def assert_repository_fail_closed_or_approved() -> None:
+    contract = _load(CONTRACT_PATH)
+    ready, errors = evaluate_repository_activation()
+    if contract.get("production_enabled") is True and not ready:
+        raise ProductionActivationError(
+            "AI4WORK production_enabled=true while PROD activation gate is not satisfied: "
+            + "; ".join(errors)
+        )
+    if contract.get("production_enabled") is not True and ready:
+        raise ProductionActivationError("inconsistent activation state: gate ready while production is disabled")
+
+
+def main() -> int:
+    try:
+        assert_repository_fail_closed_or_approved()
+    except (OSError, json.JSONDecodeError, ProductionActivationError) as exc:
+        raise SystemExit(f"REJECTED: {exc}")
+    ready, errors = evaluate_repository_activation()
+    if ready:
+        print("PASS: AI4WORK PROD activation gate is fully approved")
+    else:
+        print("PASS: AI4WORK remains fail-closed; unresolved gates: " + ", ".join(errors))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
