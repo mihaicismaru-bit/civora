@@ -12,6 +12,7 @@ import json
 import re
 import unicodedata
 from pathlib import Path
+from datetime import datetime, timedelta
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -149,35 +150,75 @@ def canonical_target(payload: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def exact_mysmis_status() -> dict[str, Any] | None:
-    """Return status-only evidence for the exact STEP-LLL call identity.
+    """Admit only an internally consistent official candidate for status-only demotion.
 
-    The MySMIS inventory is candidate-only for material publication. We use it
-    only to demote a stale OPEN state when the exact call row is FINALIZAT;
-    budget, deadline, eligibility and all other facts remain sourced elsewhere.
+    This is not raw-receipt verification, current freshness authorization, or
+    permission to publish OPEN or any other material fact.
     """
-    if not MYSMIS_INVENTORY.exists():
+    try:
+        payload = read(MYSMIS_INVENTORY)
+    except (OSError, ValueError):
         return None
-    payload = read(MYSMIS_INVENTORY)
-    inventory = payload.get("candidateInventory") if isinstance(payload.get("candidateInventory"), dict) else {}
-    for row in inventory.get("rows") or []:
-        if str(row.get("callCode") or "") != MYSMIS_CALL_CODE:
-            continue
-        status = str(row.get("status") or "").upper().strip()
-        if status != "FINALIZAT":
+    if not isinstance(payload, dict):
+        return None
+    expected = {
+        "schema": "CIVORA_MYSMIS_EXACT_CALL_INVENTORY_V1",
+        "status": "PASS_CANDIDATE_ONLY",
+        "canonicalUrl": "https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+        "authorityClass": "T1_OFFICIAL_MYSMIS_REPORTING",
+        "sourceFamily": "ROMANIA_MIPE_MYSMIS",
+        "parserVersion": "MYSMIS_EXACT_CALL_INVENTORY_V2",
+    }
+    if any(payload.get(key) != value for key, value in expected.items()):
+        return None
+    if any(payload.get(key) is not False for key in (
+        "materialFactUse", "publishAuthorized", "openCallAuthorized",
+        "deadlineAuthorized", "budgetAuthorized", "eligibilityAuthorized",
+    )):
+        return None
+    observed = payload.get("observedAt")
+    run_id = payload.get("runId")
+    digest = payload.get("rawSha256")
+    if not isinstance(observed, str) or not isinstance(run_id, str) or not run_id.strip():
+        return None
+    try:
+        stamp = datetime.fromisoformat(observed.replace("Z", "+00:00"))
+        if stamp.utcoffset() != timedelta(0):
             return None
-        return {
-            "callCode": MYSMIS_CALL_CODE,
-            "status": status,
-            "callTitle": row.get("callTitle"),
-            "canonicalUrl": payload.get("canonicalUrl"),
-            "observedAt": payload.get("observedAt"),
-            "runId": payload.get("runId"),
-            "parserVersion": payload.get("parserVersion"),
-            "rawSha256": payload.get("rawSha256"),
-            "authorityClass": payload.get("authorityClass"),
-            "materialFactUse": "STATUS_ONLY_DEMOTION",
-        }
-    return None
+    except ValueError:
+        return None
+    if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+        return None
+    inventory = payload.get("candidateInventory")
+    if not isinstance(inventory, dict) or inventory.get("exactIdentityCompleteForVisiblePage") is not True:
+        return None
+    if inventory.get("identityFailures") != [] or inventory.get("duplicateCallCodes") != []:
+        return None
+    rows = inventory.get("rows")
+    if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+        return None
+    matches = [row for row in rows if row.get("callCode") == MYSMIS_CALL_CODE]
+    if len(matches) != 1:
+        return None
+    row = matches[0]
+    if str(row.get("status") or "").upper().strip() != "FINALIZAT":
+        return None
+    return {
+        "callCode": MYSMIS_CALL_CODE,
+        "status": "FINALIZAT",
+        "callTitle": row.get("callTitle"),
+        "canonicalUrl": payload["canonicalUrl"],
+        "observedAt": observed,
+        "runId": run_id,
+        "parserVersion": payload["parserVersion"],
+        "rawSha256": digest,
+        "authorityClass": payload["authorityClass"],
+        "sourceFamily": payload["sourceFamily"],
+        "observationState": payload["status"],
+        "pageComplete": inventory.get("pageComplete") is True,
+        "materialFactUse": "STATUS_ONLY_DEMOTION",
+    }
+
 
 def dossier_target(products: dict[str, Any]) -> dict[str, Any] | None:
     for d in products.get("dossiers") or []:
