@@ -6,9 +6,9 @@ cross-checks the fetched byte fingerprint against the AFIR corpus candidate
 before resolving anything. A mismatch is fail-closed source drift, never a
 reason to auto-promote a material fact.
 
-Transient transport failures are also fail-closed. When a previously validated
-PASS snapshot exists, it is preserved byte-for-byte and the process returns the
-workflow's accepted degraded exit code instead of replacing the LKG or crashing.
+Transport failures and rejected source/parse candidates are fail-closed. When
+a previously validated PASS snapshot exists, preserve it byte-for-byte without
+renewing its age; report the rejected attempt separately in the process log.
 """
 
 from __future__ import annotations
@@ -235,9 +235,51 @@ def valid_last_known_good(path: Path, canonical_url: str) -> dict[str, Any] | No
         return None
     if not isinstance(rows, list) or not rows:
         return None
-    for key in ("sourceFingerprint", "snapshotFingerprint"):
-        if not re.fullmatch(r"[0-9a-f]{64}", clean_cell(payload.get(key))):
+    if not all(isinstance(row, dict) for row in rows):
+        return None
+    provenance = payload.get("provenance")
+    summary = payload.get("summary")
+    if not isinstance(provenance, dict) or not isinstance(summary, dict):
+        return None
+    for key in ("corpusFingerprint", "sourceFingerprint", "snapshotFingerprint"):
+        value = payload.get(key)
+        if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
             return None
+        if provenance.get(key) != value:
+            return None
+    if provenance.get("authority") != "AFIR" or provenance.get("evidenceType") != "OFFICIAL_LIVE_COUNTER":
+        return None
+    try:
+        if canonical_digest(rows) != payload["snapshotFingerprint"]:
+            return None
+        identities = {(row["interventionCode"], row["sector"].strip().casefold()) for row in rows}
+        if len(identities) != len(rows) or any(
+            not re.fullmatch(r"DR-\d{1,3}", code) or not sector for code, sector in identities
+        ):
+            return None
+        codes = sorted({code for code, _ in identities})
+        if (
+            type(summary.get("rowCount")) is not int
+            or summary["rowCount"] != len(rows)
+            or type(summary.get("interventionCount")) is not int
+            or summary["interventionCount"] != len(codes)
+            or summary.get("interventions") != codes
+        ):
+            return None
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None
+    observed_at = payload.get("sourceObservedAt")
+    try:
+        observed = dt.datetime.fromisoformat(observed_at)
+        if observed.utcoffset() is None or provenance.get("sourceObservedAt") != observed_at:
+            return None
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if any(policy.get(field) is not False for field in (
+        "autoPromoteIntoDossierBudget", "callStatusInferenceAllowed",
+        "eligibilityInferenceAllowed", "scoringInferenceAllowed",
+    )):
+        return None
     return payload
 
 
@@ -386,8 +428,27 @@ def run(corpus_path: Path, output_path: Path, fixture: Path | None = None) -> in
                 }
             )
         print(json.dumps(report, ensure_ascii=False, sort_keys=True))
-        return 2
+        # Stop downstream readers when the existing artifact is invalid.
+        return 1 if not lkg and output_path.exists() else 2
 
+    if snapshot["status"] != "PASS":
+        lkg = valid_last_known_good(output_path, canonical_url)
+        if lkg:
+            print(json.dumps({
+                "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+                "attemptStatus": snapshot["status"],
+                "failClosed": True,
+                "lastKnownGoodPreserved": True,
+                "outputUnchanged": True,
+                "canonicalUrl": canonical_url,
+                "attemptSourceFingerprint": snapshot.get("sourceFingerprint"),
+                "attemptCorpusFingerprint": snapshot.get("corpusFingerprint"),
+                "attemptParseError": snapshot.get("parseError"),
+                "lastKnownGoodSourceObservedAt": lkg.get("sourceObservedAt"),
+                "lastKnownGoodSnapshotFingerprint": lkg.get("snapshotFingerprint"),
+            }, ensure_ascii=False, sort_keys=True))
+            return 2
+        # No valid LKG: retain the existing non-publishable diagnostic contract.
     write_json(output_path, snapshot)
     print(json.dumps({"status": snapshot["status"], **snapshot["summary"]}, ensure_ascii=False, sort_keys=True))
     return 0 if snapshot["status"] == "PASS" else 2

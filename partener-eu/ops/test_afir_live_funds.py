@@ -109,10 +109,22 @@ def main() -> int:
         drifted["items"] = [dict(corpus["items"][0], sha256="0" * 64)]
         corpus_path.write_text(json.dumps(drifted, ensure_ascii=False), encoding="utf-8")
         drift = subprocess.run(command, check=False, capture_output=True, text=True)
-        drift_payload = json.loads(output_path.read_text(encoding="utf-8"))
+        drift_report = json.loads(drift.stdout)
         assert drift.returncode == 2
-        assert drift_payload["status"] == "DEGRADED_SOURCE_DRIFT"
-        assert drift_payload["policy"]["publishableDedicatedSnapshot"] is False
+        assert drift_report["attemptStatus"] == "DEGRADED_SOURCE_DRIFT"
+        assert drift_report["lastKnownGoodPreserved"] is True
+        assert output_path.read_bytes() == first, "source drift must preserve accepted LKG"
+
+        invalid_html = b"<html><body>No structured counter</body></html>"
+        invalid_corpus = dict(corpus)
+        invalid_corpus["items"] = [dict(corpus["items"][0], sha256=hashlib.sha256(invalid_html).hexdigest())]
+        corpus_path.write_text(json.dumps(invalid_corpus), encoding="utf-8")
+        fixture_path.write_bytes(invalid_html)
+        failed_parse = subprocess.run(command, check=False, capture_output=True, text=True)
+        assert failed_parse.returncode == 2
+        assert json.loads(failed_parse.stdout)["attemptStatus"] == "FAIL_PARSE"
+        assert output_path.read_bytes() == first, "parse failure must preserve accepted LKG"
+        fixture_path.write_bytes(fixture_bytes)
 
         # The real AFIR counter mutates while submissions arrive. A second
         # canonical production fetch may therefore have a different byte hash
@@ -163,14 +175,36 @@ def main() -> int:
             assert preserved["status"] == "PASS"
             assert preserved["policy"]["publishableDedicatedSnapshot"] is True
 
-            # With no LKG there is still no invented snapshot: the resolver
-            # remains fail-closed and does not create a replacement artifact.
+            corrupted = json.loads(lkg_bytes)
+            corrupted["rows"][0]["availableFundsEur"] = "999.00"
+            output_path.write_text(json.dumps(corrupted), encoding="utf-8")
+            corrupt_bytes = output_path.read_bytes()
+            assert builder.valid_last_known_good(output_path, corpus["items"][0]["url"]) is None
+            assert builder.run(corpus_path, output_path, None) == 1
+            assert output_path.read_bytes() == corrupt_bytes
+
+            corrupted = json.loads(lkg_bytes)
+            corrupted["summary"]["rowCount"] += 1
+            output_path.write_text(json.dumps(corrupted), encoding="utf-8")
+            assert builder.valid_last_known_good(output_path, corpus["items"][0]["url"]) is None
+
+            # With no LKG there is still no invented snapshot.
             output_path.unlink()
             no_lkg_status = builder.run(corpus_path, output_path, None)
             assert no_lkg_status == 2
             assert not output_path.exists()
         finally:
             builder.fetch = original_fetch
+
+        corpus_path.write_text(json.dumps(drifted), encoding="utf-8")
+        rejected = subprocess.run(command, check=False, capture_output=True, text=True)
+        assert rejected.returncode == 2
+        rejected_payload = json.loads(output_path.read_bytes())
+        assert rejected_payload["status"] == "DEGRADED_SOURCE_DRIFT"
+        assert rejected_payload["policy"]["publishableDedicatedSnapshot"] is False
+        corpus_path.write_text(json.dumps(corpus), encoding="utf-8")
+        subprocess.run(command, check=True, capture_output=True, text=True)
+        assert output_path.read_bytes() == first
 
     assert payload["status"] == "PASS"
     assert payload["sourceFingerprintMatchesCorpus"] is True
