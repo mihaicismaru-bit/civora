@@ -13,6 +13,8 @@ on:
       - 'partener-eu/ops/sanitize_public_prepare_cards.py'
       - 'partener-eu/ops/prove_public_deploy.py'
       - '.github/workflows/partener-eu-pages.yml'
+      - 'partener-eu/ops/wait_pages_artifact.py'
+      - 'partener-eu/ops/test_pages_artifact_visibility.py'
   workflow_run:
     workflows:
       - 'PARTENER.EU MIPE Ingestion'
@@ -26,6 +28,7 @@ on:
 
 permissions:
   contents: write
+  actions: read
   pages: write
   id-token: write
 
@@ -60,6 +63,7 @@ jobs:
           python partener-eu/ops/test_romana_pentru_munca_home_hero.py
           python partener-eu/ops/test_brand_civic_intelligence_v1.py
           python partener-eu/ops/prove_public_deploy.py --self-test
+          python partener-eu/ops/test_pages_artifact_visibility.py
           grep -F 'step-lll-dossier-bridge-v2.js' partener-eu/web/public-heavy-loader-v1.js
           if grep -F 'src="decision-products.js' partener-eu/web/index.html; then
             echo 'FAIL heavy decision-products.js returned to eager public path' >&2
@@ -130,9 +134,24 @@ jobs:
           name: github-pages-${{ github.run_attempt }}
           path: partener-eu/web
 
+      - name: Verify same-run Pages artifact visibility
+        id: artifact_visibility
+        if: steps.change.outputs.skip != 'true' && steps.configure.outcome == 'success' && steps.upload.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PAGES_ARTIFACT_NAME: github-pages-${{ github.run_attempt }}
+        run: |
+          python partener-eu/ops/wait_pages_artifact.py \
+            --repo "${GITHUB_REPOSITORY}" \
+            --run-id "${GITHUB_RUN_ID}" \
+            --artifact-name "${PAGES_ARTIFACT_NAME}" \
+            --max-attempts 9 \
+            --delay-seconds 4 \
+            --settle-seconds 3
+
       - name: Deploy
         id: deployment
-        if: steps.change.outputs.skip != 'true'
+        if: steps.change.outputs.skip != 'true' && steps.artifact_visibility.outcome == 'success'
         continue-on-error: true
         uses: actions/deploy-pages@v4
         with:
@@ -235,6 +254,7 @@ jobs:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
           CONFIGURE_OUTCOME: ${{ steps.configure.outcome }}
           UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
+          ARTIFACT_VISIBILITY_OUTCOME: ${{ steps.artifact_visibility.outcome }}
           DEPLOY_OUTCOME: ${{ steps.deployment.outcome }}
           READBACK_OUTCOME: ${{ steps.readback.outcome }}
           SITE_SHA256: ${{ steps.change.outputs.site }}
@@ -275,6 +295,7 @@ jobs:
               'page_url': os.environ.get('PAGE_URL') or None,
               'configure_outcome': os.environ.get('CONFIGURE_OUTCOME'),
               'upload_outcome': os.environ.get('UPLOAD_OUTCOME'),
+              'artifact_visibility_outcome': os.environ.get('ARTIFACT_VISIBILITY_OUTCOME'),
               'deploy_outcome': os.environ.get('DEPLOY_OUTCOME'),
               'readback_outcome': os.environ.get('READBACK_OUTCOME'),
               'observed_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -337,10 +358,12 @@ jobs:
         env:
           CONFIGURE_OUTCOME: ${{ steps.configure.outcome }}
           UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
+          ARTIFACT_VISIBILITY_OUTCOME: ${{ steps.artifact_visibility.outcome }}
           DEPLOY_OUTCOME: ${{ steps.deployment.outcome }}
           READBACK_OUTCOME: ${{ steps.readback.outcome }}
         run: |
           test "$CONFIGURE_OUTCOME" = success
           test "$UPLOAD_OUTCOME" = success
+          test "$ARTIFACT_VISIBILITY_OUTCOME" = success
           test "$DEPLOY_OUTCOME" = success
           test "$READBACK_OUTCOME" = success

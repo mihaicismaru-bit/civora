@@ -23,6 +23,8 @@ on:
       - '.github/workflows/partener-eu-decision-products.yml'
       - '.github/workflows/partener-eu-validation.yml'
       - '.github/workflows/partener-eu-pages.yml'
+      - 'partener-eu/ops/wait_pages_artifact.py'
+      - 'partener-eu/ops/test_pages_artifact_visibility.py'
       - '.github/workflows/partener-eu-pages-diagnostic.yml'
   push:
     branches:
@@ -42,6 +44,8 @@ on:
       - '.github/workflows/partener-eu-decision-products.yml'
       - '.github/workflows/partener-eu-validation.yml'
       - '.github/workflows/partener-eu-pages.yml'
+      - 'partener-eu/ops/wait_pages_artifact.py'
+      - 'partener-eu/ops/test_pages_artifact_visibility.py'
       - '.github/workflows/partener-eu-pages-diagnostic.yml'
 
 permissions:
@@ -91,6 +95,9 @@ jobs:
           python partener-eu/ops/test_mipe_lifecycle_result_evidence_cleanup.py
           python partener-eu/ops/test_mipe_decision_products_determinism_cleanup.py
           python partener-eu/ops/test_p10_policy_regression.py
+
+      - name: Replay Pages artifact visibility barrier without deploying
+        run: python partener-eu/ops/test_pages_artifact_visibility.py
 
       - name: Provenance, immutable-runtime and route arbitration regressions
         run: |
