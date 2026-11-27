@@ -333,7 +333,7 @@ def main() -> int:
         "standfirst": "Dosar istoric PEO STEP-LLL pentru competențe în tehnologii critice. Registrul public MySMIS marchează apelul FINALIZAT; condițiile și documentele de mai jos rămân utile ca referință pentru implementare și apeluri similare." if is_finalized else "Dosar STEP-LLL în reverificare. Condițiile istorice rămân documentate, dar starea curentă nu este autorizată pentru depunere.",
         "audience": list(APPLICANTS),
     })
-    set_fact(dossier, "Status", current_label); set_fact(dossier, "Deschidere", "29 mai 2026, 16:00"); set_fact(dossier, "Termen", "30 septembrie 2026, 16:00")
+    set_fact(dossier, "Status", current_label, "CONFIRMED" if is_finalized else "UNRESOLVED"); set_fact(dossier, "Deschidere", "29 mai 2026, 16:00"); set_fact(dossier, "Termen", "30 septembrie 2026, 16:00")
     set_fact(dossier, "Grant", "Valoare eligibilă maximă dimensionată cu reperul de 7.974 EUR/participant"); set_fact(dossier, "Buget", "92.000.000 EUR"); set_fact(dossier, "Contribuție proprie", "0%")
     set_fact(dossier, "Durată maximă", "36 luni"); set_fact(dossier, "Arie", "Toate regiunile sau minimum 2 regiuni de dezvoltare")
     summary = [
@@ -366,7 +366,13 @@ def main() -> int:
     if mysmis_status and mysmis_status.get("canonicalUrl"):
         add_source(dossier, {"url": mysmis_status["canonicalUrl"], "observedAt": mysmis_status.get("observedAt"), "tier": "T1"}, "MySMIS — registrul public, identitate exactă STEP-LLL Adulți", ["status"], "T1")
     quality = dossier.setdefault("quality", {}); verified = set(quality.get("verifiedFactClasses") or []); verified.update(SUPPORTED_CLASSES)
-    quality["verifiedFactClasses"] = sorted(verified); quality["blockedFactClasses"] = [x for x in quality.get("blockedFactClasses") or [] if x not in SUPPORTED_CLASSES]; quality["completeness"] = 100; quality["depthCompleteness"] = 100; quality["evidenceCount"] = len(dossier.get("sources") or []); quality["failClosed"] = True; quality["stepLllAuthoritativeBundle"] = True; quality["applicantListPolicy"] = "GUIDE_EXPLICIT_ONLY"; quality["executiveSummaryPresent"] = True
+    blocked = set(quality.get("blockedFactClasses") or []) - SUPPORTED_CLASSES
+    # Historical guide coverage does not verify the current status. Preserve
+    # the historical sections, but make the unresolved status explicit to consumers.
+    if not is_finalized:
+        verified.discard("status")
+        blocked.add("status")
+    quality["verifiedFactClasses"] = sorted(verified); quality["blockedFactClasses"] = sorted(blocked); quality["completeness"] = 100; quality["depthCompleteness"] = 100; quality["evidenceCount"] = len(dossier.get("sources") or []); quality["failClosed"] = True; quality["stepLllAuthoritativeBundle"] = True; quality["applicantListPolicy"] = "GUIDE_EXPLICIT_ONLY"; quality["executiveSummaryPresent"] = True
     quality["statusProvenance"] = mysmis_status if is_finalized else {"status": "UNRESOLVED", "materialFactUse": "FAIL_CLOSED"}
     dossier["executiveSummary"] = {"status": current_status, "opens": "2026-05-29T16:00:00+03:00", "closes": "2026-09-30T16:00:00+03:00", "applicants": APPLICANTS, "targetGroup": ["Persoane angajate și/sau șomeri cu vârsta de peste 29 de ani.", "Minimum 25 participanți/proiect."], "activities": ACTIVITIES, "callBudget": "92.000.000 EUR", "projectValue": "Valoare eligibilă maximă dimensionată cu reperul de 7.974 EUR × numărul participanților; reperul nu este cost unitar.", "cofinancing": "0%", "region": "Toate regiunile de dezvoltare sau minimum 2 regiuni.", "geography": "Toate regiunile de dezvoltare sau minimum 2 regiuni.", "implementationPeriod": "Maximum 36 luni.", "evaluation": "Competitivă, conform grilei din ghidul final/consolidat.", "sourcePolicy": "GUIDE_EXPLICIT_ONLY", "sourceBound": True}
     dossier["documentSummaries"] = [{"kind": "CORRIGENDUM", "title": "Corrigendum nr. 1", "items": CORRIGENDUM_SUMMARY, "sourceUrl": source_url(corr), "tier": corr.get("tier") or "T1"}, {"kind": "QA_AM", "title": "Q&A Autoritatea de Management", "items": QA_SUMMARY, "sourceUrl": source_url(qa), "tier": qa.get("tier") or "T1"}]
