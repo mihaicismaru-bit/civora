@@ -105,14 +105,14 @@ def parse_eur(value: str) -> str | None:
     cell = clean_cell(value).replace("\u00a0", " ").strip()
     if cell.upper() in {"-", "–", "—", "N/A", "N/D"}:
         return None
-    raw = cell.upper().replace("EUR", "").strip()
-    raw = re.sub(r"\s+", "", raw)
-    if not raw:
-        raise ValueError("empty EUR value")
-    if "," in raw:
-        raw = raw.replace(".", "").replace(",", ".")
-    else:
-        raw = raw.replace(".", "")
+    raw = cell.upper()
+    if raw.endswith("EUR"):
+        raw = raw[:-3].strip()
+    # Accept only nonnegative Romanian-formatted amounts, without guessing
+    # what malformed punctuation, exponent notation or embedded text meant.
+    if not re.fullmatch(r"(?:[0-9]+|[0-9]{1,3}(?:\.[0-9]{3})+|[0-9]{1,3}(?: [0-9]{3})+)(?:,[0-9]{1,2})?", raw):
+        raise ValueError(f"invalid EUR value: {value!r}")
+    raw = raw.replace(".", "").replace(" ", "").replace(",", ".")
     try:
         amount = Decimal(raw)
     except InvalidOperation as exc:
@@ -129,10 +129,10 @@ def parse_available_funds(value: str) -> tuple[str | None, str]:
     return amount, "REPORTED" if amount is not None else "UNKNOWN"
 
 def parse_int(value: str) -> int:
-    raw = re.sub(r"[^\d-]", "", clean_cell(value))
-    if not raw:
+    raw = clean_cell(value)
+    if not re.fullmatch(r"(?:[0-9]+|[0-9]{1,3}(?:\.[0-9]{3})+|[0-9]{1,3}(?: [0-9]{3})+)", raw):
         raise ValueError(f"invalid integer value: {value!r}")
-    return int(raw)
+    return int(raw.replace(".", "").replace(" ", ""))
 
 
 def parse_local_datetime(value: str) -> tuple[str, str]:
@@ -154,9 +154,13 @@ def parse_rows(table_rows: list[list[Any]]) -> list[dict[str, Any]]:
         if not isinstance(raw_row, list):
             continue
         cells = [clean_cell(cell) for cell in raw_row]
-        if len(cells) < 9 or not re.fullmatch(r"DR-\d{1,3}", cells[0].upper()):
+        if not cells or not re.fullmatch(r"DR-\d{1,3}", cells[0].upper()):
             continue
         code = cells[0].upper()
+        # A recognized but truncated/shifted component must invalidate the
+        # whole candidate, never disappear silently from a PASS snapshot.
+        if len(cells) != 9 or not cells[1]:
+            raise ValueError(f"invalid AFIR counter row shape: {code}")
         sector = cells[1]
         key = (code, sector.casefold())
         if key in seen:
