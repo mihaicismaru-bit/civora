@@ -511,11 +511,16 @@ for parser in (module, sync_mod):
                 {"label": "Termen", "value": raw, "confidence": "CONFIRMED"},
             ],
         }
-        assert not parser.current_open(ambiguous, clock_before_seconds), raw
-        # Equally reject an ambiguous competing opening observation.
-        ambiguous["quickFacts"][1]["value"] = "27 noiembrie 2026, ora 12:30"
+        # Evaluate before every legacy-normalized cutoff; otherwise expiry
+        # could hide the exact-clock defect and make a broken test pass.
+        assert not parser.current_open(ambiguous, module.parse_date("2026-11-27T08:00:00Z")), raw
+        # Evaluate after every legacy-normalized start, before a valid cutoff.
+        ambiguous["quickFacts"][1]["value"] = "27 noiembrie 2026, ora 13:30"
+        ambiguous["openFrom"] = "27 noiembrie 2026, ora 12:00"
+        opening_clock = module.parse_date("2026-11-27T11:00:00Z")
+        assert parser.current_open(ambiguous, opening_clock)
         ambiguous["openFrom"] = raw
-        assert not parser.current_open(ambiguous, clock_before_seconds), raw
+        assert not parser.current_open(ambiguous, opening_clock), raw
 
 assert not sync_mod.current_open({**cluster_probe, "quickFacts": [
     {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
