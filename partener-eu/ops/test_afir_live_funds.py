@@ -124,6 +124,33 @@ def main() -> int:
         assert failed_parse.returncode == 2
         assert json.loads(failed_parse.stdout)["attemptStatus"] == "FAIL_PARSE"
         assert output_path.read_bytes() == first, "parse failure must preserve accepted LKG"
+        # A partial recognized DR component or malformed amount/count is not
+        # an acceptable smaller counter: reject the entire candidate and keep LKG.
+        malformed_candidates = (
+            FIXTURE.replace("<td>283.310</td>", "<td>1.2.3</td>", 1),
+            FIXTURE.replace("<td>283.310</td>", "<td>NaN</td>", 1),
+            FIXTURE.replace("<td>283.310</td>", "<td>1E3</td>", 1),
+            FIXTURE.replace("<td>283.310</td>", "<td>-1</td>", 1),
+            FIXTURE.replace("<td>6</td>", "<td>1x2</td>", 1),
+            FIXTURE.replace("<td>6</td>", "<td>-1</td>", 1),
+            FIXTURE.replace("<td>6</td>", "<td>1,5</td>", 1),
+            FIXTURE.replace("<td>6</td>", "", 1),
+            FIXTURE.replace("<strong>Componenta LEGUMICULTURĂ</strong>", "", 1),
+            FIXTURE.replace("<td>6</td>", "<td>6</td><td>unexpected</td>", 1),
+        )
+        for malformed in malformed_candidates:
+            assert malformed != FIXTURE
+            raw = malformed.encode("utf-8")
+            fixture_path.write_bytes(raw)
+            malformed_corpus = dict(corpus, items=[
+                dict(corpus["items"][0], sha256=hashlib.sha256(raw).hexdigest())
+            ])
+            corpus_path.write_text(json.dumps(malformed_corpus), encoding="utf-8")
+            attempt = subprocess.run(command, check=False, capture_output=True, text=True)
+            assert attempt.returncode == 2, attempt.stdout + attempt.stderr
+            assert json.loads(attempt.stdout)["attemptStatus"] == "FAIL_PARSE"
+            assert output_path.read_bytes() == first
+
         fixture_path.write_bytes(fixture_bytes)
 
         # The real AFIR counter mutates while submissions arrive. A second
