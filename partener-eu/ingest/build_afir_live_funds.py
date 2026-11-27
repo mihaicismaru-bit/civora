@@ -29,7 +29,7 @@ from afir_ingest import fetch
 ROOT = Path(__file__).resolve().parent
 DEFAULT_CORPUS = ROOT / "state" / "afir_corpus.json"
 DEFAULT_OUTPUT = ROOT / "state" / "afir_live_funds.json"
-COUNTER_PATH = "/finantare/contor-fonduri-disponibile"
+COUNTER_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile"
 BUCHAREST = ZoneInfo("Europe/Bucharest")
 
 
@@ -87,16 +87,18 @@ def clean_cell(value: Any) -> str:
 
 
 def normalize_counter_url(url: str) -> str:
-    return (url or "").strip().rstrip("/").lower()
+    return (url or "").strip().rstrip("/")
 
 
 def find_counter_item(corpus: dict[str, Any]) -> dict[str, Any]:
-    for item in corpus.get("items") or []:
-        if not isinstance(item, dict):
-            continue
-        if normalize_counter_url(str(item.get("url") or "")).endswith(COUNTER_PATH):
-            return item
-    raise ValueError("AFIR live-funds counter was not found in the corpus")
+    matches = [
+        item for item in corpus.get("items") or []
+        if isinstance(item, dict)
+        and normalize_counter_url(str(item.get("url") or "")) == COUNTER_URL
+    ]
+    if len(matches) != 1:
+        raise ValueError("Expected exactly one official AFIR live-funds counter in the corpus")
+    return matches[0]
 
 
 def parse_eur(value: str) -> str | None:
@@ -199,6 +201,8 @@ def canonical_digest(rows: list[dict[str, Any]]) -> str:
 
 
 def load_source_bytes(url: str, fixture: Path | None) -> tuple[bytes, str | None, int | None]:
+    if normalize_counter_url(url) != COUNTER_URL:
+        raise SourceTransportError("AFIR counter requested URL is not the exact official endpoint")
     if fixture is not None:
         return fixture.read_bytes(), None, 200
     response = fetch(url)
@@ -206,6 +210,12 @@ def load_source_bytes(url: str, fixture: Path | None) -> tuple[bytes, str | None
         raise SourceTransportError(
             f"AFIR counter fetch failed: status={response.get('status')} error={response.get('error')}"
         )
+    # urllib follows redirects. The final endpoint, not the requested URL,
+    # identifies the actual authority of the bytes.
+    if normalize_counter_url(str(response.get("url") or "")) != COUNTER_URL:
+        raise SourceTransportError("AFIR counter final URL is not the exact official endpoint")
+    if response.get("status") != 200 or "html" not in str(response.get("content_type") or "").lower():
+        raise SourceTransportError("AFIR counter response is not a successful HTML representation")
     return response["data"], response.get("content_type"), response.get("status")
 
 
@@ -229,7 +239,10 @@ def valid_last_known_good(path: Path, canonical_url: str) -> dict[str, Any] | No
     rows = payload.get("rows")
     if payload.get("source") != "AFIR" or payload.get("status") != "PASS":
         return None
-    if normalize_counter_url(str(payload.get("canonicalUrl") or "")) != normalize_counter_url(canonical_url):
+    if (
+        normalize_counter_url(canonical_url) != COUNTER_URL
+        or normalize_counter_url(str(payload.get("canonicalUrl") or "")) != COUNTER_URL
+    ):
         return None
     if policy.get("publishableDedicatedSnapshot") is not True:
         return None

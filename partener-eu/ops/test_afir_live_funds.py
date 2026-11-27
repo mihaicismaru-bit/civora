@@ -154,6 +154,53 @@ def main() -> int:
         assert live_reconciled["provenance"]["corpusObservedAt"] == corpus["items"][0]["observedAt"]
         assert live_reconciled["sourceObservedAt"] != corpus["items"][0]["observedAt"]
 
+        # A matching URL suffix or matching payload hash cannot establish
+        # authority. Exercise the real transport adapter, not its mock.
+        official_url = corpus["items"][0]["url"]
+        for url in (
+            "https://example.invalid/finantare/contor-fonduri-disponibile/",
+            "https://www.afir.ro.example.invalid/finantare/contor-fonduri-disponibile/",
+            "http://www.afir.ro/finantare/contor-fonduri-disponibile/",
+            official_url + "?copy=1",
+        ):
+            hostile = dict(corpus, items=[dict(corpus["items"][0], url=url)])
+            try:
+                builder.build_snapshot(hostile, fixture_path)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("noncanonical counter admitted: " + url)
+        duplicate = dict(corpus, items=corpus["items"] * 2)
+        try:
+            builder.find_counter_item(duplicate)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("ambiguous counter identity admitted")
+
+        original_fetch = builder.fetch
+        response = dict(ok=True, url=official_url, status=200,
+                        content_type="text/html; charset=utf-8", data=fixture_bytes)
+        try:
+            builder.fetch = lambda _url: response
+            assert builder.build_snapshot(corpus)["status"] == "PASS"
+            for changes in (
+                {"url": "https://example.invalid/finantare/contor-fonduri-disponibile/"},
+                {"url": "https://www.afir.ro/other-page/"},
+                {"url": None},
+                {"status": 206},
+                {"content_type": "application/octet-stream"},
+            ):
+                builder.fetch = lambda _url: dict(response, **changes)
+                try:
+                    builder.build_snapshot(corpus)
+                except builder.SourceTransportError:
+                    pass
+                else:
+                    raise AssertionError("unverified live response admitted: " + str(changes))
+        finally:
+            builder.fetch = original_fetch
+
         # Re-establish a validated PASS snapshot, then reproduce the production
         # TLS/transport outage. The LKG must remain byte-identical and the
         # builder must return the workflow's accepted fail-closed exit code 2.
@@ -174,6 +221,14 @@ def main() -> int:
             preserved = json.loads(output_path.read_text(encoding="utf-8"))
             assert preserved["status"] == "PASS"
             assert preserved["policy"]["publishableDedicatedSnapshot"] is True
+
+            builder.fetch = lambda _url: dict(
+                ok=True, url="https://example.invalid/finantare/contor-fonduri-disponibile/",
+                status=200, content_type="text/html", data=fixture_bytes,
+            )
+            assert builder.run(corpus_path, output_path, None) == 2
+            assert output_path.read_bytes() == lkg_bytes, "redirect rejection must preserve LKG"
+            builder.fetch = lambda _url: {"ok": False, "error": "simulated outage"}
 
             corrupted = json.loads(lkg_bytes)
             corrupted["rows"][0]["availableFundsEur"] = "999.00"
