@@ -121,8 +121,10 @@ jobs:
       - name: Probe classified official sources without changing facts
         run: python partener-eu/ingest/source_registry_probe.py
 
-      - name: Capture read-only source-resolution diagnostic (PR only)
-        if: github.event_name == 'pull_request'
+      # Preserve the bounded probe diagnostic before unrelated live gates can fail.
+      # It is not a canonical ledger, raw evidence or publication authorization.
+      - name: Capture read-only source-resolution diagnostic
+        continue-on-error: ${{ github.event_name != 'pull_request' }}
         env:
           EXACT_HEAD: ${{ steps.exact-head.outputs.sha }}
         run: |
@@ -162,13 +164,13 @@ jobs:
           Path('/tmp/source-resolution-diagnostic.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
           PY
 
-      - name: Upload read-only source-resolution diagnostic (PR only)
-        if: github.event_name == 'pull_request'
+      - name: Upload read-only source-resolution diagnostic
+        continue-on-error: ${{ github.event_name != 'pull_request' }}
         uses: actions/upload-artifact@v4
         with:
           name: partener-source-resolution-diagnostic
           path: /tmp/source-resolution-diagnostic.json
-          retention-days: 7
+          retention-days: ${{ github.event_name == 'pull_request' && 7 || 1 }}
           if-no-files-found: error
 
       - name: Capture live Interreg programming evidence without changing facts
