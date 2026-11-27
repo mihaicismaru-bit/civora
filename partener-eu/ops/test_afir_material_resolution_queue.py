@@ -190,6 +190,9 @@ def main() -> int:
         "wrong_interventions", "wrong_authority", "missing_provenance",
         "wrong_provenance_hash", "duplicate_identity", "malformed_policy",
         "status_inference", "nonofficial_url",
+        "different_corpus_observation", "missing_corpus_observation",
+        "invalid_observation_timestamp", "naive_observation_timestamp",
+        "generation_before_observation", "missing_generation_timestamp",
     ):
         bad = copy.deepcopy(live_funds)
         bad_corpus = copy.deepcopy(counter_corpus)
@@ -222,6 +225,20 @@ def main() -> int:
         elif name == "nonofficial_url":
             bad["canonicalUrl"] = "https://example.invalid/finantare/contor-fonduri-disponibile/"
             bad_corpus["items"][0]["url"] = bad["canonicalUrl"]
+        elif name == "different_corpus_observation":
+            bad_corpus["items"][0]["observedAt"] = "2026-09-22T16:30:26+00:00"
+        elif name == "missing_corpus_observation":
+            bad_corpus["items"][0].pop("observedAt")
+        elif name in ("invalid_observation_timestamp", "naive_observation_timestamp"):
+            value = "not-a-timestamp" if name == "invalid_observation_timestamp" else "2026-09-22T16:29:26"
+            bad["sourceObservedAt"] = value
+            bad["provenance"]["sourceObservedAt"] = value
+            bad["provenance"]["corpusObservedAt"] = value
+            bad_corpus["items"][0]["observedAt"] = value
+        elif name == "generation_before_observation":
+            bad["generatedAt"] = "2026-09-22T16:28:38+00:00"
+        elif name == "missing_generation_timestamp":
+            bad.pop("generatedAt")
         rejected, _ = run_builder(bad_corpus, bad)
         assert rejected["summary"]["unresolvedCount"] == 1, name
         assert rejected["items"][0]["status"] == "OPEN", name
