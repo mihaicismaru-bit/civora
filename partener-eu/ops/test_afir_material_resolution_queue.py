@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import copy
+import hashlib
 import json
 import subprocess
 import sys
@@ -109,6 +111,16 @@ def main() -> int:
             }
         ],
     }
+    rows = [
+        {"interventionCode": "DR-14", "sector": "LEGUMICULTURĂ", "availableFundsEur": "100.00"},
+        {"interventionCode": "DR-14", "sector": "ZOOTEHNIC", "availableFundsEur": "200.00"},
+        {"interventionCode": "DR-14", "sector": "ALTE SECTOARE", "availableFundsEur": "0.00"},
+        {"interventionCode": "DR-14", "sector": "ACHIZIȚII SIMPLE", "availableFundsEur": "0.00"},
+        {"interventionCode": "DR-18", "sector": "FLORICULTURĂ", "availableFundsEur": "300.00"},
+    ]
+    snapshot_fingerprint = hashlib.sha256(json.dumps(
+        rows, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")).hexdigest()
     live_funds = {
         "schemaVersion": 1,
         "source": "AFIR",
@@ -119,13 +131,30 @@ def main() -> int:
         "sourceFingerprintMatchesCorpus": True,
         "sourceObservedAt": "2026-09-22T16:29:26+00:00",
         "generatedAt": "2026-09-22T16:29:38+00:00",
-        "snapshotFingerprint": "s" * 64,
+        "snapshotFingerprint": snapshot_fingerprint,
+        "sourceFingerprintReconciledFromCanonicalLiveFetch": False,
+        "rows": rows,
+        "provenance": {
+            "authority": "AFIR",
+            "evidenceType": "OFFICIAL_LIVE_COUNTER",
+            "corpusFingerprint": counter_fingerprint,
+            "sourceFingerprint": counter_fingerprint,
+            "snapshotFingerprint": snapshot_fingerprint,
+            "sourceFingerprintMatchesCorpus": True,
+            "sourceFingerprintReconciledFromCanonicalLiveFetch": False,
+            "sourceObservedAt": "2026-09-22T16:29:26+00:00",
+            "corpusObservedAt": "2026-09-22T16:29:26+00:00",
+        },
         "policy": {
             "publishableDedicatedSnapshot": True,
             "autoPromoteIntoDossierBudget": False,
+            "callStatusInferenceAllowed": False,
+            "eligibilityInferenceAllowed": False,
+            "scoringInferenceAllowed": False,
         },
         "summary": {
             "rowCount": 5,
+            "interventionCount": 2,
             "interventions": ["DR-14", "DR-18"],
         },
     }
@@ -154,6 +183,49 @@ def main() -> int:
     assert unresolved["summary"]["unresolvedCount"] == 1
     assert unresolved["items"][0]["status"] == "OPEN"
     assert unresolved["items"][0]["requiresReconciliation"] is True
+
+    # A PASS label and matching source hash alone must never resolve the queue.
+    for name in (
+        "missing_rows", "modified_row", "invalid_digest", "wrong_count",
+        "wrong_interventions", "wrong_authority", "missing_provenance",
+        "wrong_provenance_hash", "duplicate_identity", "malformed_policy",
+        "status_inference", "nonofficial_url",
+    ):
+        bad = copy.deepcopy(live_funds)
+        bad_corpus = copy.deepcopy(counter_corpus)
+        if name == "missing_rows":
+            bad.pop("rows")
+        elif name == "modified_row":
+            bad["rows"][0]["availableFundsEur"] = "999.00"
+        elif name == "invalid_digest":
+            bad["snapshotFingerprint"] = bad["provenance"]["snapshotFingerprint"] = "s" * 64
+        elif name == "wrong_count":
+            bad["summary"]["rowCount"] = 6
+        elif name == "wrong_interventions":
+            bad["summary"]["interventions"] = ["DR-14"]
+        elif name == "wrong_authority":
+            bad["provenance"]["authority"] = "OTHER"
+        elif name == "missing_provenance":
+            bad.pop("provenance")
+        elif name == "wrong_provenance_hash":
+            bad["provenance"]["sourceFingerprint"] = "e" * 64
+        elif name == "duplicate_identity":
+            bad["rows"][1]["sector"] = bad["rows"][0]["sector"]
+            digest = hashlib.sha256(json.dumps(
+                bad["rows"], ensure_ascii=False, sort_keys=True, separators=(",", ":")
+            ).encode("utf-8")).hexdigest()
+            bad["snapshotFingerprint"] = bad["provenance"]["snapshotFingerprint"] = digest
+        elif name == "malformed_policy":
+            bad["policy"] = []
+        elif name == "status_inference":
+            bad["policy"]["callStatusInferenceAllowed"] = True
+        elif name == "nonofficial_url":
+            bad["canonicalUrl"] = "https://example.invalid/finantare/contor-fonduri-disponibile/"
+            bad_corpus["items"][0]["url"] = bad["canonicalUrl"]
+        rejected, _ = run_builder(bad_corpus, bad)
+        assert rejected["summary"]["unresolvedCount"] == 1, name
+        assert rejected["items"][0]["status"] == "OPEN", name
+        assert rejected["items"][0]["publishMaterialFacts"] is False, name
 
     empty_payload, _ = run_builder({
         "schemaVersion": 2,
