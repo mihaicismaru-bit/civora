@@ -16,6 +16,7 @@ import argparse
 import hashlib
 import json
 import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -140,6 +141,20 @@ def matching_live_funds_resolution(
         return None
 
     if not snapshot_integrity_valid(live_funds):
+        return None
+
+    # A matching content hash may recur across distinct acquisition attempts.
+    # Bind this resolution to the exact corpus observation, not just its hash.
+    observed_at = live_funds.get("sourceObservedAt")
+    if observed_at != item.get("observedAt"):
+        return None
+    generated_at = live_funds.get("generatedAt")
+    try:
+        observed = datetime.fromisoformat(observed_at)
+        generated = datetime.fromisoformat(generated_at)
+        if observed.utcoffset() is None or generated.utcoffset() is None or generated < observed:
+            return None
+    except (TypeError, ValueError, OverflowError):
         return None
     summary = live_funds["summary"]
     row_count = summary["rowCount"]
