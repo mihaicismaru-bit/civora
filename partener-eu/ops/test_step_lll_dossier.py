@@ -97,6 +97,27 @@ def test_status_admission():
             file.write_text("{broken", encoding="utf-8")
             assert module.exact_mysmis_status() is None
             assert observe([]) is None
+    # Exercise the entire projection in memory, including transition from an
+    # earlier verified status to REVIEW after a failed acquisition.
+    for evidence in (None, valid):
+        dossier = {"id": module.TARGET_ID, "quality": {
+            "verifiedFactClasses": ["status"], "blockedFactClasses": ["status"]},
+            "quickFacts": [{"label": "Status", "value": "FINALIZAT", "confidence": "CONFIRMED"}]}
+        products = {"dossiers": [dossier]}
+        canonical = {"calls": [{"id": module.TARGET_ID}]}
+        with patch.object(module, "read", side_effect=[products, canonical]), \
+             patch.object(module, "exact_mysmis_status", return_value=evidence), \
+             patch.object(module, "write") as output:
+            assert module.main() == 0
+            output.assert_called_once_with(products)
+        quality = dossier["quality"]
+        assert quality["failClosed"] is True
+        assert dossier["status"] == ("CLOSED" if evidence else "REVIEW")
+        assert ("status" in quality["verifiedFactClasses"]) is bool(evidence)
+        assert ("status" in quality["blockedFactClasses"]) is (not bool(evidence))
+        assert get_fact(dossier, "Status")["confidence"] == ("CONFIRMED" if evidence else "UNRESOLVED")
+        assert dossier["publicationState"] == ("PUBLISHABLE" if evidence else "PROVISIONAL_FAIL_CLOSED")
+        assert dossier["executiveSummary"]["status"] == dossier["status"]
     print("PASS STEP-LLL isolated status-admission fixtures")
 
 
