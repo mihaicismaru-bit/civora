@@ -2,6 +2,10 @@
 from __future__ import annotations
 
 import json
+import copy
+import importlib.util
+import tempfile
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -20,7 +24,84 @@ def joined(section):
     return " ".join(section.get("items") or []).lower() if section else ""
 
 
+def test_status_admission():
+    path = ROOT / "partener-eu" / "ingest" / "apply_step_lll_authoritative_dossier.py"
+    spec = importlib.util.spec_from_file_location("step_lll_dossier", path)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    row = {"callCode": module.MYSMIS_CALL_CODE, "status": "FINALIZAT"}
+    good = {
+        "schema": "CIVORA_MYSMIS_EXACT_CALL_INVENTORY_V1",
+        "status": "PASS_CANDIDATE_ONLY",
+        "canonicalUrl": "https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+        "authorityClass": "T1_OFFICIAL_MYSMIS_REPORTING",
+        "sourceFamily": "ROMANIA_MIPE_MYSMIS",
+        "parserVersion": "MYSMIS_EXACT_CALL_INVENTORY_V2",
+        "observedAt": "2026-11-27T02:56:59+00:00",
+        "runId": "fixture",
+        "rawSha256": "a" * 64,
+        **dict.fromkeys(("materialFactUse", "publishAuthorized", "openCallAuthorized",
+                         "deadlineAuthorized", "budgetAuthorized", "eligibilityAuthorized"), False),
+        "candidateInventory": {
+            "exactIdentityCompleteForVisiblePage": True,
+            "identityFailures": [], "duplicateCallCodes": [],
+            "pageComplete": False, "rows": [row],
+        },
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        file = Path(tmp) / "inventory.json"
+        with patch.object(module, "MYSMIS_INVENTORY", file):
+            def observe(value):
+                file.write_text(json.dumps(value), encoding="utf-8")
+                return module.exact_mysmis_status()
+
+            assert module.exact_mysmis_status() is None
+            valid = observe(good)
+            assert valid and valid["materialFactUse"] == "STATUS_ONLY_DEMOTION"
+            assert valid["pageComplete"] is False
+            assert valid["observationState"] == "PASS_CANDIDATE_ONLY"
+            for field, value in (
+                ("status", "SOURCE_UNAVAILABLE_FAIL_CLOSED"),
+                ("status", "PROVISIONAL_FAIL_CLOSED"),
+                ("canonicalUrl", "https://reporting.mysmis2021.gov.ro.example.invalid/"),
+                ("authorityClass", "DISCOVERY_ONLY"),
+                ("sourceFamily", "UNKNOWN"),
+                ("parserVersion", "UNKNOWN"),
+                ("observedAt", "2026-11-27T02:56:59"),
+                ("observedAt", "2026-11-27T02:56:59+02:00"),
+                ("runId", ""),
+                ("rawSha256", "missing"),
+                ("openCallAuthorized", True),
+                ("publishAuthorized", 0),
+            ):
+                candidate = copy.deepcopy(good)
+                candidate[field] = value
+                assert observe(candidate) is None, field
+            for field in ("observedAt", "rawSha256", "runId", "authorityClass"):
+                candidate = copy.deepcopy(good)
+                del candidate[field]
+                assert observe(candidate) is None, field
+            other = {**row, "status": "DESCHIS"}
+            for rows in ([row, other], [other, row], [row, row], [other],
+                         [{**row, "callCode": "PEO/OTHER"}], [None], []):
+                candidate = copy.deepcopy(good)
+                candidate["candidateInventory"]["rows"] = rows
+                assert observe(candidate) is None, rows
+            for key, value in (("exactIdentityCompleteForVisiblePage", False),
+                               ("identityFailures", ["missing"]),
+                               ("duplicateCallCodes", [module.MYSMIS_CALL_CODE])):
+                candidate = copy.deepcopy(good)
+                candidate["candidateInventory"][key] = value
+                assert observe(candidate) is None, key
+            file.write_text("{broken", encoding="utf-8")
+            assert module.exact_mysmis_status() is None
+            assert observe([]) is None
+    print("PASS STEP-LLL isolated status-admission fixtures")
+
+
 def main() -> int:
+    test_status_admission()
     payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))
     d = next(
         (
