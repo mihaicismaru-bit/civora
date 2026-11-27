@@ -84,7 +84,7 @@ def has_exact_open_clock(value: Any) -> bool:
     """
     raw = str(value or "").strip()
     if re.fullmatch(
-        r"20\d{2}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,6})?)?(?:Z|[+-]\d{2}:\d{2})",
+        r"20\d{2}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)",
         raw, flags=re.I,
     ):
         return True
@@ -93,10 +93,13 @@ def has_exact_open_clock(value: Any) -> bool:
         r"ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|"
         r"septembrie|octombrie|noiembrie|decembrie"
     )
-    match = re.search(r"\b\d{1,2}\s+(?:" + months + r")\s+20\d{2}\b(.*)", normalized)
-    return bool(match and re.match(
-        r"^\s*,?\s*(?:(?:la\s+)?ora\s*|la\s+)?\d{1,2}[:.]\d{2}(?::\d{2})?\b",
-        match.group(1),
+    # Require the entire source value: a suffix may contain a different
+    # timezone, malformed seconds, or a second competing cutoff. Never
+    # silently drop it and interpret the first clock as Bucharest time.
+    return bool(re.fullmatch(
+        r"\d{1,2}\s+(?:" + months + r")\s+20\d{2}"
+        r"\s*,?\s*(?:(?:la\s+)?ora\s*|la\s+)?\d{1,2}[:.]\d{2}(?::\d{2})?",
+        normalized,
     ))
 
 
