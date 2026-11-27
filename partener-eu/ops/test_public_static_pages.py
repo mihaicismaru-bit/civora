@@ -491,6 +491,32 @@ for parser in (module, sync_mod):
     probe["closesAt"] = "27 noiembrie 2026, ora 12:00:45"
     assert not parser.current_open(probe, clock_before_seconds)
 
+# An exact clock is the entire value, not a prefix. Do not lose a zone,
+# malformed fractional/seconds tail, or a second conflicting deadline.
+for parser in (module, sync_mod):
+    for raw in (
+        "27 noiembrie 2026, ora 12:00 UTC+03:00",
+        "27 noiembrie 2026, ora 12:00 CET",
+        "27 noiembrie 2026, ora 12:00:9",
+        "27 noiembrie 2026, ora 12:00 sau 10:00",
+        "27 noiembrie 2026, ora 12:00.5",
+        "2026-11-27T12:00:00+01:99",
+        "2026-11-27T12:00:00.000001+02:00",
+    ):
+        ambiguous = {
+            "id": "synthetic-ambiguous-clock-suffix",
+            "status": "OPEN", "publicationState": "PUBLISHABLE",
+            "quickFacts": [
+                {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+                {"label": "Termen", "value": raw, "confidence": "CONFIRMED"},
+            ],
+        }
+        assert not parser.current_open(ambiguous, clock_before_seconds), raw
+        # Equally reject an ambiguous competing opening observation.
+        ambiguous["quickFacts"][1]["value"] = "27 noiembrie 2026, ora 12:30"
+        ambiguous["openFrom"] = raw
+        assert not parser.current_open(ambiguous, clock_before_seconds), raw
+
 assert not sync_mod.current_open({**cluster_probe, "quickFacts": [
     {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
     {"label": "Termen", "value": "6 noiembrie 2026", "confidence": "CONFIRMED"},
