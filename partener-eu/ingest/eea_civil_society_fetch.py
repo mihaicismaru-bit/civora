@@ -8,6 +8,7 @@ authorized for publication here; material facts remain reconciliation candidates
 from __future__ import annotations
 
 import argparse
+import base64
 import datetime as dt
 import hashlib
 import importlib.util
@@ -26,7 +27,7 @@ adapter = importlib.util.module_from_spec(spec)
 assert spec and spec.loader
 spec.loader.exec_module(adapter)
 
-PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V1"
+PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V3"
 INDEX_URL = "https://eeagrants.org/en/eea-civil-society-fund-romania/calls"
 OFFICIAL_HOSTS = {"eeagrants.org", "www.eeagrants.org"}
 MAX_BYTES = 4_000_000
@@ -197,6 +198,22 @@ def _call_number_from_url(url: str) -> str | None:
     return number_match.group(1) if number_match else None
 
 
+def _require_exact_call_identity(requested_url: str, final_url: str, raw: bytes) -> None:
+    """Reject a mismatched numbered endpoint, including official redirects."""
+    expected = _call_number_from_url(requested_url)
+    doc = _parse_document(raw)
+    body_numbers = re.findall(
+        r"\b(?:Call number|Numărul Apelului(?: de proiecte)?)\s*:?\s*(\d{1,3})\b",
+        _flat_text(doc), flags=re.IGNORECASE,
+    )
+    title = re.match(r"^(?:Call|Apel)\s*#?\s*(\d{1,3})\b",
+                     " ".join(doc.h1_parts), flags=re.IGNORECASE)
+    if (not expected or _call_number_from_url(final_url) != expected
+            or not body_numbers or set(body_numbers) != {expected}
+            or not title or title.group(1) != expected):
+        raise ValueError("exact-call URL/body/title identity mismatch")
+
+
 def _status_label(flat: str) -> str | None:
     pairs = (
         (r"\bCall for projects\s+Open\b", "Open"),
@@ -274,25 +291,37 @@ def collect_live(
     fetched_at: str | None = None,
     minimum_calls: int = 1,
     fetcher: Callable[[str], dict[str, Any]] = fetch_url,
+    seed_urls: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     fetched_at = fetched_at or _utc_now()
     index = fetcher(index_url)
     index_final = _official_url(str(index["final_url"]), call_detail=False)
     index_raw = bytes(index["raw"])
     call_urls = discover_call_urls(index_raw, base_url=index_final)
-    if len(call_urls) < minimum_calls:
-        raise RuntimeError(
-            f"discovered {len(call_urls)} call-detail URLs, below minimum {minimum_calls}"
-        )
+    # An official index can stop listing expired calls. Preserve its hashed
+    # observation even when it no longer links the expected detail pages.
+    # The CLI still exits nonzero below: no all-or-nothing reconciliation.
+    discovery_shortfall = len(call_urls) < minimum_calls
+    # Explicit seeds are diagnostic only. They cannot certify index health.
+    seed_mode = bool(seed_urls)
+    seeds: dict[str, str] = {}
+    for url in seed_urls:
+        exact = _official_url(url, call_detail=True)
+        number = _call_number_from_url(exact)
+        if not number or number in seeds:
+            raise ValueError("seed URLs require unique numbered exact call paths")
+        seeds[number] = exact
+    acquisition_urls = list(seeds.values()) if seed_mode else call_urls
 
     records: list[dict[str, Any]] = []
     pages: list[dict[str, Any]] = []
     errors: list[dict[str, str]] = []
-    for requested_url in call_urls:
+    for requested_url in acquisition_urls:
         try:
             response = fetcher(requested_url)
             final_url = _official_url(str(response["final_url"]), call_detail=True)
             raw = bytes(response["raw"])
+            _require_exact_call_identity(requested_url, final_url, raw)
             record = parse_call_page(raw, authority_url=final_url)
             normalized = adapter.normalize_record(
                 record,
@@ -303,6 +332,11 @@ def collect_live(
             )
             if normalized is None:
                 raise RuntimeError("call-detail page did not yield a stable call identifier")
+            if seed_mode and normalized["observation_state"] == "OPEN_CALL":
+                # Preserve the authority's label/fingerprint, but a diagnostic
+                # seed receipt cannot admit OPEN without semantic reconciliation.
+                normalized["observation_state"] = "UNKNOWN"
+                normalized["requires_reconcile"] = True
             records.append(normalized)
             pages.append(
                 {
@@ -314,6 +348,7 @@ def collect_live(
                     "bytes": len(raw),
                     "call_identifier": normalized["call_identifier"],
                     "observation_state": normalized["observation_state"],
+                    **({"raw_response_b64": base64.b64encode(raw).decode("ascii")} if seed_mode else {}),
                 }
             )
         except Exception as exc:
@@ -360,7 +395,16 @@ def collect_live(
             "content_type": str(index["content_type"]),
             "raw_hash": _sha256(index_raw),
             "bytes": len(index_raw),
+            "observation_state": (
+                "NO_EXACT_CALL_LINKS" if not call_urls
+                else "DISCOVERY_SHORTFALL" if discovery_shortfall
+                else "EXACT_CALL_LINKS_OBSERVED"
+            ),
+            "minimum_calls_required": minimum_calls,
+            **({"raw_response_b64": base64.b64encode(index_raw).decode("ascii")} if seed_mode else {}),
         },
+        "diagnostic_seed_mode": seed_mode,
+        "seed_urls": list(seeds.values()),
         "fetched_at": fetched_at,
         "parser_version": PARSER_VERSION,
         "adapter_version": adapter.PARSER_VERSION,
@@ -371,6 +415,8 @@ def collect_live(
         "errors": errors,
         "stats": {
             "discovered_call_urls": len(call_urls),
+            "minimum_calls_required": minimum_calls,
+            "discovery_shortfall": discovery_shortfall,
             "fetched_call_pages": len(pages),
             "normalized_records": len(normalized_records),
             "open_call_evidence": sum(
@@ -388,6 +434,11 @@ def collect_live(
             "errors": len(errors),
             "conflicts": len(conflicts),
         },
+        "acquisition_status": (
+            "DIAGNOSTIC_SEED_CAPTURE" if seed_mode
+            else "INCOMPLETE_DISCOVERY" if discovery_shortfall or errors or conflicts
+            else "COMPLETE_INDEX_DISCOVERY"
+        ),
         "material_fact_use": False,
         "publish_authorized": False,
         "publication_effect": "NONE",
@@ -402,6 +453,7 @@ def main() -> int:
     parser.add_argument("--fetched-at", default=None)
     parser.add_argument("--minimum-calls", type=int, default=1)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--seed-url", action="append", default=[], help="Exact numbered official URL; diagnostic only, always nonzero")
     args = parser.parse_args()
 
     run_id = args.run_id or f"EEA-CSF-LIVE-{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
@@ -410,6 +462,7 @@ def main() -> int:
         run_id=run_id,
         fetched_at=args.fetched_at,
         minimum_calls=args.minimum_calls,
+        seed_urls=tuple(args.seed_url),
     )
     payload = json.dumps(evidence, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.output:
@@ -418,6 +471,8 @@ def main() -> int:
     else:
         print(payload, end="")
 
+    if evidence["diagnostic_seed_mode"]:
+        return 2
     if evidence["stats"]["errors"] or evidence["stats"]["conflicts"]:
         return 2
     if evidence["stats"]["fetched_call_pages"] < args.minimum_calls:

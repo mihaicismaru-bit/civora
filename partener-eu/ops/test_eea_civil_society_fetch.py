@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
+import base64
 import hashlib
 import importlib.util
+import json
+import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -126,6 +130,130 @@ def main():
     if page_hashes != expected:
         fail("raw page hashes are not preserved exactly")
 
+    # Index-discovered pages are subject to the same identity checks as seeds.
+    # A real official host/path alone must not attest a different call body.
+    for raw, final_url in [
+        (CALL2_HTML, CALL1),
+        (CALL2_HTML, CALL2),
+        (CALL1_HTML.replace(b"Call number", b"Missing identity"), CALL1),
+        (CALL1_HTML.replace(b"Call #1", b"Call #2"), CALL1),
+        (CALL1_HTML.replace(b"<div>Call number</div><div>1</div>",
+                           b"<div>Call number</div><div>1</div><div>Call number</div><div>2</div>"), CALL1),
+    ]:
+        def mismatched_index_fetch(url):
+            return response(url, INDEX_HTML) if url == INDEX else (
+                response(url, raw, final_url=final_url) if url == CALL1 else response(url, CALL2_HTML)
+            )
+        held_identity = module.collect_live(index_url=INDEX, run_id="TEST-INDEX-IDENTITY",
+            fetched_at=FETCHED, minimum_calls=2, fetcher=mismatched_index_fetch)
+        if held_identity["acquisition_status"] != "INCOMPLETE_DISCOVERY" or len(held_identity["errors"]) != 1:
+            fail("mismatched index-discovered call must be rejected")
+        if {r["call_identifier"] for r in held_identity["records"]} != {"EEA-CSF-RO-CALL-02"}:
+            fail("mismatched call body must not contaminate another identifier")
+
+    # The official Romanian page uses a longer label and Apel in its heading.
+    ro_url = CALL1.replace("/en/", "/ro/")
+    ro_html = CALL1_HTML.decode().replace("Call #1", "Apel #1").replace(
+        "Call number", "Numărul Apelului de proiecte").encode()
+    module._require_exact_call_identity(ro_url, ro_url, ro_html)
+
+    # The official index can drop all call-detail links after a deadline.
+    # A missing index must yield a provenance receipt, not an exception that
+    # prevents the failure artifact from being uploaded.
+    empty_html = b"<html><h1>Calls</h1><p>Applications closed 8 October 2026</p><p>No results found</p></html>"
+
+    def empty_fetch(url):
+        if url != INDEX:
+            raise AssertionError(f"unexpected exact-call fetch: {url}")
+        return response(url, empty_html)
+
+    held = module.collect_live(
+        index_url=INDEX,
+        run_id="TEST-EMPTY-INDEX",
+        fetched_at=FETCHED,
+        minimum_calls=7,
+        fetcher=empty_fetch,
+    )
+    if held["source_index"]["raw_hash"] != hashlib.sha256(empty_html).hexdigest():
+        fail("empty index must preserve exact official response hash")
+    if held["source_index"]["url"] != INDEX or held["fetched_at"] != FETCHED:
+        fail("empty index provenance URL / fetch timestamp drift")
+    if held["source_index"]["observation_state"] != "NO_EXACT_CALL_LINKS":
+        fail("missing exact-call links must have an explicit observation state")
+    if held["acquisition_status"] != "INCOMPLETE_DISCOVERY":
+        fail("empty index cannot count as complete acquisition")
+    if held["stats"]["discovered_call_urls"] != 0 or not held["stats"]["discovery_shortfall"]:
+        fail("empty index must fail the minimum-7 exact-call requirement")
+    if held["pages"] or held["records"] or held["publish_authorized"] or held["material_fact_use"]:
+        fail("empty index cannot invent or authorize call evidence")
+    if held["publication_effect"] != "NONE" or held["stats"]["open_call_evidence"]:
+        fail("index-only shortfall cannot promote OPEN or publish")
+
+    # Exercise CLI behavior: nonzero failure *and* an immutable-ready JSON
+    # receipt, rather than a pre-serialization exception.
+    original_collect, original_argv = module.collect_live, sys.argv
+    try:
+        module.collect_live = lambda **kwargs: original_collect(fetcher=empty_fetch, **kwargs)
+        with tempfile.TemporaryDirectory() as d:
+            output = Path(d) / "live-evidence.json"
+            sys.argv = ["eea_civil_society_fetch.py", "--minimum-calls", "7", "--output", str(output)]
+            exit_code = module.main()
+            if exit_code != 2 or not output.is_file():
+                fail("CLI must fail closed and still persist index evidence")
+            receipt = json.loads(output.read_text(encoding="utf-8"))
+            if receipt["source_index"]["raw_hash"] != held["source_index"]["raw_hash"]:
+                fail("CLI failure receipt hash drift")
+    finally:
+        module.collect_live, sys.argv = original_collect, original_argv
+
+    closed_html = CALL1_HTML.replace(b"<div>Open</div>", b"<div>Closed</div>")
+    def seed_fetch(url):
+        if url == INDEX:
+            return response(url, empty_html)
+        if url == CALL1:
+            return response(url, closed_html)
+        raise AssertionError(f"unexpected seed {url}")
+
+    seeded = module.collect_live(index_url=INDEX, run_id="TEST-SEED",
+        fetched_at=FETCHED, minimum_calls=7, fetcher=seed_fetch, seed_urls=(CALL1,))
+    if seeded["acquisition_status"] != "DIAGNOSTIC_SEED_CAPTURE" or not seeded["diagnostic_seed_mode"]:
+        fail("seed capture must remain diagnostic")
+    if seeded["stats"]["discovered_call_urls"] != 0 or seeded["stats"]["fetched_call_pages"] != 1:
+        fail("seed pages cannot count as discovered index links")
+    if base64.b64decode(seeded["pages"][0]["raw_response_b64"]) != closed_html:
+        fail("seed raw page replay bytes drift")
+    if base64.b64decode(seeded["source_index"]["raw_response_b64"]) != empty_html:
+        fail("seed raw index replay bytes drift")
+    if seeded["publish_authorized"] or seeded["material_fact_use"] or seeded["stats"]["open_call_evidence"]:
+        fail("seed capture cannot authorize or invent OPEN evidence")
+
+    def stale_open_seed(url):
+        return response(url, empty_html if url == INDEX else CALL1_HTML)
+    stale = module.collect_live(index_url=INDEX, run_id="TEST-OPEN-SEED",
+        fetched_at=FETCHED, fetcher=stale_open_seed, seed_urls=(CALL1,))
+    if stale["stats"]["open_call_evidence"] or stale["records"][0]["status_label"] != "Open":
+        fail("seed must preserve raw Open label without OPEN_CALL admission")
+    if stale["records"][0]["observation_state"] != "UNKNOWN" or not stale["records"][0]["requires_reconcile"]:
+        fail("seed Open label must remain held for reconciliation")
+
+    def mismatch_fetch(url):
+        return response(url, empty_html if url == INDEX else CALL2_HTML)
+    mismatch = module.collect_live(index_url=INDEX, run_id="TEST-MISMATCH",
+        fetched_at=FETCHED, fetcher=mismatch_fetch, seed_urls=(CALL1,))
+    if mismatch["pages"] or mismatch["records"] or len(mismatch["errors"]) != 1:
+        fail("mismatched exact-call body must be rejected")
+    original_collect, original_argv = module.collect_live, sys.argv
+    try:
+        module.collect_live = lambda **kwargs: original_collect(fetcher=seed_fetch, **kwargs)
+        with tempfile.TemporaryDirectory() as d:
+            output = Path(d) / "seed.json"
+            sys.argv = ["eea_civil_society_fetch.py", "--minimum-calls", "1",
+                        "--seed-url", CALL1, "--output", str(output)]
+            if module.main() != 2 or not output.is_file():
+                fail("even sufficient diagnostic seed capture must exit nonzero")
+    finally:
+        module.collect_live, sys.argv = original_collect, original_argv
+
     def bad_final(url):
         return response(url, CALL1_HTML, final_url="https://example.org/evil")
 
@@ -142,7 +270,7 @@ def main():
     else:
         fail("non-official redirect must fail closed before call parsing")
 
-    print("PASS EEA CSF live acquisition: official discovery, exact-page readback, raw hashes, parsing, reconciliation and redirect guard")
+    print("PASS EEA CSF live acquisition: official discovery, exact-page readback, hashed empty-index receipt, fail-closed CLI, parsing, reconciliation and redirect guard")
 
 
 if __name__ == "__main__":

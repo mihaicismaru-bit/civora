@@ -38,6 +38,7 @@ jobs:
           python-version: '3.12'
 
       - name: Capture exact official call-page evidence
+        id: live_capture
         run: |
           mkdir -p /tmp/partener-eea-csf
           python partener-eu/ingest/eea_civil_society_fetch.py \
@@ -141,6 +142,65 @@ jobs:
           if any(row.get('missing_proofs') != ['PUBLIC_PROJECTION_QUALITY_GATE'] for row in admission.get('records', [])):
               raise SystemExit('FAIL: call-level public projection gate drift')
           print('PASS EEA CSF canonical staging admission:', stats)
+          PY
+
+      # PR-only recovery experiment. Never overwrite the primary receipt or
+      # unblock reconciliation when the official index is incomplete.
+      - name: Capture numbered exact pages for diagnostic replay only
+        if: ${{ failure() && github.event_name == 'pull_request' && steps.live_capture.outcome == 'failure' }}
+        timeout-minutes: 3
+        run: |
+          python - <<'PY'
+          import base64
+          import hashlib
+          import json
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          root = Path('/tmp/partener-eea-csf')
+          primary = root / 'live-evidence.json'
+          if not primary.is_file():
+              print('No primary receipt; diagnostic capture not attempted')
+              sys.exit(0)
+          data = json.loads(primary.read_text(encoding='utf-8'))
+          if data.get('acquisition_status') != 'INCOMPLETE_DISCOVERY' or data.get('source_index', {}).get('observation_state') != 'NO_EXACT_CALL_LINKS':
+              print('Not an empty-index receipt; diagnostic capture not attempted')
+              sys.exit(0)
+          before = hashlib.sha256(primary.read_bytes()).hexdigest()
+          prefix = 'https://eeagrants.org/en/eea-civil-society-fund-romania/calls/'
+          slugs = [
+              'call-1-strengthening-democracy-and-rule-law-through-civil-society-initiatives',
+              'call-2-empowering-civic-participation-underserved-communities',
+              'call-3-community-driven-projects-human-rights-and-social-justice',
+              'call-4-promoting-diversity-equality-and-combating-gender-based-violence',
+              'call-5-roma-inclusion-and-empowerment-through-development-interethnic-communities',
+              'call-6-protecting-human-rights-through-climate-and-environmental-actions',
+              'call-7-organisational-development-experienced-csos-and-federations',
+          ]
+          output = root / 'seed-diagnostic.json'
+          cmd = [sys.executable, 'partener-eu/ingest/eea_civil_society_fetch.py',
+                 '--minimum-calls', '7', '--output', str(output)]
+          for slug in slugs:
+              cmd.extend(['--seed-url', prefix + slug])
+          result = subprocess.run(cmd, timeout=150)
+          if result.returncode != 2 or not output.is_file():
+              raise SystemExit('FAIL: diagnostic must emit separate receipt and exit 2')
+          seed = json.loads(output.read_text(encoding='utf-8'))
+          if (seed.get('acquisition_status') != 'DIAGNOSTIC_SEED_CAPTURE'
+                  or seed.get('diagnostic_seed_mode') is not True
+                  or seed.get('publication_effect') != 'NONE'
+                  or seed.get('publish_authorized') is not False
+                  or seed.get('material_fact_use') is not False
+                  or seed['stats']['open_call_evidence'] != 0):
+              raise SystemExit('FAIL: diagnostic seed boundary violated')
+          for page in [seed['source_index'], *seed['pages']]:
+              raw = base64.b64decode(page['raw_response_b64'], validate=True)
+              if hashlib.sha256(raw).hexdigest() != page['raw_hash']:
+                  raise SystemExit('FAIL: diagnostic replay hash mismatch')
+          if hashlib.sha256(primary.read_bytes()).hexdigest() != before:
+              raise SystemExit('FAIL: primary receipt mutated')
+          print('DIAGNOSTIC ONLY:', seed['stats']['fetched_call_pages'], '/ 7 exact pages; reconciliation remains blocked')
           PY
 
       - name: Upload bounded live evidence, reconciliation and staging receipts

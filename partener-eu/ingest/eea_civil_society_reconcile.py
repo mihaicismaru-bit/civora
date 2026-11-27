@@ -138,6 +138,26 @@ def reconcile_live_evidence(
         _fail("input live evidence must be non-publishing")
     if evidence.get("publish_authorized") or evidence.get("material_fact_use"):
         _fail("input live evidence cannot pre-authorize material facts")
+    # Diagnostic seeds never confer index completeness or staging authority.
+    # Reject explicit diagnostic/shortfall markers even if counts are rewritten.
+    acquisition_status = evidence.get("acquisition_status")
+    index = evidence.get("source_index")
+    if evidence.get("diagnostic_seed_mode") or evidence.get("seed_urls"):
+        _fail("diagnostic seed evidence requires separate admission review")
+    if acquisition_status is not None and acquisition_status != "COMPLETE_INDEX_DISCOVERY":
+        _fail("acquisition status does not support complete index discovery")
+    if isinstance(index, dict) and index.get("observation_state") in {
+        "NO_EXACT_CALL_LINKS", "DISCOVERY_SHORTFALL"
+    }:
+        _fail("official index discovery remains incomplete")
+    if evidence.get("parser_version") in {
+        "EEA_CSF_ROMANIA_LIVE_FETCH_V2", "EEA_CSF_ROMANIA_LIVE_FETCH_V3"
+    }:
+        if (acquisition_status != "COMPLETE_INDEX_DISCOVERY"
+                or evidence.get("diagnostic_seed_mode") is not False
+                or not isinstance(index, dict)
+                or index.get("observation_state") != "EXACT_CALL_LINKS_OBSERVED"):
+            _fail("V2/V3 evidence lacks explicit complete non-diagnostic index provenance")
     if evidence.get("errors") or evidence.get("conflicts"):
         _fail("live evidence contains errors/conflicts")
 
@@ -151,7 +171,7 @@ def reconcile_live_evidence(
     expected = len(records)
     if stats.get("discovered_call_urls") != expected or stats.get("fetched_call_pages") != expected or stats.get("normalized_records") != expected:
         _fail(f"incomplete live batch: {stats}")
-    if stats.get("errors") or stats.get("conflicts") or stats.get("unknown_evidence"):
+    if stats.get("discovery_shortfall") or stats.get("errors") or stats.get("conflicts") or stats.get("unknown_evidence"):
         _fail(f"unresolved live evidence stats: {stats}")
 
     page_by_id: dict[str, dict[str, Any]] = {}
