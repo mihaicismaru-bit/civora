@@ -32,12 +32,14 @@ def atomic_json(path, obj):
     finally:
         if os.path.exists(tmp): os.unlink(tmp)
 
-def recover_state():
+def recover_state(*, persist=True):
     current = load_json(STATE)
     if isinstance(current, dict) and current.get('sources') is not None: return current, False
     cp = load_json(CHECKPOINT)
     if isinstance(cp, dict) and cp.get('sources') is not None:
-        atomic_json(STATE, cp); return cp, True
+        if persist:
+            atomic_json(STATE, cp)
+        return cp, True
     return {'schema_version':3,'sources':{},'last_run':None}, False
 
 def static_frontend_checks():
@@ -160,7 +162,7 @@ def evaluate_change(prev, observed_semantic):
     return True, count>=2, pending, count
 
 def run(live=True):
-    started=nowz(); state,recovered=recover_state(); registry=load_json(OPS/'sources.json', {'sources':[]})
+    started=nowz(); state,recovered=recover_state(persist=live); registry=load_json(OPS/'sources.json', {'sources':[]})
     frontend=static_frontend_checks(); results=[]; critical_fail=False
     for src in registry['sources']:
         prev=state['sources'].get(src['id'],{})
@@ -195,8 +197,11 @@ def run(live=True):
         state['sources'][src['id']]={'raw_sha256':obs.get('raw_sha256') if content_quality_ok else prev.get('raw_sha256'),'semantic_sha256':current_sem,'pending_semantic_sha256':pending,'pending_count':pending_count,'last_success':started if (obs['ok'] and content_quality_ok) else prev.get('last_success'),'last_observed':started,'consecutive_failures':failures,'health':health,'quarantined':quarantined,'health_scope':health_scope,'material_facts_authority':material_facts_authority,'final_url':obs.get('final_url') or prev.get('final_url')}
     state['last_run']=started; state['schema_version']=3
     report={'checkpoint':'PARTENER-EU-CIVORA-P10-0020','run_started':started,'live':live,'state_recovered_from_checkpoint':recovered,'frontend_checks':frontend,'sources':results,'summary':{'frontend_pass':sum(x['pass'] for x in frontend),'frontend_total':len(frontend),'source_pass':sum(x['health']=='PASS' for x in results),'source_degraded':sum(x['health']=='DEGRADED' for x in results),'source_fail':sum(x['health']=='FAIL' for x in results),'source_quarantined':sum(x['quarantined'] for x in results),'change_candidates':sum(x['change_candidate'] for x in results),'change_detected':sum(x['change_detected'] for x in results),'low_information_sources':sum(not x.get('content_quality_ok',True) and x.get('quality_issue')=='LOW_INFORMATION_HTML_SHELL' for x in results),'critical_fail':critical_fail},'change_policy':'semantic fingerprint + two consecutive identical high-information observations before resolution task; low-information HTML shells are suppressed fail-closed','source_failure_policy':'failed non-CRITICAL source is quarantined and blocks dependent material facts; this diagnostic probe never authorizes material facts, including healthy material-authority sources; exact-call reconciliation remains a separate canonical decision; CRITICAL source failure stops global qualifying run','civora_v1':'NOT_CLOSED','production_day_count_rule':'>=30 distinct UTC dates with qualifying runs before closure'}
-    atomic_json(CHECKPOINT,state); atomic_json(STATE,state); atomic_json(LATEST,report)
-    HISTORY.mkdir(parents=True,exist_ok=True); stamp=started.replace(':','').replace('-',''); atomic_json(HISTORY/(stamp+'.json'),report)
+    # Offline smoke exercises the code without acquiring official evidence. It
+    # must not replace live health, last_success, checkpoint or history.
+    if live:
+        atomic_json(CHECKPOINT,state); atomic_json(STATE,state); atomic_json(LATEST,report)
+        HISTORY.mkdir(parents=True,exist_ok=True); stamp=started.replace(':','').replace('-',''); atomic_json(HISTORY/(stamp+'.json'),report)
     frontend_fail=not all(x['pass'] for x in frontend)
     return report, 2 if (critical_fail or frontend_fail) else 0
 
