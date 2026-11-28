@@ -152,7 +152,8 @@ for marker in [
     "DISCOVERY_ONLY",
     "material_facts_authority",
     "non_material_scope=health_scope != 'MATERIAL_SOURCE'",
-    "material_facts_publishable=bool(material_facts_authority and not quarantined and content_quality_ok)",
+    "material_facts_publishable=False",
+    "publication_permission_scope",
 ]:
     if marker not in validator:
         errors.append(f"source health/authority guard missing: {marker}")
@@ -266,6 +267,98 @@ for marker in ["AUTH_OR_ACCESS_DEPENDENT", "accessDependencies", "AUTH_PATH_MARK
 for marker in ["recover_state", "corrupt_state_checkpoint_recovery"]:
     if marker not in recovery:
         errors.append(f"recovery regression evidence missing: {marker}")
+
+# Execute the actual probe with in-memory persistence: health and semantic
+# observations are evidence, never a publication permit, even after B/B/B.
+from unittest.mock import patch
+import p10_validate as probe
+
+def replay_p10_permission(live, bodies, authority=True, scope="MATERIAL_SOURCE"):
+    src = {"id": "SRC-TEST", "url": "https://example.invalid/call",
+           "material_facts_authority": authority, "health_scope": scope}
+    state = {"sources": {"SRC-TEST": {"semantic_sha256": "a" * 64}},
+             "schema_version": 3}
+    import tempfile
+    with tempfile.TemporaryDirectory() as temp, patch.multiple(
+        probe, HISTORY=Path(temp), recover_state=lambda **kwargs: (state, False),
+        load_json=lambda *args: {"sources": [src]},
+        static_frontend_checks=lambda: [{"pass": True}],
+        atomic_json=lambda *args: None,
+    ), patch.object(probe, "fetch_source", side_effect=bodies):
+        rows = []
+        for _ in range(len(bodies)):
+            report, _ = probe.run(live=live)
+            rows.append(report["sources"][0])
+    return rows
+
+def observation(digest, ok=True, size=1000, semantic=800):
+    return {"ok": ok, "semantic_sha256": digest, "bytes": size,
+            "semantic_chars": semantic, "raw_sha256": digest,
+            "markers_found": [], "final_url": "https://example.invalid/call"}
+
+scenarios = [
+    (True, [observation("a" * 64)], True, "MATERIAL_SOURCE"),
+    (True, [observation("b" * 64)] * 3, True, "MATERIAL_SOURCE"),
+    (True, [observation(None, False)] * 3, True, "MATERIAL_SOURCE"),
+    (True, [observation("b" * 64, size=5000, semantic=20)], True, "MATERIAL_SOURCE"),
+    (True, [observation("a" * 64)], False, "DISCOVERY_ONLY"),
+    (True, [observation("a" * 64)], False, "TRANSPORT_ONLY"),
+    (False, [None], True, "MATERIAL_SOURCE"),
+]
+for live, observations, authority, scope in scenarios:
+    replay_rows = replay_p10_permission(live, observations, authority, scope)
+    if any(row.get("dependent_material_facts_publishable") is not False
+           or row.get("publication_permission_scope") != "DIAGNOSTIC_ONLY"
+           for row in replay_rows):
+        errors.append("P10 diagnostic probe granted material publication permission")
+    if live and authority and scope == "MATERIAL_SOURCE" and observations[0]["ok"] and observations[0]["semantic_chars"] >= 256:
+        if not all(row["health"] == "PASS" and row["material_facts_authority"] for row in replay_rows):
+            errors.append("P10 publication containment incorrectly suppressed source health/authority metadata")
+
+# Real temporary file replay: an offline smoke must never overwrite a verified
+# receipt or recover a missing/corrupt state onto disk. Live recovery is tested
+# independently in test_recovery.py.
+import tempfile
+with tempfile.TemporaryDirectory() as temp:
+    root = Path(temp)
+    state_path = root / "state.json"
+    checkpoint_path = root / "checkpoint.json"
+    latest_path = root / "latest.json"
+    history_path = root / "history"
+    ops_path = root / "ops"
+    ops_path.mkdir()
+    history_path.mkdir()
+    prior = {"schema_version": 3, "sources": {"SRC-TEST": {
+        "semantic_sha256": "a" * 64, "raw_sha256": "b" * 64,
+        "last_success": "2026-01-01T00:00:00Z", "health": "FAIL",
+        "consecutive_failures": 3}}, "last_run": "2026-01-01T00:00:00Z"}
+    probe.atomic_json(checkpoint_path, prior)
+    probe.atomic_json(latest_path, {"live": True, "receipt": "retained"})
+    probe.atomic_json(history_path / "previous.json", {"live": True})
+    probe.atomic_json(ops_path / "sources.json", {"sources": [{
+        "id": "SRC-TEST", "url": "https://example.invalid/call",
+        "material_facts_authority": True}]})
+    with patch.multiple(probe, STATE=state_path, CHECKPOINT=checkpoint_path,
+                        LATEST=latest_path, HISTORY=history_path, OPS=ops_path,
+                        static_frontend_checks=lambda: [{"pass": True}]), \
+         patch.object(probe, "fetch_source", side_effect=AssertionError("offline fetch")):
+        for mode in ("valid", "missing", "corrupt"):
+            if mode == "valid":
+                probe.atomic_json(state_path, prior)
+            elif mode == "missing":
+                state_path.unlink()
+            else:
+                state_path.write_bytes(b"not-json")
+            before = {str(f.relative_to(root)): f.read_bytes()
+                      for f in root.rglob("*") if f.is_file()}
+            report, code = probe.run(live=False)
+            after = {str(f.relative_to(root)): f.read_bytes()
+                     for f in root.rglob("*") if f.is_file()}
+            if before != after or report.get("live") is not False or code != 0:
+                errors.append(f"offline smoke altered persistent evidence: {mode}")
+            if report.get("state_recovered_from_checkpoint") != (mode != "valid"):
+                errors.append(f"offline recovery classification mismatch: {mode}")
+
 
 if errors:
     raise SystemExit("FAIL P10 policy regression guard: " + "; ".join(errors))

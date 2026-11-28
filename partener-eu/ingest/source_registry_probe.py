@@ -160,6 +160,8 @@ def reviewed_baseline_hash(source_id: str):
     except Exception:
         return None
 
+    if not isinstance(entry, dict):
+        return None
     accepted = entry.get("accepted_semantic_sha256")
     if not isinstance(accepted, str) or not re.fullmatch(r"[0-9a-f]{64}", accepted):
         return None
@@ -175,7 +177,7 @@ def reviewed_baseline_hash(source_id: str):
         task = json.loads(task_path.read_text(encoding="utf-8"))
     except Exception:
         return None
-    if task.get("status") != "RESOLVED_NON_MATERIAL_CHANGE":
+    if not isinstance(task, dict) or task.get("status") != "RESOLVED_NON_MATERIAL_CHANGE":
         return None
     if task.get("resolved_semantic_sha256") != accepted:
         return None
@@ -184,6 +186,61 @@ def reviewed_baseline_hash(source_id: str):
     if task.get("material_fact_action") != "NONE" or task.get("publish_authorized") is not False:
         return None
     return accepted
+
+
+def pending_resolution_task(source_id):
+    """The durable task, not a repeated probe digest, controls pending review."""
+    try:
+        task = json.loads((TASK_DIR / f"{source_id}.json").read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return "NONE", None
+    except (OSError, ValueError):
+        return "INVALID", None
+    if not isinstance(task, dict) or task.get("source_id") != source_id:
+        return "INVALID", None
+    status = task.get("status")
+    if status == "RESOLVED_NON_MATERIAL_CHANGE":
+        return ("NONE", None) if reviewed_baseline_hash(source_id) else ("INVALID", None)
+    if status == "RESOLVED_REVERTED_TO_BASELINE":
+        return ("NONE", None) if (task.get("material_fact_autoupdate_allowed") is False and
+            task.get("material_fact_action") == "NONE" and task.get("publish_authorized") is False) else ("INVALID", None)
+    if status != "OPEN" or task.get("material_fact_autoupdate_allowed") is not False:
+        return "INVALID", None
+    previous = task.get("previous_semantic_sha256") or task.get("baseline_semantic_sha256")
+    candidate = task.get("current_semantic_sha256") or task.get("candidate_semantic_sha256")
+    if not all(isinstance(h, str) and re.fullmatch(r"[0-9a-f]{64}", h) for h in (previous, candidate)) or previous == candidate:
+        return "INVALID", None
+    if any(task.get(k) not in (None, h) for k, h in (("baseline_semantic_sha256", previous), ("candidate_semantic_sha256", candidate))):
+        return "INVALID", None
+    if task.get("publish_authorized") is True or task.get("automatic_material_fact_update_allowed") is True:
+        return "INVALID", None
+    return "OPEN", (previous, candidate)
+
+
+def retain_pending_resolution(src, row, state, hashes, observed_at):
+    if state == "NONE":
+        return False
+    row["resolution_task_required"] = True
+    row["publish_material_fact_update"] = False
+    row["resolution_task_state"] = state
+    if state != "OPEN":
+        row["semantic_hash_changed"] = False
+        return True
+    if row.get("health") != "PASS":
+        return True
+    baseline, candidate = hashes
+    current = row.get("semantic_sha256")
+    if not isinstance(current, str) or not re.fullmatch(r"[0-9a-f]{64}", current):
+        row["resolution_task_state"] = "INVALID_OBSERVATION"
+        return True
+    row["semantic_hash_changed"] = current != candidate
+    row["last_known_semantic_sha256"] = baseline
+    if current == baseline:
+        # A historical task's prior digest is not an independently reviewed raw receipt.
+        row["resolution_task_state"] = "REVERSION_REVIEW_REQUIRED"
+    else:
+        write_resolution_task(src, baseline, current, observed_at)
+    return True
 
 
 def task_baseline_hash(source_id: str, old: dict):
@@ -239,6 +296,13 @@ def write_resolution_task(src, old_hash, new_hash, observed_at):
         "blocked_fact_classes": ["deadline", "eligibility", "budget", "scoring", "beneficiaries", "material_call_status", "other_material_facts"],
         "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update.",
     }
+    if isinstance(existing, dict) and existing.get("status") == "OPEN":
+        # Keep audit metadata and synchronize any legacy digest aliases.
+        task = {**existing, **task}
+        if "candidate_semantic_sha256" in task:
+            task["candidate_semantic_sha256"] = new_hash
+        if "baseline_semantic_sha256" in task:
+            task["baseline_semantic_sha256"] = old_hash
     p.write_text(json.dumps(task, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
@@ -307,9 +371,18 @@ def main():
             "material_fact_use": bool(src.get("material_fact_use")),
             "source_families": list(src.get("source_families") or []),
         }
+        pending_state, pending_hashes = pending_resolution_task(src["id"])
+        if pending_state == "NONE" and old.get("resolution_task_required") and not (TASK_DIR / f"{src['id']}.json").is_file():
+            # A lost ledger cannot turn a previously pending observation into a baseline.
+            pending_state = "INVALID"
+        if pending_state == "OPEN":
+            baseline_hash = pending_hashes[0]
+        elif pending_state == "INVALID":
+            baseline_hash = old.get("last_known_semantic_sha256")
+        else:
+            baseline_hash = task_baseline_hash(src["id"], old)
         try:
             row.update(fetch_source(src))
-            baseline_hash = task_baseline_hash(src["id"], old)
             if not row.get("content_quality_ok", True):
                 observed_hash = row.get("semantic_sha256")
                 row["observed_semantic_sha256"] = observed_hash
@@ -328,14 +401,17 @@ def main():
                 changed = bool(baseline_hash and baseline_hash != new_hash)
                 row["semantic_hash_changed"] = changed
                 row["resolution_task_required"] = bool(changed and src.get("material_fact_use"))
-                row["publish_material_fact_update"] = False if changed else None
+                # Transport/semantic observations never authorize material publication.
+                row["publish_material_fact_update"] = False
                 row["consecutive_failures"] = 0
                 row["health"] = "PASS" if row.get("ok") else "FAIL"
                 row["quarantined"] = False
-                if row["resolution_task_required"]:
-                    write_resolution_task(src, baseline_hash, new_hash, observed_at)
-                else:
-                    close_reverted_resolution_task(src, baseline_hash, new_hash, observed_at)
+                if pending_state == "NONE" and row["resolution_task_required"]:
+                    try:
+                        write_resolution_task(src, baseline_hash, new_hash, observed_at)
+                    except (OSError, ValueError) as exc:
+                        row["resolution_task_state"] = "LEDGER_WRITE_FAILED"
+                        row["resolution_task_error"] = f"{type(exc).__name__}: {exc}"
         except Exception as exc:
             failures = int(old.get("consecutive_failures") or 0) + 1
             row.update({
@@ -348,9 +424,17 @@ def main():
                 "resolution_task_required": False,
                 "publish_material_fact_update": False,
                 "consecutive_failures": failures,
-                "last_known_semantic_sha256": task_baseline_hash(src["id"], old),
+                "last_known_semantic_sha256": baseline_hash,
                 "quarantined": failures >= 3,
             })
+        try:
+            retain_pending_resolution(src, row, pending_state, pending_hashes, observed_at)
+        except (OSError, ValueError) as exc:
+            # A ledger write failure must not erase the pending task or allow publication.
+            row["resolution_task_required"] = True
+            row["publish_material_fact_update"] = False
+            row["resolution_task_state"] = "LEDGER_WRITE_FAILED"
+            row["resolution_task_error"] = f"{type(exc).__name__}: {exc}"
         out["sources"].append(row)
 
     out["summary"] = {

@@ -121,6 +121,58 @@ jobs:
       - name: Probe classified official sources without changing facts
         run: python partener-eu/ingest/source_registry_probe.py
 
+      # Preserve the bounded probe diagnostic before unrelated live gates can fail.
+      # It is not a canonical ledger, raw evidence or publication authorization.
+      - name: Capture read-only source-resolution diagnostic
+        continue-on-error: ${{ github.event_name != 'pull_request' }}
+        env:
+          EXACT_HEAD: ${{ steps.exact-head.outputs.sha }}
+        run: |
+          python - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          state=Path('partener-eu/ingest/state/source_registry_health.json')
+          raw=state.read_bytes()
+          d=json.loads(raw)
+          fields=('id','tier','class','source_families','health','quarantined','content_quality_ok','quality_issue','semantic_hash_changed','resolution_task_required','resolution_task_state','publish_material_fact_update','raw_sha256','semantic_sha256','last_known_semantic_sha256')
+          task_fields=('source_id','status','previous_semantic_sha256','current_semantic_sha256','baseline_semantic_sha256','candidate_semantic_sha256','resolved_semantic_sha256','material_fact_autoupdate_allowed','publish_authorized')
+          rows=[]
+          for x in d['sources']:
+              source_id=x['id']
+              if not isinstance(source_id,str) or not source_id or any(c not in 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_' for c in source_id):
+                  raise ValueError('invalid source identity')
+              row={k:x[k] for k in fields if k in x}
+              p=Path('partener-eu/validation/resolution-tasks') / (source_id+'.json')
+              try:
+                  task_raw=p.read_bytes()
+              except FileNotFoundError:
+                  row['task']={'read_state':'MISSING'}
+              except OSError:
+                  row['task']={'read_state':'UNREADABLE'}
+              else:
+                  task={'sha256':hashlib.sha256(task_raw).hexdigest(),'read_state':'INVALID'}
+                  try:
+                      obj=json.loads(task_raw)
+                      if isinstance(obj,dict):
+                          task.update({k:obj[k] for k in task_fields if k in obj and (obj[k] is None or isinstance(obj[k],(str,bool)))})
+                          task['read_state']='PARSED'
+                  except (ValueError,UnicodeError):
+                      pass
+                  row['task']=task
+              rows.append(row)
+          receipt={'schema':'PARTENER_SOURCE_RESOLUTION_DIAGNOSTIC_V1','head_sha':os.environ['EXACT_HEAD'],'run_id':os.environ['GITHUB_RUN_ID']+'-'+os.environ['GITHUB_RUN_ATTEMPT'],'observed_at':d['observed_at'],'source_health_sha256':hashlib.sha256(raw).hexdigest(),'summary':d['summary'],'rows':rows,'publication_effect':'NONE','publish_authorized':False}
+          Path('/tmp/source-resolution-diagnostic.json').write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+
+      - name: Upload read-only source-resolution diagnostic
+        continue-on-error: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-source-resolution-diagnostic
+          path: /tmp/source-resolution-diagnostic.json
+          retention-days: ${{ github.event_name == 'pull_request' && 7 || 1 }}
+          if-no-files-found: error
+
       - name: Capture live Interreg programming evidence without changing facts
         run: |
           python partener-eu/ingest/interreg_programming_live_fetch.py \
@@ -330,7 +382,7 @@ jobs:
                   tp=Path('partener-eu/validation/resolution-tasks') / f"{x.get('id')}.json"
                   if not tp.exists():
                       missing.append(x.get('id'))
-              if x.get('quality_issue') == 'LOW_INFORMATION_HTML_SHELL' and (x.get('semantic_hash_changed') or x.get('resolution_task_required')):
+              if x.get('quality_issue') == 'LOW_INFORMATION_HTML_SHELL' and (x.get('semantic_hash_changed') or (x.get('resolution_task_required') and not (x.get('resolution_task_state') == 'OPEN' and x.get('publish_material_fact_update') is False))):
                   unsafe_shell.append(x.get('id'))
           if bad or missing or unsafe_shell:
               print('FAIL fail-closed:', {'unsafe': bad, 'missing_tasks': missing, 'unsafe_shells': unsafe_shell})
@@ -343,21 +395,48 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          ACQUISITION_HEAD="$(git rev-parse HEAD)"
           cp partener-eu/ingest/state/source_registry_health.json /tmp/source_registry_health.json
+          # BEGIN source-resolution snapshot copy guard
           rm -rf /tmp/source-resolution-tasks
           mkdir -p /tmp/source-resolution-tasks
-          if [ -d partener-eu/validation/resolution-tasks ]; then
-            cp -a partener-eu/validation/resolution-tasks/. /tmp/source-resolution-tasks/
+          if [ ! -d partener-eu/validation/resolution-tasks ]; then
+            echo "FAIL source-resolution task directory missing; refusing partial persistence." >&2
+            exit 1
           fi
+          cp -a partener-eu/validation/resolution-tasks/. /tmp/source-resolution-tasks/
+          diff -qr partener-eu/validation/resolution-tasks /tmp/source-resolution-tasks
+          # END source-resolution snapshot copy guard
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
           for attempt in 1 2 3 4 5; do
             git fetch origin main
+            # BEGIN source-registry optimistic persistence guard
+            if ! git merge-base --is-ancestor "$ACQUISITION_HEAD" origin/main; then
+              echo "FAIL source-registry acquisition base is no longer an ancestor of main; reacquire." >&2
+              exit 1
+            fi
+            if ! git diff --quiet "$ACQUISITION_HEAD" origin/main -- \
+              .github/workflows/partener-eu-source-registry.yml \
+              partener-eu/ingest/source_registry.json \
+              partener-eu/ingest/source_registry_probe.py \
+              partener-eu/ingest/data_plane_contract.json \
+              partener-eu/ingest/intelligence_index.py \
+              partener-eu/ingest/state/source_registry_health.json \
+              partener-eu/validation/accepted-source-baselines.json \
+              partener-eu/validation/resolution-tasks; then
+              echo "FAIL source-registry inputs or reviewed ledger advanced; reacquire instead of overwriting." >&2
+              exit 1
+            fi
+            # END source-registry optimistic persistence guard
             git reset --hard origin/main
             cp /tmp/source_registry_health.json partener-eu/ingest/state/source_registry_health.json
+            # BEGIN source-resolution restore copy guard
             mkdir -p partener-eu/validation/resolution-tasks
-            cp -a /tmp/source-resolution-tasks/. partener-eu/validation/resolution-tasks/ || true
+            cp -a /tmp/source-resolution-tasks/. partener-eu/validation/resolution-tasks/
+            diff -qr /tmp/source-resolution-tasks partener-eu/validation/resolution-tasks
+            # END source-resolution restore copy guard
             python partener-eu/ingest/intelligence_index.py
             git add partener-eu/ingest/state/source_registry_health.json partener-eu/ingest/state/intelligence_index.json partener-eu/validation/resolution-tasks
             if git diff --cached --quiet; then

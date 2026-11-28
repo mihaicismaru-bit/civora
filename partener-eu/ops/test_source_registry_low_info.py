@@ -44,3 +44,237 @@ finally:
     module.TASK_DIR = original_task_dir
 
 print("PASS source registry low-information regression")
+
+
+# Durable reconciliation ledger: a repeated candidate is not a reviewed baseline.
+with tempfile.TemporaryDirectory() as td:
+    root = Path(td)
+    original = (module.REGISTRY, module.STATE, module.TASK_DIR,
+                module.REVIEWED_BASELINES, module.fetch_source)
+    try:
+        module.REGISTRY = root / "registry.json"
+        module.STATE = root / "state.json"
+        module.TASK_DIR = root / "tasks"
+        module.REVIEWED_BASELINES = root / "reviewed.json"
+        module.TASK_DIR.mkdir()
+        source = {"id": "SRC-TEST", "tier": "T1", "class": "official", "url": "https://example.invalid/", "material_fact_use": True}
+        module.REGISTRY.write_text(json.dumps({"sources": [source]}), encoding="utf-8")
+        a, b, c = "a" * 64, "b" * 64, "c" * 64
+        task_path = module.TASK_DIR / "SRC-TEST.json"
+        module.STATE.write_text(json.dumps({"sources": [{"id": source["id"], "semantic_sha256": a, "semantic_chars": 500, "bytes": 8000}]}), encoding="utf-8")
+
+        def observe(digest, quality=True, error=False):
+            def fetch(_):
+                if error:
+                    raise OSError("synthetic failed transport")
+                return {"ok": True, "semantic_sha256": digest, "semantic_chars": 500,
+                        "bytes": 8000, "content_quality_ok": quality}
+            module.fetch_source = fetch
+            module.main()
+            state = json.loads(module.STATE.read_text(encoding="utf-8"))
+            row = state["sources"][0]
+            assert state["summary"]["resolution_tasks_required"] == int(row["resolution_task_required"])
+            return row
+
+        row = observe(a)
+        assert row["health"] == "PASS" and not row["resolution_task_required"]
+        assert not row["semantic_hash_changed"] and row["publish_material_fact_update"] is False
+
+        row = observe(b)
+        assert row["semantic_hash_changed"] and row["resolution_task_required"]
+        task = json.loads(task_path.read_text(encoding="utf-8"))
+        first = task["first_observed_at"]
+        task["candidate_semantic_sha256"] = b
+        task["audit_fixture"] = "preserve"
+        task_path.write_text(json.dumps(task), encoding="utf-8")
+
+        row = observe(b)
+        assert not row["semantic_hash_changed"] and row["resolution_task_required"]
+        assert row["publish_material_fact_update"] is False
+        assert row["last_known_semantic_sha256"] == a
+        row = observe(c)
+        assert row["semantic_hash_changed"] and row["resolution_task_required"]
+        task = json.loads(task_path.read_text(encoding="utf-8"))
+        assert task["previous_semantic_sha256"] == a
+        assert task["current_semantic_sha256"] == task["candidate_semantic_sha256"] == c
+        assert task["first_observed_at"] == first and task["audit_fixture"] == "preserve"
+        snapshot = task_path.read_bytes()
+        for row in (observe(None, error=True), observe(b, quality=False)):
+            assert row["resolution_task_required"] and row["publish_material_fact_update"] is False
+            assert row["health"] != "PASS" and row["last_known_semantic_sha256"] == a
+        assert task_path.read_bytes() == snapshot
+        row = observe(a)
+        assert row["resolution_task_state"] == "REVERSION_REVIEW_REQUIRED"
+        assert row["resolution_task_required"] and task_path.read_bytes() == snapshot
+
+        # Missing durable ledger after a previously pending observation fails closed.
+        task_path.unlink()
+        row = observe(c)
+        assert row["resolution_task_required"] and row["publish_material_fact_update"] is False
+        assert row["resolution_task_state"] == "INVALID" and not task_path.exists()
+        task_path.write_bytes(snapshot)
+
+        # An inconsistent or malformed task remains visible and is never overwritten.
+        task_path.write_text("{", encoding="utf-8")
+        row = observe(c)
+        assert row["resolution_task_required"] and row["publish_material_fact_update"] is False
+        assert row["resolution_task_state"] == "INVALID" and task_path.read_text() == "{"
+        for patch in ({"source_id": "wrong"}, {"candidate_semantic_sha256": b},
+                      {"previous_semantic_sha256": None}, {"publish_authorized": True}):
+            task_path.write_text(json.dumps({**task, **patch}), encoding="utf-8")
+            assert module.pending_resolution_task(source["id"]) == ("INVALID", None)
+
+        # Explicitly reviewed exact non-material acceptance is the existing release gate.
+        task.update(status="RESOLVED_NON_MATERIAL_CHANGE", resolved_semantic_sha256=c,
+                    material_fact_action="NONE", publish_authorized=False)
+        task_path.write_text(json.dumps(task), encoding="utf-8")
+        assert module.pending_resolution_task(source["id"]) == ("INVALID", None)
+        module.REVIEWED_BASELINES.write_text(json.dumps({"baselines": {source["id"]: {
+            "accepted_semantic_sha256": c, "decision": "RESOLVED_NON_MATERIAL_CHANGE",
+            "material_fact_action": "NONE", "publish_authorized": False}}}), encoding="utf-8")
+        row = observe(c)
+        assert not row["resolution_task_required"] and not row["semantic_hash_changed"]
+        assert row["publish_material_fact_update"] is False
+        task_path.unlink()
+        assert module.pending_resolution_task(source["id"]) == ("NONE", None)
+    finally:
+        (module.REGISTRY, module.STATE, module.TASK_DIR,
+         module.REVIEWED_BASELINES, module.fetch_source) = original
+
+print("PASS durable source-resolution ledger regression")
+
+
+# Exercise the exact production retry guard against real Git history. Do not
+# mutate the checkout under test; the temporary repository represents main.
+import os
+import subprocess
+import textwrap
+
+workflow = (ROOT / ".github/workflows/partener-eu-source-registry.yml").read_text(encoding="utf-8")
+guard_start = "            # BEGIN source-registry optimistic persistence guard"
+guard_end = "            # END source-registry optimistic persistence guard"
+assert workflow.count(guard_start) == workflow.count(guard_end) == 1
+guard = textwrap.dedent(workflow.split(guard_start, 1)[1].split(guard_end, 1)[0])
+assert workflow.index('ACQUISITION_HEAD="$(git rev-parse HEAD)"') < workflow.index("for attempt in 1 2 3 4 5; do")
+assert workflow.index("git fetch origin main", workflow.index("for attempt in 1 2 3 4 5; do")) < workflow.index(guard_start) < workflow.index("git reset --hard origin/main")
+
+with tempfile.TemporaryDirectory() as td:
+    root = Path(td)
+    def git(*args):
+        return subprocess.check_output(["git", "-C", str(root), *args], text=True, stderr=subprocess.STDOUT).strip()
+
+    def put(path, content):
+        target = root / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+
+    git("init", "-q")
+    git("config", "user.email", "test@example.invalid")
+    git("config", "user.name", "test")
+    protected = [
+        ".github/workflows/partener-eu-source-registry.yml",
+        "partener-eu/ingest/source_registry.json",
+        "partener-eu/ingest/source_registry_probe.py",
+        "partener-eu/ingest/data_plane_contract.json",
+        "partener-eu/ingest/intelligence_index.py",
+        "partener-eu/ingest/state/source_registry_health.json",
+        "partener-eu/validation/accepted-source-baselines.json",
+        "partener-eu/validation/resolution-tasks/SRC-TEST.json",
+    ]
+    for path in protected:
+        put(path, "old")
+    put("unrelated.txt", "old")
+    git("add", ".")
+    git("commit", "-qm", "base")
+    base = git("rev-parse", "HEAD")
+
+    def check_guard(expected):
+        before = git("rev-parse", "HEAD")
+        receipt = (root / protected[-1]).read_bytes()
+        result = subprocess.run(["bash", "-c", guard], cwd=root,
+                                env={**os.environ, "ACQUISITION_HEAD": base},
+                                capture_output=True, text=True)
+        assert result.returncode == expected, (expected, result.returncode, result.stderr)
+        assert git("rev-parse", "HEAD") == before
+        assert (root / protected[-1]).read_bytes() == receipt
+
+    git("update-ref", "refs/remotes/origin/main", base)
+    check_guard(0)
+    for path in ["unrelated.txt", *protected]:
+        git("reset", "--hard", base)
+        put(path, "new")
+        git("add", ".")
+        git("commit", "-qm", "concurrent change")
+        git("update-ref", "refs/remotes/origin/main", git("rev-parse", "HEAD"))
+        check_guard(0 if path == "unrelated.txt" else 1)
+
+    # A new task that was absent at acquisition is also protected.
+    git("reset", "--hard", base)
+    put("partener-eu/validation/resolution-tasks/SRC-NEW.json", "new")
+    git("add", ".")
+    git("commit", "-qm", "new task")
+    git("update-ref", "refs/remotes/origin/main", git("rev-parse", "HEAD"))
+    check_guard(1)
+
+    # Divergent/non-ancestor history must never admit a stale snapshot.
+    git("checkout", "--orphan", "rewritten")
+    git("commit", "--allow-empty", "-qm", "rewritten main")
+    git("update-ref", "refs/remotes/origin/main", git("rev-parse", "HEAD"))
+    check_guard(1)
+
+print("PASS source registry optimistic persistence regression")
+
+
+# Replay the exact workflow copy boundaries in an isolated workspace. A
+# partially copied task ledger must never advance to index rebuild/push.
+import os
+import subprocess
+import tempfile
+import textwrap
+
+copy_workflow = (ROOT / ".github/workflows/partener-eu-source-registry.yml").read_text(encoding="utf-8")
+copy_cases = [
+    ("snapshot", "normal"), ("snapshot", "missing"),
+    ("snapshot", "partial_error"), ("snapshot", "partial_success"),
+    ("restore", "normal"), ("restore", "partial_error"),
+    ("restore", "partial_success"), ("restore", "extra"),
+]
+for phase, mode in copy_cases:
+    marker = f"source-resolution {phase} copy guard"
+    block = textwrap.dedent(copy_workflow.split(f"# BEGIN {marker}\n", 1)[1]
+                           .split(f"# END {marker}", 1)[0])
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        tasks = root / "partener-eu/validation/resolution-tasks"
+        snap = root / "snapshot"
+        source = tasks if phase == "snapshot" else snap
+        dest = snap if phase == "snapshot" else tasks
+        if mode != "missing":
+            source.mkdir(parents=True)
+            for name in ("A.json", "B.json"):
+                (source / name).write_text("new " + name, encoding="utf-8")
+        if phase == "restore":
+            dest.mkdir(parents=True)
+            (dest / "A.json").write_text("old A", encoding="utf-8")
+            (dest / "B.json").write_text("old B", encoding="utf-8")
+            if mode == "extra":
+                (dest / "C.json").write_text("unexpected", encoding="utf-8")
+        block = block.replace("/tmp/source-resolution-tasks", str(snap))
+        fault = ""
+        if mode.startswith("partial"):
+            # Inject a partial copy, including a false-success return code.
+            exit_code = 1 if mode == "partial_error" else 0
+            fault = 'cp() { command cp "$2/A.json" "$3/A.json"; return ' + str(exit_code) + '; }\n'
+        result = subprocess.run(
+            ["bash", "-c", "set -euo pipefail\n" + fault + block + "\ntouch reached-next-step"],
+            cwd=root, capture_output=True, text=True,
+        )
+        expected_ok = mode == "normal"
+        assert (result.returncode == 0) == expected_ok, (phase, mode, result.stderr, result.stdout)
+        assert (root / "reached-next-step").exists() == expected_ok, (phase, mode)
+        if expected_ok:
+            assert {p.name: p.read_bytes() for p in source.iterdir()} == {
+                p.name: p.read_bytes() for p in dest.iterdir()
+            }, (phase, mode)
+
+print("PASS source-resolution copy integrity regression (8 scenarios)")
