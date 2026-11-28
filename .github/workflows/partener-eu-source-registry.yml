@@ -395,6 +395,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          ACQUISITION_HEAD="$(git rev-parse HEAD)"
           cp partener-eu/ingest/state/source_registry_health.json /tmp/source_registry_health.json
           rm -rf /tmp/source-resolution-tasks
           mkdir -p /tmp/source-resolution-tasks
@@ -406,6 +407,24 @@ jobs:
 
           for attempt in 1 2 3 4 5; do
             git fetch origin main
+            # BEGIN source-registry optimistic persistence guard
+            if ! git merge-base --is-ancestor "$ACQUISITION_HEAD" origin/main; then
+              echo "FAIL source-registry acquisition base is no longer an ancestor of main; reacquire." >&2
+              exit 1
+            fi
+            if ! git diff --quiet "$ACQUISITION_HEAD" origin/main -- \
+              .github/workflows/partener-eu-source-registry.yml \
+              partener-eu/ingest/source_registry.json \
+              partener-eu/ingest/source_registry_probe.py \
+              partener-eu/ingest/data_plane_contract.json \
+              partener-eu/ingest/intelligence_index.py \
+              partener-eu/ingest/state/source_registry_health.json \
+              partener-eu/validation/accepted-source-baselines.json \
+              partener-eu/validation/resolution-tasks; then
+              echo "FAIL source-registry inputs or reviewed ledger advanced; reacquire instead of overwriting." >&2
+              exit 1
+            fi
+            # END source-registry optimistic persistence guard
             git reset --hard origin/main
             cp /tmp/source_registry_health.json partener-eu/ingest/state/source_registry_health.json
             mkdir -p partener-eu/validation/resolution-tasks
