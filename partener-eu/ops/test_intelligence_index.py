@@ -63,6 +63,37 @@ def main():
         fixture_state(root)
         reference = dt.datetime(2026, 8, 12, 10, tzinfo=dt.timezone.utc)
         registry_path = root / "source_registry.json"
+        # PEO calendar dates are estimates, not actual call lifecycle. Keep
+        # historical rows searchable without presenting them as future launches.
+        for launch, close, expected in (
+            ("2025-10-01T00:00:00", "2025-12-31T00:00:00", "HISTORICAL_ESTIMATE"),
+            ("2026-08-13", "2026-12-01", "FUTURE_LAUNCH_ESTIMATE"),
+            ("2026-08-12", "2026-08-12", "CURRENT_ESTIMATE_WINDOW"),
+            ("2026-08-01", "2026-08-12", "CURRENT_ESTIMATE_WINDOW"),
+            ("2026-08-13", "2026-08-12", "UNKNOWN_ESTIMATE_WINDOW"),
+            (None, "2026-08-12", "UNKNOWN_ESTIMATE_WINDOW"),
+            ("2026-08-13", None, "UNKNOWN_ESTIMATE_WINDOW"),
+            ("2026-02-30", "2026-12-01", "UNKNOWN_ESTIMATE_WINDOW"),
+            ("2026-08-13T10:00:00", "2026-12-01", "UNKNOWN_ESTIMATE_WINDOW"),
+        ):
+            state = {
+                "status": "OK_OFFICIAL_OIR_COPY",
+                "lastRun": {"observedAt": "2026-08-12T08:00:00Z"},
+                "items": [{"id": "test", "title": "Estimate",
+                           "plannedLaunch": launch, "plannedClose": close}],
+            }
+            _, calendar_rows = mod.peo_calendar_records(state, reference, {})
+            assert len(calendar_rows) == 1
+            row = calendar_rows[0]
+            assert row["planningHorizon"] == expected, row
+            assert row["plannedLaunch"] == launch and row["plannedClose"] == close
+            assert row["recordType"] == "PLANNED_CALL"
+            assert row["decisionUse"] == "PLANNING_ONLY"
+            assert row["publishMaterialFacts"] is False
+        # Romanian local date can already be tomorrow relative to UTC.
+        boundary = dt.datetime(2026, 8, 12, 22, tzinfo=dt.timezone.utc)
+        assert mod.planning_horizon("2026-08-12", "2026-08-12", boundary) == "HISTORICAL_ESTIMATE"
+
         # The domestic-only fixture deliberately lacks the international roster.
         # Test the full production contract separately before using a local
         # reduced contract for the pre-existing domestic behavior assertions.
