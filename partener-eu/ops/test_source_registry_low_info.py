@@ -76,6 +76,10 @@ with tempfile.TemporaryDirectory() as td:
             assert state["summary"]["resolution_tasks_required"] == int(row["resolution_task_required"])
             return row
 
+        row = observe(a)
+        assert row["health"] == "PASS" and not row["resolution_task_required"]
+        assert not row["semantic_hash_changed"] and row["publish_material_fact_update"] is False
+
         row = observe(b)
         assert row["semantic_hash_changed"] and row["resolution_task_required"]
         task = json.loads(task_path.read_text(encoding="utf-8"))
@@ -130,7 +134,7 @@ with tempfile.TemporaryDirectory() as td:
             "material_fact_action": "NONE", "publish_authorized": False}}}), encoding="utf-8")
         row = observe(c)
         assert not row["resolution_task_required"] and not row["semantic_hash_changed"]
-        assert row.get("publish_material_fact_update") is not True
+        assert row["publish_material_fact_update"] is False
         task_path.unlink()
         assert module.pending_resolution_task(source["id"]) == ("NONE", None)
     finally:
