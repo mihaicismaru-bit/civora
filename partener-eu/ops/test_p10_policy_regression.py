@@ -280,7 +280,7 @@ def replay_p10_permission(live, bodies, authority=True, scope="MATERIAL_SOURCE")
              "schema_version": 3}
     import tempfile
     with tempfile.TemporaryDirectory() as temp, patch.multiple(
-        probe, HISTORY=Path(temp), recover_state=lambda: (state, False),
+        probe, HISTORY=Path(temp), recover_state=lambda **kwargs: (state, False),
         load_json=lambda *args: {"sources": [src]},
         static_frontend_checks=lambda: [{"pass": True}],
         atomic_json=lambda *args: None,
@@ -314,6 +314,50 @@ for live, observations, authority, scope in scenarios:
     if live and authority and scope == "MATERIAL_SOURCE" and observations[0]["ok"] and observations[0]["semantic_chars"] >= 256:
         if not all(row["health"] == "PASS" and row["material_facts_authority"] for row in replay_rows):
             errors.append("P10 publication containment incorrectly suppressed source health/authority metadata")
+
+# Real temporary file replay: an offline smoke must never overwrite a verified
+# receipt or recover a missing/corrupt state onto disk. Live recovery is tested
+# independently in test_recovery.py.
+import tempfile
+with tempfile.TemporaryDirectory() as temp:
+    root = Path(temp)
+    state_path = root / "state.json"
+    checkpoint_path = root / "checkpoint.json"
+    latest_path = root / "latest.json"
+    history_path = root / "history"
+    ops_path = root / "ops"
+    ops_path.mkdir()
+    history_path.mkdir()
+    prior = {"schema_version": 3, "sources": {"SRC-TEST": {
+        "semantic_sha256": "a" * 64, "raw_sha256": "b" * 64,
+        "last_success": "2026-01-01T00:00:00Z", "health": "FAIL",
+        "consecutive_failures": 3}}, "last_run": "2026-01-01T00:00:00Z"}
+    probe.atomic_json(checkpoint_path, prior)
+    probe.atomic_json(latest_path, {"live": True, "receipt": "retained"})
+    probe.atomic_json(history_path / "previous.json", {"live": True})
+    probe.atomic_json(ops_path / "sources.json", {"sources": [{
+        "id": "SRC-TEST", "url": "https://example.invalid/call",
+        "material_facts_authority": True}]})
+    with patch.multiple(probe, STATE=state_path, CHECKPOINT=checkpoint_path,
+                        LATEST=latest_path, HISTORY=history_path, OPS=ops_path,
+                        static_frontend_checks=lambda: [{"pass": True}]), \
+         patch.object(probe, "fetch_source", side_effect=AssertionError("offline fetch")):
+        for mode in ("valid", "missing", "corrupt"):
+            if mode == "valid":
+                probe.atomic_json(state_path, prior)
+            elif mode == "missing":
+                state_path.unlink()
+            else:
+                state_path.write_bytes(b"not-json")
+            before = {str(f.relative_to(root)): f.read_bytes()
+                      for f in root.rglob("*") if f.is_file()}
+            report, code = probe.run(live=False)
+            after = {str(f.relative_to(root)): f.read_bytes()
+                     for f in root.rglob("*") if f.is_file()}
+            if before != after or report.get("live") is not False or code != 0:
+                errors.append(f"offline smoke altered persistent evidence: {mode}")
+            if report.get("state_recovered_from_checkpoint") != (mode != "valid"):
+                errors.append(f"offline recovery classification mismatch: {mode}")
 
 
 if errors:
