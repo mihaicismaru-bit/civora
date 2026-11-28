@@ -49,9 +49,11 @@ env:
   MIPE_BROWSER_EXECUTABLE: ''
   MIPE_RETRIEVAL_TRANSPORT: 'playwright-chromium-direct-romania-v3'
 
+# An official-source crawl can last 100 minutes; hourly :15 must not cancel it.
+# Keep the existing single-run lock, serializing acquisition until artifact handoff.
 concurrency:
   group: partener-eu-mipe-ro-crawl-v3
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   crawl:
