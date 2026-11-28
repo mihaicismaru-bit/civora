@@ -401,7 +401,8 @@ def main():
                 changed = bool(baseline_hash and baseline_hash != new_hash)
                 row["semantic_hash_changed"] = changed
                 row["resolution_task_required"] = bool(changed and src.get("material_fact_use"))
-                row["publish_material_fact_update"] = False if changed else None
+                # Transport/semantic observations never authorize material publication.
+                row["publish_material_fact_update"] = False
                 row["consecutive_failures"] = 0
                 row["health"] = "PASS" if row.get("ok") else "FAIL"
                 row["quarantined"] = False
