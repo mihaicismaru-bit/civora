@@ -63,6 +63,45 @@ def main():
         fixture_state(root)
         reference = dt.datetime(2026, 8, 12, 10, tzinfo=dt.timezone.utc)
         registry_path = root / "source_registry.json"
+        # Malformed external URL evidence cannot crash index construction or
+        # bind a registry observation, even when all raw strings match.
+        for bad_url in (
+            "https://afir.ro:bogus/a", "https://afir.ro:65536/a",
+            "https://[broken/a", "https://afir.ro＠evil.example/a",
+            "https://user@afir.ro/a", "https://www./a", "https://bad host/a",
+        ):
+            assert mod.canonical_url(bad_url) is None, bad_url
+            assert not mod.registry_endpoint_bound(
+                {"url": bad_url},
+                {"url": bad_url, "selected_url": bad_url, "final_url": bad_url},
+            ), bad_url
+        for raw, expected in (
+            ("https://www.afir.ro/finantare/test/", "https://afir.ro/finantare/test"),
+            ("https://resurse.mysmis2021.gov.ro/calls", "https://resurse.mysmis2021.gov.ro/calls"),
+            ("http://example.org:8080/a//b/?q=1", "https://example.org:8080/a/b?q=1"),
+        ):
+            assert mod.canonical_url(raw) == expected
+        primary = "https://afir.ro/official"
+        alias = "https://www.afir.ro/official"
+        assert mod.registry_endpoint_bound(
+            {"url": primary, "canonical_aliases": [alias]},
+            {"url": primary, "selected_url": alias, "final_url": alias},
+        )
+        invalid_alias = "https://afir.ro:bogus/official"
+        assert not mod.registry_endpoint_bound(
+            {"url": primary, "canonical_aliases": [invalid_alias]},
+            {"url": primary, "selected_url": invalid_alias, "final_url": invalid_alias},
+        )
+        # One malformed AFIR row must not erase unrelated valid evidence.
+        _, valid_rows = mod.afir_records({
+            "status": "PASS", "generatedAt": "2026-08-12T08:00:00Z",
+            "items": [
+                {"url": invalid_alias},
+                {"url": primary, "observedAt": "2026-08-12T08:00:00Z", "title": "Official"},
+            ],
+        }, reference, {})
+        assert len(valid_rows) == 1 and valid_rows[0]["canonicalUrl"] == primary
+        assert valid_rows[0]["publishMaterialFacts"] is False
         # PEO calendar dates are estimates, not actual call lifecycle. Keep
         # historical rows searchable without presenting them as future launches.
         for launch, close, expected in (
