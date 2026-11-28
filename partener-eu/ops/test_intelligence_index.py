@@ -94,6 +94,49 @@ def main():
         boundary = dt.datetime(2026, 8, 12, 22, tzinfo=dt.timezone.utc)
         assert mod.planning_horizon("2026-08-12", "2026-08-12", boundary) == "HISTORICAL_ESTIMATE"
 
+        # Ledger trace is useful for replay but is never an immutable RAW proof.
+        workbook_url = "https://oirvest.ro/calendar.xlsx"
+        workbook_state = {
+            "status": "OK_OFFICIAL_OIR_COPY",
+            "retrievalSource": workbook_url,
+            "retrievalSourceClass": "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST",
+            "directMipeVerified": False,
+            "lastRun": {"source": workbook_url, "sha256": "a" * 64,
+                        "observedAt": "2026-08-12T08:00:00Z"},
+        }
+        workbook_row = {"id": "test", "title": "Estimate", "sourceSheet": "Apeluri",
+                        "sourceRow": 42}
+        trace = mod.peo_workbook_provenance(workbook_state, workbook_row)[0]
+        assert trace["observationState"] == "WORKBOOK_LEDGER_REFERENCE_ONLY"
+        assert trace["sha256"] == "a" * 64 and trace["fetchedUrl"] == workbook_url
+        assert trace["sourceSheet"] == "Apeluri" and trace["sourceRow"] == 42
+        assert trace["observedAt"] == workbook_state["lastRun"]["observedAt"]
+        assert "run_id" not in trace and "parser_version" not in trace
+        for changes, run_changes, row_changes in (
+            ({"status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED"}, {}, {}),
+            ({"directMipeVerified": True}, {}, {}),
+            ({"retrievalSourceClass": "UNKNOWN"}, {}, {}),
+            ({"retrievalSource": "https://example.org/calendar.xlsx"},
+             {"source": "https://example.org/calendar.xlsx"}, {}),
+            ({}, {"source": "https://oirvest.ro/other.xlsx"}, {}),
+            ({}, {"sha256": "z" * 64}, {}),
+            ({}, {"observedAt": "invalid"}, {}),
+            ({}, {}, {"sourceSheet": ""}),
+            ({}, {}, {"sourceRow": True}),
+            ({}, {}, {"sourceRow": 0}),
+        ):
+            bad = {**workbook_state, **changes,
+                   "lastRun": {**workbook_state["lastRun"], **run_changes}}
+            bad_row = {**workbook_row, **row_changes}
+            trace = mod.peo_workbook_provenance(bad, bad_row)[0]
+            assert trace["observationState"] == "UNBOUND_LEDGER_REFERENCE", trace
+            assert "sha256" not in trace and "sourceRow" not in trace
+        _, trace_rows = mod.peo_calendar_records(
+            {**workbook_state, "items": [workbook_row]}, reference, {})
+        assert trace_rows[0]["provenance"][0]["sourceRow"] == 42
+        assert trace_rows[0]["decisionUse"] == "PLANNING_ONLY"
+        assert trace_rows[0]["publishMaterialFacts"] is False
+
         # The domestic-only fixture deliberately lacks the international roster.
         # Test the full production contract separately before using a local
         # reduced contract for the pre-existing domestic behavior assertions.
