@@ -73,7 +73,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v6
+      # A pull_request job normally checks out refs/pull/N/merge, not the PR head.
+      # Safety-gate evidence must test the exact source commit under review.
+      # This QA workflow has read-only permissions and no publication secrets.
+      - name: Checkout exact source head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Prove exact-head checkout before executing QA
+        env:
+          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          ACTUAL_HEAD="$(git rev-parse HEAD)"
+          printf 'PARTENER_EU_WEB_QA_EXACT_HEAD=%s expected=%s\n' "$ACTUAL_HEAD" "$EXPECTED_HEAD"
+          test "$ACTUAL_HEAD" = "$EXPECTED_HEAD"
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
@@ -99,6 +113,8 @@ jobs:
           python partener-eu/ops/test_web_hygiene.py
           python partener-eu/ops/test_public_boot_performance.py
           python partener-eu/ops/check_deployment_freshness.py --self-test
+          # Negative readback contract (no HTTP and no deployment in --self-test).
+          python partener-eu/ops/prove_public_deploy.py --self-test
           python partener-eu/ops/test_frontend_regression.py
           python partener-eu/ops/test_brand_civic_intelligence_v1.py
           python partener-eu/ops/test_public_static_pages.py
