@@ -142,3 +142,84 @@ with tempfile.TemporaryDirectory() as td:
          module.REVIEWED_BASELINES, module.fetch_source) = original
 
 print("PASS durable source-resolution ledger regression")
+
+
+# Exercise the exact production retry guard against real Git history. Do not
+# mutate the checkout under test; the temporary repository represents main.
+import os
+import subprocess
+import textwrap
+
+workflow = (ROOT / ".github/workflows/partener-eu-source-registry.yml").read_text(encoding="utf-8")
+guard_start = "            # BEGIN source-registry optimistic persistence guard"
+guard_end = "            # END source-registry optimistic persistence guard"
+assert workflow.count(guard_start) == workflow.count(guard_end) == 1
+guard = textwrap.dedent(workflow.split(guard_start, 1)[1].split(guard_end, 1)[0])
+assert workflow.index('ACQUISITION_HEAD="$(git rev-parse HEAD)"') < workflow.index("for attempt in 1 2 3 4 5; do")
+assert workflow.index("git fetch origin main", workflow.index("for attempt in 1 2 3 4 5; do")) < workflow.index(guard_start) < workflow.index("git reset --hard origin/main")
+
+with tempfile.TemporaryDirectory() as td:
+    root = Path(td)
+    def git(*args):
+        return subprocess.check_output(["git", "-C", str(root), *args], text=True, stderr=subprocess.STDOUT).strip()
+
+    def put(path, content):
+        target = root / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+
+    git("init", "-q")
+    git("config", "user.email", "test@example.invalid")
+    git("config", "user.name", "test")
+    protected = [
+        ".github/workflows/partener-eu-source-registry.yml",
+        "partener-eu/ingest/source_registry.json",
+        "partener-eu/ingest/source_registry_probe.py",
+        "partener-eu/ingest/data_plane_contract.json",
+        "partener-eu/ingest/intelligence_index.py",
+        "partener-eu/ingest/state/source_registry_health.json",
+        "partener-eu/validation/accepted-source-baselines.json",
+        "partener-eu/validation/resolution-tasks/SRC-TEST.json",
+    ]
+    for path in protected:
+        put(path, "old")
+    put("unrelated.txt", "old")
+    git("add", ".")
+    git("commit", "-qm", "base")
+    base = git("rev-parse", "HEAD")
+
+    def check_guard(expected):
+        before = git("rev-parse", "HEAD")
+        receipt = (root / protected[-1]).read_bytes()
+        result = subprocess.run(["bash", "-c", guard], cwd=root,
+                                env={**os.environ, "ACQUISITION_HEAD": base},
+                                capture_output=True, text=True)
+        assert result.returncode == expected, (expected, result.returncode, result.stderr)
+        assert git("rev-parse", "HEAD") == before
+        assert (root / protected[-1]).read_bytes() == receipt
+
+    git("update-ref", "refs/remotes/origin/main", base)
+    check_guard(0)
+    for path in ["unrelated.txt", *protected]:
+        git("reset", "--hard", base)
+        put(path, "new")
+        git("add", ".")
+        git("commit", "-qm", "concurrent change")
+        git("update-ref", "refs/remotes/origin/main", git("rev-parse", "HEAD"))
+        check_guard(0 if path == "unrelated.txt" else 1)
+
+    # A new task that was absent at acquisition is also protected.
+    git("reset", "--hard", base)
+    put("partener-eu/validation/resolution-tasks/SRC-NEW.json", "new")
+    git("add", ".")
+    git("commit", "-qm", "new task")
+    git("update-ref", "refs/remotes/origin/main", git("rev-parse", "HEAD"))
+    check_guard(1)
+
+    # Divergent/non-ancestor history must never admit a stale snapshot.
+    git("checkout", "--orphan", "rewritten")
+    git("commit", "--allow-empty", "-qm", "rewritten main")
+    git("update-ref", "refs/remotes/origin/main", git("rev-parse", "HEAD"))
+    check_guard(1)
+
+print("PASS source registry optimistic persistence regression")
