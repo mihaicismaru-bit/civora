@@ -135,7 +135,34 @@ def semantic_sha(rows: list[dict[str, Any]]) -> str:
     return hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
-def parse_inventory(raw: str) -> dict[str, Any]:
+def replay_info_code(href: str) -> str | None:
+    """Replay-only check; never execute the APEX link or trust a foreign URL."""
+    decoded = decode_js_unicode(href)
+    dialog = re.match(r"^javascript:apex\.navigation\.dialog\('([^']+)'", decoded)
+    target = dialog.group(1) if dialog else decoded
+    try:
+        parsed = urllib.parse.urlsplit(urllib.parse.urljoin(CANONICAL_URL, target))
+        if (
+            parsed.scheme != "https" or parsed.netloc.lower() != EXPECTED_HOST
+            or parsed.path != EXPECTED_PATH.rsplit("/", 1)[0] + "/detaliu-apel"
+        ):
+            return None
+        params = urllib.parse.parse_qsl(parsed.query, keep_blank_values=True, errors="strict")
+    except (ValueError, UnicodeError):
+        return None
+    codes = [v for k, v in params if k.lower() == "p201_cod_apel"]
+    if len(codes) != 1 or not codes[0]:
+        return None
+    # Preserve the actual query identity after exactly one URL decoding.
+    # Reject residual escapes, whitespace, control characters and URL delimiters
+    # rather than normalizing distinct or malformed identities into one key.
+    code = codes[0]
+    if any(c.isspace() or not c.isprintable() or c in "%&?#\"'" for c in code):
+        return None
+    return code
+
+
+def parse_inventory(raw: str, *, replay_strict: bool = False) -> dict[str, Any]:
     if "Apeluri validate 2021-2027" not in raw:
         raise RuntimeError("expected MySMIS registry marker missing")
     parser = ReportTableParser()
@@ -165,7 +192,14 @@ def parse_inventory(raw: str) -> dict[str, Any]:
         if not programme or not call_title:
             continue
         info_cell = cells[header["info"]]
-        codes = [call_code_from_href(href) for href in info_cell.get("hrefs", [])]
+        hrefs = info_cell.get("hrefs", [])
+        extractor = replay_info_code if replay_strict else call_code_from_href
+        codes = [extractor(href) for href in hrefs]
+        if replay_strict and any(
+            not code and re.search(r"[?&]p201_cod_apel=", decode_js_unicode(href), re.I)
+            for href, code in zip(hrefs, codes)
+        ):
+            codes = []
         codes = [code for code in codes if code]
         code = codes[0] if len(set(codes)) == 1 else None
         if not code:
@@ -214,6 +248,139 @@ def parse_inventory(raw: str) -> dict[str, Any]:
         "paginationRequired": total is None or len(data_rows) < total,
         "materialSemanticSha256": semantic_sha(rows) if rows else None,
         "rows": rows,
+    }
+
+
+
+# Offline replay boundary only. The live scout remains single-page until the
+# official APEX pagination request/response contract is independently acquired.
+REPLAY_VERSION = "MYSMIS_PAGINATED_RECEIPT_REPLAY_V1"
+MAX_REPLAY_PAGES = 100
+MAX_REPLAY_BYTES = 50_000_000
+
+
+def replay_paginated_inventory(
+    pages: list[tuple[dict[str, Any], bytes]], expected_run_id: str
+) -> dict[str, Any]:
+    """Verify a complete ordered set of full official HTML page receipts.
+
+    Input is externally acquired raw bytes plus a receipt, never a URL to fetch.
+    Reject ambiguity rather than claiming completeness. This does not establish
+    receipt authenticity by itself; the trusted acquisition handoff is required.
+    No canonical writes, freshness reset, or status admission occur here.
+    """
+    if not expected_run_id or not pages or len(pages) > MAX_REPLAY_PAGES:
+        raise ValueError("invalid replay run or page count")
+    if sum(len(raw) for _, raw in pages) > MAX_REPLAY_BYTES:
+        raise ValueError("replay byte limit exceeded")
+    next_row = 1
+    total = None
+    unique: dict[str, dict[str, Any]] = {}
+    mirrored = 0
+    seen_hashes: set[str] = set()
+    seen_identity_pages: set[tuple[str, ...]] = set()
+    coverage = []
+    previous_fetched_at = None
+    for receipt, raw in pages:
+        # V1 accepts only full documents with the exact stable official URL.
+        # Session-specific URLs / APEX fragments need a separately reviewed
+        # transport contract; never persist session cookies or tokens here.
+        required = {
+            "url": CANONICAL_URL,
+            "runId": expected_run_id,
+            "parserVersion": PARSER_VERSION,
+            "sourceFamily": "ROMANIA_MIPE_MYSMIS",
+            "authorityClass": "T1_OFFICIAL_MYSMIS_REPORTING",
+            "observationState": "ACQUIRED_CANDIDATE_ONLY",
+            "programmeFamily": "ROMANIA_MULTI_PROGRAMME",
+        }
+        if any(receipt.get(k) != v for k, v in required.items()):
+            raise ValueError("receipt provenance mismatch")
+        media_type = str(receipt.get("contentType", "")).split(";", 1)[0].strip().lower()
+        if receipt.get("httpStatus") != 200 or media_type not in ("text/html", "application/xhtml+xml"):
+            raise ValueError("invalid page transport receipt")
+        try:
+            fetched_at = dt.datetime.fromisoformat(receipt["fetchedAt"].replace("Z", "+00:00"))
+            if fetched_at.utcoffset() != dt.timedelta(0):
+                raise ValueError("timestamp must be UTC")
+        except (KeyError, AttributeError, TypeError, ValueError) as exc:
+            raise ValueError("invalid fetchedAt") from exc
+        if previous_fetched_at is not None and fetched_at < previous_fetched_at:
+            raise ValueError("nonmonotonic sequential acquisition timestamps")
+        previous_fetched_at = fetched_at
+        if not raw or len(raw) >= MAX_BYTES:
+            raise ValueError("empty or potentially truncated page")
+        digest = hashlib.sha256(raw).hexdigest()
+        if receipt.get("rawSha256") != digest or digest in seen_hashes:
+            raise ValueError("raw digest mismatch or repeated page")
+        seen_hashes.add(digest)
+        doc = raw.decode("utf-8", errors="strict")
+        if not re.search(r"</html>\s*$", doc, re.I):
+            raise ValueError("incomplete HTML document")
+        ranges = {
+            tuple(int(re.sub(r"\D", "", value)) for value in match)
+            for match in re.findall(r"\b([0-9][0-9.,]*)\s*-\s*([0-9][0-9.,]*)\s*of\s*([0-9][0-9.,]*)\b", clean(doc), re.I)
+        }
+        if len(ranges) != 1:
+            raise ValueError("missing or ambiguous pagination range")
+        start, end, reported_total = ranges.pop()
+        if total is None:
+            total = reported_total
+        if reported_total != total or start != next_row or not start <= end <= total:
+            raise ValueError("noncontiguous page range or changing total")
+        parsed = parse_inventory(doc, replay_strict=True)
+        if (
+            not parsed["exactIdentityCompleteForVisiblePage"]
+            or parsed["validatedCallCount"] != total
+            or parsed["visibleRowCount"] != end - start + 1
+        ):
+            raise ValueError("page identity or row count mismatch")
+        identities = tuple(sorted(row["callCode"] for row in parsed["rows"]))
+        if not identities or identities in seen_identity_pages:
+            raise ValueError("repeated page identity set")
+        seen_identity_pages.add(identities)
+        mirrored += parsed["mirroredDuplicateRowCount"]
+        for row in parsed["rows"]:
+            code = row["callCode"]
+            if code in unique:
+                if unique[code] != row:
+                    raise ValueError("conflicting cross-page duplicate")
+                mirrored += 1
+            else:
+                unique[code] = row
+        coverage.append({
+            **required,
+            "fetchedAt": receipt["fetchedAt"],
+            "rawSha256": digest,
+            "httpStatus": 200,
+            "contentType": receipt["contentType"],
+            "firstRow": start,
+            "lastRow": end,
+            "reportedTotal": total,
+        })
+        next_row = end + 1
+    if total is None or next_row != total + 1 or len(unique) + mirrored != total:
+        raise ValueError("incomplete inventory coverage")
+    rows = sorted(unique.values(), key=lambda row: row["callCode"])
+    return {
+        "schema": REPLAY_VERSION,
+        "runId": expected_run_id,
+        "status": "COMPLETE_REPLAY_CANDIDATE_ONLY",
+        "validatedCallCount": total,
+        "exactIdentityRowCount": len(rows),
+        "mirroredDuplicateRowCount": mirrored,
+        "pageCount": len(coverage),
+        "pageReceipts": coverage,
+        "coverageSha256": hashlib.sha256(json.dumps(coverage, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest(),
+        "materialSemanticSha256": semantic_sha(rows),
+        "rows": rows,
+        "materialFactUse": False,
+        "publishAuthorized": False,
+        "openCallAuthorized": False,
+        "deadlineAuthorized": False,
+        "budgetAuthorized": False,
+        "eligibilityAuthorized": False,
+        "publicationEffect": "NONE",
     }
 
 

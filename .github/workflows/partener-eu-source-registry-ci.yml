@@ -4,6 +4,11 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/source_registry.json'
+      - 'partener-eu/ingest/intelligence_index.py'
+      - 'partener-eu/ops/test_intelligence_index.py'
+      - 'partener-eu/ingest/mysmis_call_inventory_scout.py'
+      - 'partener-eu/ops/test_mysmis_call_inventory_scout.py'
+      - 'partener-eu/ops/mysmis_public_ui_protocol_probe.mjs'
       - 'partener-eu/ingest/source_registry_probe.py'
       - 'partener-eu/ingest/data_plane_contract.json'
       - 'partener-eu/ingest/funding_tenders_api.py'
@@ -94,6 +99,90 @@ jobs:
 
       - name: Validate P10 and canonical source authority compatibility
         run: python partener-eu/ops/test_p10_policy_regression.py
+
+      - name: Validate intelligence index evidence freshness and replay
+        run: python partener-eu/ops/test_intelligence_index.py
+
+      - name: Validate MySMIS exact-call inventory and immutable pagination replay
+        run: python partener-eu/ops/test_mysmis_call_inventory_scout.py
+
+      - name: Inspect official MySMIS pagination protocol shape (diagnostic only)
+        continue-on-error: true
+        run: |
+          python - <<'PY'
+          import hashlib, json, re, sys
+          sys.path.insert(0, 'partener-eu/ingest')
+          import mysmis_call_inventory_scout as scout
+          try:
+              _, body, content_type = scout.fetch_html(timeout=25)
+              if not body or len(body) >= scout.MAX_BYTES:
+                  raise ValueError('empty or potentially truncated response')
+              raw = body.decode('utf-8', errors='strict')
+              if not raw.rstrip().lower().endswith('</html>'):
+                  raise ValueError('incomplete document')
+              inventory = scout.parse_inventory(raw, replay_strict=True)
+              # Fixed allowlist of marker names only. Never log HTML, hrefs,
+              # inline JS, cookies, session IDs, checksums or request values.
+              markers = (
+                  'apex.widget.report.paginate', 'apex.widget.report',
+                  'apex.widget.interactiveReport', 'apex.widget.interactiveGrid',
+                  'apex.server.plugin', 'apex.region', 'a-IRR-pagination',
+                  'a-IRR-button--pagination', 'a-Report-pagination',
+                  'data-pagination', 'data-page', 'data-action',
+                  'p_request', 'p_flow_id', 'p_flow_step_id', 'p_instance',
+              )
+              print(json.dumps({
+                  'schema': 'MYSMIS_PROTOCOL_SHAPE_DIAGNOSTIC_V1',
+                  'canonicalUrl': scout.CANONICAL_URL,
+                  'fetchedAt': scout.now(),
+                  'runId': scout.run_id(),
+                  'parserVersion': scout.PARSER_VERSION,
+                  'sourceFamily': 'ROMANIA_MIPE_MYSMIS',
+                  'programmeFamily': 'ROMANIA_MULTI_PROGRAMME',
+                  'authorityClass': 'T1_OFFICIAL_MYSMIS_REPORTING',
+                  'observationState': 'PROTOCOL_DISCOVERY_ONLY',
+                  'rawSha256': hashlib.sha256(body).hexdigest(),
+                  'contentType': content_type,
+                  'bytes': len(body),
+                  'visibleRowCount': inventory['visibleRowCount'],
+                  'validatedCallCount': inventory['validatedCallCount'],
+                  'strictIdentityComplete': inventory['exactIdentityCompleteForVisiblePage'],
+                  'markerPresence': {m: m.lower() in raw.lower() for m in markers},
+                  'rawPersisted': False,
+                  'paginationProtocolConfirmed': False,
+                  'materialFactUse': False,
+                  'publishAuthorized': False,
+                  'openCallAuthorized': False,
+                  'publicationEffect': 'NONE',
+              }, sort_keys=True))
+          except Exception as exc:
+              # Do not print exception messages: URLs may contain session data.
+              print(json.dumps({'status': 'PROTOCOL_DISCOVERY_FAILED_CLOSED',
+                                'errorType': type(exc).__name__,
+                                'publishAuthorized': False, 'openCallAuthorized': False}))
+              sys.exit(2)
+          PY
+
+      - name: Validate MySMIS UI diagnostic range and endpoint guards
+        run: |
+          node --check partener-eu/ops/mysmis_public_ui_protocol_probe.mjs
+          node partener-eu/ops/mysmis_public_ui_protocol_probe.mjs --self-test
+
+      - name: Observe bounded public MySMIS page range (draft diagnostic only)
+        if: github.event_name == 'pull_request' && github.head_ref == 'partener/mysmis-paginated-replay-1429'
+        continue-on-error: true
+        timeout-minutes: 2
+        run: |
+          # V15 reached 750/1002 rows at the 70s outer deadline. Allow a
+          # bounded 105s single session, with kill grace inside the 2m step.
+          # No additional transitions, retries or canonical authorization.
+          set +e
+          timeout --kill-after=5s 105s node partener-eu/ops/mysmis_public_ui_protocol_probe.mjs
+          rc=$?
+          if [ "$rc" -ne 0 ]; then
+            printf '{"status":"UI_DIAGNOSTIC_PROCESS_FAILED_CLOSED","exitCode":%s,"rawPersisted":false,"immutableReceipt":false,"materialFactUse":false,"publishAuthorized":false,"openCallAuthorized":false,"publicationEffect":"NONE"}\n' "$rc"
+          fi
+          exit "$rc"
 
       - name: Validate low-information fail-closed behavior
         run: python partener-eu/ops/test_source_registry_low_info.py
