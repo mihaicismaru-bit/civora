@@ -206,6 +206,45 @@ def planning_horizon(launch_value: Any, close_value: Any, reference: dt.datetime
     return "CURRENT_ESTIMATE_WINDOW"
 
 
+def peo_workbook_provenance(state: Dict[str, Any], row: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Expose the existing ledger reference, not a new verification of RAW bytes."""
+    raw_url = state.get("retrievalSource")
+    url = canonical_url(raw_url)
+    if not url:
+        return []
+    entry = {"url": url, "tier": "T1B", "label": "PEO calendar — source ledger",
+             "observationState": "UNBOUND_LEDGER_REFERENCE"}
+    run = state.get("lastRun") or {}
+    sheet, number = row.get("sourceSheet"), row.get("sourceRow")
+    digest = run.get("sha256")
+    observed = run.get("observedAt")
+    # Only the currently supported institutional-copy contract has a known
+    # row-to-workbook binding. Do not infer direct MIPE verification.
+    if (
+        state.get("status") == "OK_OFFICIAL_OIR_COPY"
+        and state.get("retrievalSourceClass") == "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST"
+        and state.get("directMipeVerified") is False
+        and isinstance(raw_url, str) and raw_url.startswith("https://")
+        and urllib.parse.urlparse(url).hostname == "oirvest.ro"
+        and run.get("source") == raw_url
+        and isinstance(digest, str) and re.fullmatch(r"[0-9a-f]{64}", digest)
+        and isinstance(observed, str) and parse_time(observed) is not None
+        and isinstance(sheet, str) and sheet.strip()
+        and type(number) is int and number > 0
+    ):
+        entry.update({
+            "label": "OIR PECU Vest — copie instituțională",
+            "observationState": "WORKBOOK_LEDGER_REFERENCE_ONLY",
+            "fetchedUrl": raw_url,
+            "sha256": digest,
+            "observedAt": observed,
+            "sourceSheet": sheet,
+            "sourceRow": number,
+            "retrievalSourceClass": state["retrievalSourceClass"],
+        })
+    return [entry]
+
+
 def peo_calendar_records(
     state: Dict[str, Any], reference: dt.datetime, config: Dict[str, Any]
 ) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
@@ -256,7 +295,7 @@ def peo_calendar_records(
             "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
             "publishMaterialFacts": False,
             "blockedFactClasses": MATERIAL_FACT_CLASSES,
-            "provenance": ([{"url": retrieval_url, "tier": "T1B", "label": "OIR PECU Vest — copie instituțională"}] if retrieval_url else []),
+            "provenance": peo_workbook_provenance(state, row),
         })
     return source, records
 
