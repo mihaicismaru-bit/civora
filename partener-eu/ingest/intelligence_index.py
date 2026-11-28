@@ -18,6 +18,7 @@ import re
 import tempfile
 import urllib.parse
 from collections import Counter
+from zoneinfo import ZoneInfo
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 
@@ -184,6 +185,27 @@ def afir_records(
     return source, records
 
 
+def planning_horizon(launch_value: Any, close_value: Any, reference: dt.datetime) -> str:
+    """Classify calendar estimates, never actual call lifecycle or deadlines."""
+    def calendar_day(value: Any) -> Optional[dt.date]:
+        if not isinstance(value, str) or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}(?:T00:00:00)?", value):
+            return None
+        try:
+            return dt.date.fromisoformat(value[:10])
+        except ValueError:
+            return None
+
+    launch, close = calendar_day(launch_value), calendar_day(close_value)
+    if launch is None or close is None or launch > close:
+        return "UNKNOWN_ESTIMATE_WINDOW"
+    today = reference.astimezone(ZoneInfo("Europe/Bucharest")).date()
+    if close < today:
+        return "HISTORICAL_ESTIMATE"
+    if launch > today:
+        return "FUTURE_LAUNCH_ESTIMATE"
+    return "CURRENT_ESTIMATE_WINDOW"
+
+
 def peo_calendar_records(
     state: Dict[str, Any], reference: dt.datetime, config: Dict[str, Any]
 ) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
@@ -224,6 +246,7 @@ def peo_calendar_records(
             "region": row.get("region"),
             "plannedLaunch": row.get("plannedLaunch"),
             "plannedClose": row.get("plannedClose"),
+            "planningHorizon": planning_horizon(row.get("plannedLaunch"), row.get("plannedClose"), reference),
             "applicantsSignal": row.get("applicants"),
             "budgetSignal": row.get("budget"),
             "observedAt": observed_at,
