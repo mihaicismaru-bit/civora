@@ -45,8 +45,10 @@ def parse_time(value: Any) -> Optional[dt.datetime]:
         return None
     try:
         parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
-        if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=dt.timezone.utc)
+        # A timezone-free source heartbeat cannot establish UTC freshness.
+        # Do not invent a timezone for archival or acquired official evidence.
+        if parsed.tzinfo is None or parsed.utcoffset() is None:
+            return None
         return parsed.astimezone(dt.timezone.utc)
     except ValueError:
         return None
@@ -109,7 +111,12 @@ def freshness(observed_at: Any, reference: dt.datetime, max_age_hours: int) -> D
     observed = parse_time(observed_at)
     if not observed:
         return {"status": "UNKNOWN", "ageHours": None, "maxAgeHours": max_age_hours}
-    age = max(0.0, (reference - observed).total_seconds() / 3600)
+    age_seconds = (reference - observed).total_seconds()
+    # A future timestamp must never refresh LKG. Allow only bounded clock skew
+    # between official acquisition and the replay runner.
+    if age_seconds < -300:
+        return {"status": "UNKNOWN", "ageHours": None, "maxAgeHours": max_age_hours}
+    age = max(0.0, age_seconds / 3600)
     return {
         "status": "CURRENT" if age <= max_age_hours else "STALE",
         "ageHours": round(age, 2),
@@ -135,6 +142,9 @@ def afir_records(
         "itemCount": len(state.get("items") or []),
         "failClosed": True,
     }
+    # Content may be indexed for discovery while its acquisition is degraded
+    # or stale; only a CURRENT, healthy official source earns the evidence label.
+    evidence_current = source_availability(source) == "AVAILABLE"
     records = []
     for row in state.get("items") or []:
         url = canonical_url(row.get("url"))
@@ -158,7 +168,7 @@ def afir_records(
             "observedAt": observed_at,
             "freshness": source["freshness"]["status"],
             "textExtracted": bool(row.get("textExtracted")),
-            "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+            "decisionUse": "OFFICIAL_EVIDENCE_INDEX" if evidence_current else "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
             "materialChangeCandidate": material_candidate,
             "materialFactAction": "RESOLUTION_REQUIRED" if material_candidate else "NO_AUTO_PROMOTION",
             "publishMaterialFacts": False,
@@ -229,6 +239,12 @@ def mipe_records(
     observed_at = run.get("observedAt")
     available = bool(run.get("sourceAvailable"))
     sla = int(config.get("freshnessSlaHours") or 8)
+    # A recent failed acquisition is a fresh *attempt*, not fresh official
+    # evidence. Keep its recency observable without refreshing the LKG corpus.
+    attempt_freshness = freshness(observed_at, reference, sla)
+    state_status = str(state.get("status") or "UNKNOWN").upper()
+    verified = available and (state_status in {"PASS", "OK"} or state_status.startswith("OK_"))
+    evidence_freshness = attempt_freshness if verified else freshness(None, reference, sla)
     source = {
         "id": "MIPE_CORPUS",
         "tier": config.get("tier") or "T1",
@@ -238,12 +254,14 @@ def mipe_records(
         "dependencyScopes": config.get("dependencyScopes") or [],
         "status": state.get("status") or "UNKNOWN",
         "observedAt": observed_at,
-        "freshness": freshness(observed_at, reference, sla),
+        "freshness": evidence_freshness,
+        "lastAttemptFreshness": attempt_freshness,
         "itemCount": len(state.get("items") or []),
         "sourceAvailable": available,
         "lastKnownGoodPreserved": "LAST_KNOWN_GOOD_PRESERVED" in str(state.get("status") or ""),
         "failClosed": True,
     }
+    evidence_current = verified and evidence_freshness["status"] == "CURRENT"
     records = []
     for row in state.get("items") or []:
         url = canonical_url(row.get("url") or row.get("sourceUrl"))
@@ -260,7 +278,7 @@ def mipe_records(
             "fingerprint": row.get("sha256") or row.get("contentHash"),
             "observedAt": row.get("observedAt") or observed_at,
             "freshness": source["freshness"]["status"],
-            "decisionUse": "OFFICIAL_EVIDENCE_INDEX" if available else "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+            "decisionUse": "OFFICIAL_EVIDENCE_INDEX" if evidence_current else "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
             "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
             "publishMaterialFacts": False,
             "blockedFactClasses": MATERIAL_FACT_CLASSES,
@@ -273,8 +291,38 @@ def registry_source(
     state: Dict[str, Any], reference: dt.datetime, config: Dict[str, Any]
 ) -> Dict[str, Any]:
     observed_at = state.get("observed_at")
-    summary = state.get("summary") or {}
+    rows = state.get("sources")
+    summary = state.get("summary")
+    rows = rows if isinstance(rows, list) else []
+    summary = summary if isinstance(summary, dict) else {}
     sla = int(config.get("freshnessSlaHours") or 12)
+
+    # Health summaries are metadata, not authoritative evidence of successful
+    # acquisition. Reconcile against individual observations, as P10 does.
+    counts = Counter()
+    quarantined = 0
+    valid = bool(rows)
+    for row in rows:
+        if not isinstance(row, dict) or row.get("health") not in {"PASS", "DEGRADED", "FAIL"}:
+            valid = False
+            break
+        counts[row["health"]] += 1
+        quarantined += bool(row.get("quarantined"))
+    expected = {
+        "total": len(rows),
+        "pass": counts["PASS"],
+        "degraded": counts["DEGRADED"],
+        "fail": counts["FAIL"],
+        "quarantined": quarantined,
+    }
+    summary_matches = valid and all(
+        type(summary.get(key)) is int and summary[key] == number
+        for key, number in expected.items()
+    )
+    healthy = summary_matches and not (
+        counts["DEGRADED"] or counts["FAIL"] or quarantined
+    )
+
     return {
         "id": "VERIFIED_SOURCE_REGISTRY",
         "tier": config.get("tier") or "MIXED_T1_T1B_T2",
@@ -282,14 +330,16 @@ def registry_source(
         "programmes": config.get("programmes") or [],
         "sourceFamilies": config.get("sourceFamilies") or [],
         "dependencyScopes": config.get("dependencyScopes") or [],
-        "status": "PASS" if not summary.get("fail") else "DEGRADED",
+        "status": "PASS" if healthy else "DEGRADED",
         "observedAt": observed_at,
         "freshness": freshness(observed_at, reference, sla),
-        "itemCount": int(summary.get("total") or len(state.get("sources") or [])),
-        "resolutionTasksRequired": int(summary.get("resolution_tasks_required") or 0),
+        "itemCount": len(rows),
+        "resolutionTasksRequired": sum(
+            row.get("resolution_task_required") is True
+            for row in rows if isinstance(row, dict)
+        ),
         "failClosed": True,
     }
-
 
 def state_contract_result(
     source_id: str,

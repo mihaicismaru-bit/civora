@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "discovered_on": "2026-11-15",
+  "official_notice_date": "2026-11-13",
+  "official_notice_local_time": "09:45",
+  "source_id": "SRC-RO-AFIR-EMAIL-INCIDENT-20261113",
+  "programme_family": "PS_PAC_2023_2027/AFIR_OPERATIONS",
+  "source_family": "ROMANIA/AFIR/OPERATIONAL_ADVISORY",
+  "authority_class": "T1_OFFICIAL_AGENCY",
+  "observation_state": "OPERATIONAL_ADVISORY_DISCOVERY_ONLY",
+  "candidate_lifecycle": "DATED_OPERATIONS_NOTICE_NOT_CALL",
+  "official_url": "https://www.afir.ro/info-la-zi/afir-se-confrunta-cu-lipsa-serviciilor-de-e-mail-din-cauza-problemei-care-se-manifesta-la-nivel-global/",
+  "official_attribution": "AFIR notice dated 13 Nov 2026 reports e-mail communication interrupted during Microsoft 365/Outlook service incident and advises use of alternative AFIR contact channels shown on the website.",
+  "source_provenance": {
+    "requested_url": "https://www.afir.ro/info-la-zi/afir-se-confrunta-cu-lipsa-serviciilor-de-e-mail-din-cauza-problemei-care-se-manifesta-la-nivel-global/",
+    "final_url": null,
+    "fetched_at": null,
+    "raw_sha256": null,
+    "parser_version": null,
+    "run_id": null,
+    "raw_original_acquired": false,
+    "semantic_replay_passed": false
+  },
+  "policy": {
+    "current_outage_confirmed": false,
+    "current_recovery_confirmed": false,
+    "material_fact_use": false,
+    "open_call_authorized": false,
+    "publish_authorized": false,
+    "distribution_authorized": false,
+    "material_fact_publication_authorized": false,
+    "publication_effect": "NONE"
+  },
+  "next_gate": [
+    "Acquire exact official HTML with strict TLS, endpoint identity, original bytes, fetched_at UTC, SHA-256, parser_version and run_id",
+    "Replay immutable raw original and check dated article identity and visible service advisory semantics",
+    "For operational status NOW obtain a separate fresh dated official update; never infer continuing outage or recovery from the 13 November notice",
+    "Do not change funding-call lifecycle or disseminate applicant alerts without reviewed material evidence"
+  ],
+  "rollback": "Revert only dated advisory registry/discovery/test changes from the unmerged PR; leave canonical LKG and all source receipts unchanged."
+}

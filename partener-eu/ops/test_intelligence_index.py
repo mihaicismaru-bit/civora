@@ -62,6 +62,92 @@ def main():
         root = pathlib.Path(directory)
         fixture_state(root)
         reference = dt.datetime(2026, 8, 12, 10, tzinfo=dt.timezone.utc)
+        # Acquisition timestamps without an explicit UTC offset have no
+        # verifiable timezone. They must not renew the evidence clock.
+        assert mod.parse_time("2026-08-12T10:00:00") is None
+        assert mod.parse_time("2026-08-12") is None
+        assert mod.freshness("2026-08-12T10:00:00", reference, 8)["status"] == "UNKNOWN"
+        assert mod.parse_time("2026-08-12T12:00:00+02:00") == reference
+        # Corpus rows remain discoverable but cannot claim CURRENT official
+        # evidence if the last attempt is stale or source health is degraded.
+        afir_fixture = {
+            "status": "PASS", "generatedAt": "2026-08-12T08:00:00Z",
+            "items": [{"url": "https://afir.ro/finantare/sample", "title": "Sample"}],
+        }
+        mipe_fixture = {
+            "status": "OK",
+            "lastRun": {"observedAt": "2026-08-12T08:00:00Z", "sourceAvailable": True},
+            "items": [{"url": "https://mfe.gov.ro/ghid/sample", "title": "Sample"}],
+        }
+        afir_source, afir_rows = mod.afir_records(afir_fixture, reference, {})
+        mipe_source, mipe_rows = mod.mipe_records(mipe_fixture, reference, {})
+        assert afir_source["freshness"]["status"] == "CURRENT"
+        assert mipe_source["freshness"]["status"] == "CURRENT"
+        assert afir_rows[0]["decisionUse"] == "OFFICIAL_EVIDENCE_INDEX"
+        assert mipe_rows[0]["decisionUse"] == "OFFICIAL_EVIDENCE_INDEX"
+        for degraded_status in ("FAIL", "DEGRADED"):
+            afir_fixture["status"] = degraded_status
+            _, rows = mod.afir_records(afir_fixture, reference, {})
+            assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+        afir_fixture["status"] = "PASS"
+        afir_fixture["generatedAt"] = "2026-08-11T01:00:00Z"
+        _, rows = mod.afir_records(afir_fixture, reference, {})
+        assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+        afir_fixture["generatedAt"] = "2026-08-12T08:00:00"
+        _, rows = mod.afir_records(afir_fixture, reference, {})
+        assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+        for degraded_status in ("DEGRADED_LAST_KNOWN_GOOD_PRESERVED", "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED"):
+            mipe_fixture["status"] = degraded_status
+            _, rows = mod.mipe_records(mipe_fixture, reference, {})
+            assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+        mipe_fixture["status"] = "OK"
+        mipe_fixture["lastRun"]["observedAt"] = "2026-08-11T01:00:00Z"
+        _, rows = mod.mipe_records(mipe_fixture, reference, {})
+        assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+        mipe_fixture["lastRun"]["observedAt"] = "2026-08-12T08:00:00"
+        _, rows = mod.mipe_records(mipe_fixture, reference, {})
+        assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+        mipe_fixture["lastRun"]["observedAt"] = "2026-08-12T08:00:00Z"
+        mipe_fixture["lastRun"]["sourceAvailable"] = False
+        _, rows = mod.mipe_records(mipe_fixture, reference, {})
+        assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+
+        # Future-dated evidence outside a bounded five-minute clock skew
+        # cannot be treated as CURRENT or renew a stale official corpus.
+        assert mod.freshness("2026-08-12T10:04:59Z", reference, 8)["status"] == "CURRENT"
+        rejected_future = mod.freshness("2026-08-12T10:05:01Z", reference, 8)
+        assert rejected_future["status"] == "UNKNOWN", rejected_future
+        assert rejected_future["ageHours"] is None
+        # An internally inconsistent registry-health summary must never
+        # reclassify degraded/quarantined official observations as PASS.
+        registry_fixture = {
+            "observed_at": "2026-08-12T08:00:00Z",
+            "sources": [
+                {"health": "PASS", "quarantined": False, "resolution_task_required": False},
+                {"health": "PASS", "quarantined": False, "resolution_task_required": False},
+            ],
+            "summary": {"total": 2, "pass": 2, "degraded": 0, "fail": 0, "quarantined": 0},
+        }
+        assert mod.registry_source(registry_fixture, reference, {})["status"] == "PASS"
+        registry_fixture["sources"][1]["health"] = "DEGRADED"
+        registry_fixture["summary"]["pass"] = 1
+        registry_fixture["summary"]["degraded"] = 1
+        assert mod.registry_source(registry_fixture, reference, {})["status"] == "DEGRADED"
+        registry_fixture["sources"][1]["health"] = "PASS"
+        registry_fixture["sources"][1]["quarantined"] = True
+        registry_fixture["summary"].update({"pass": 2, "degraded": 0, "quarantined": 1})
+        assert mod.registry_source(registry_fixture, reference, {})["status"] == "DEGRADED"
+        registry_fixture["sources"][1]["quarantined"] = False
+        registry_fixture["summary"]["quarantined"] = 0
+        registry_fixture["summary"]["total"] = 3
+        assert mod.registry_source(registry_fixture, reference, {})["status"] == "DEGRADED"
+        registry_fixture["summary"]["total"] = True
+        assert mod.registry_source(registry_fixture, reference, {})["status"] == "DEGRADED"
+        registry_fixture["summary"]["total"] = 2
+        registry_fixture["summary"].pop("pass")
+        assert mod.registry_source(registry_fixture, reference, {})["status"] == "DEGRADED"
+        assert mod.registry_source(registry_fixture, reference, {})["itemCount"] == 2
+
         registry_path = root / "source_registry.json"
         index = mod.compile_with_replay(root, reference, source_registry_path=registry_path)
         assert index["contract"]["status"] == "PASS", index["contract"]
@@ -75,6 +161,12 @@ def main():
         assert index["summary"]["materialFactsAutopromoted"] == 0
         assert index["summary"]["recordCount"] == 3
         assert "MIPE_CORPUS" in index["summary"]["unavailableT1Sources"]
+        # A two-hour-old failed MIPE fetch is an observed heartbeat, not a
+        # two-hour-old verified official corpus. Never renew evidence age from LKG.
+        failed_mipe = next(row for row in index["sources"] if row["id"] == "MIPE_CORPUS")
+        assert failed_mipe["lastAttemptFreshness"]["status"] == "CURRENT"
+        assert failed_mipe["freshness"]["status"] == "UNKNOWN"
+        assert "MIPE_CORPUS" in index["summary"]["materialStaleOrUnknownSources"]
         material = next(row for row in index["records"] if row.get("materialChangeCandidate"))
         assert material["materialFactAction"] == "RESOLUTION_REQUIRED"
         assert material["publishMaterialFacts"] is False
@@ -114,9 +206,29 @@ def main():
         assert healthy_material["sources"][-1]["status"] == "DEGRADED"
         assert healthy_material["summary"]["materialResolutionTasksRequired"] == 0
         assert healthy_material["summary"]["materialStaleOrUnknownSources"] == []
+        healthy_mipe = next(row for row in healthy_material["sources"] if row["id"] == "MIPE_CORPUS")
+        assert healthy_mipe["lastAttemptFreshness"]["status"] == "CURRENT"
+        assert healthy_mipe["freshness"]["status"] == "CURRENT"
         assert healthy_material["summary"]["unavailableT1Sources"] == []
         assert healthy_material["summary"]["operationalUnavailableT1Sources"] == ["SRC-DISCOVERY-ONLY"]
         assert healthy_material["dataPlane"]["dependencyIsolation"]["blockedSourceIds"] == []
+
+        # Even an otherwise successful MIPE acquisition cannot claim fresh
+        # authority if its timestamp is implausibly ahead of the replay clock.
+        write(root / "mipe_state.json", {
+            "status": "OK", "items": [],
+            "lastRun": {"observedAt": "2026-08-13T10:00:00Z", "sourceAvailable": True},
+        })
+        future_mipe = mod.compile_with_replay(root, reference, source_registry_path=registry_path)
+        future_mipe_source = next(row for row in future_mipe["sources"] if row["id"] == "MIPE_CORPUS")
+        assert future_mipe_source["freshness"]["status"] == "UNKNOWN"
+        assert "MIPE_CORPUS" in future_mipe["summary"]["materialStaleOrUnknownSources"]
+        future_gates = {row["sourceId"]: row for row in future_mipe["dataPlane"]["dependencyIsolation"]["gates"]}
+        assert future_gates["MIPE_CORPUS"]["materialFactGate"] == "BLOCKED_SOURCE_DEPENDENCIES"
+        write(root / "mipe_state.json", {
+            "status": "OK", "items": [],
+            "lastRun": {"observedAt": "2026-08-12T08:00:00Z", "sourceAvailable": True},
+        })
 
         stale = mod.compile_with_replay(
             root,

@@ -13,8 +13,10 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import tempfile
 from typing import Any
+from urllib.parse import urlsplit
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 VALIDATION = ROOT / "validation"
@@ -69,7 +71,7 @@ def parse_utc(value: Any) -> dt.datetime | None:
     try:
         parsed = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
         if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=dt.timezone.utc)
+            return None  # An unzoned timestamp is not verified UTC source evidence.
         return parsed.astimezone(dt.timezone.utc)
     except Exception:
         return None
@@ -79,7 +81,12 @@ def age_seconds(value: Any) -> int | None:
     parsed = parse_utc(value)
     if not parsed:
         return None
-    return max(0, int((now() - parsed).total_seconds()))
+    skew_seconds = (now() - parsed).total_seconds()
+    # A future-dated health ledger cannot reset source freshness or LKG age.
+    # Accept only a bounded five-minute capture/runner clock skew.
+    if skew_seconds < -300:
+        return None
+    return max(0, int(skew_seconds))
 
 
 def canonical_sha(obj: Any) -> str:
@@ -93,6 +100,139 @@ def history_path(report: dict[str, Any]) -> pathlib.Path | None:
         return None
     stamp = str(started).replace(":", "").replace("-", "")
     return HISTORY / f"{stamp}.json"
+
+
+def mipe_health_status(value: Any) -> str:
+    # Only observed direct-acquisition success states may be reported healthy.
+    # Both known LKG-preserved failures and unknown future statuses fail closed.
+    return "PASS" if value in {"OK", "OK_NO_NEW_RELEVANT_ITEMS"} else "DEGRADED_FAIL_CLOSED"
+
+
+def mipe_lkg_preserved(value: Any) -> bool:
+    # Different MIPE acquisition transports emit either of these known
+    # degraded states. Both retain the previous corpus, not fresh evidence.
+    return value in {
+        "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+        "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+    }
+
+
+def same_official_endpoint(selected: Any, final: Any) -> bool:
+    """A successful redirect may vary only the www spelling or trailing slash.
+
+    A 200 response from another path, host, query or unsafe transport is
+    not evidence for the registered source, regardless of the row's label.
+    """
+    if not isinstance(selected, str) or not isinstance(final, str):
+        return False
+    try:
+        a, b = urlsplit(selected), urlsplit(final)
+        for u in (a, b):
+            if (
+                u.scheme != "https" or not u.hostname
+                or u.username is not None or u.password is not None
+                or u.port not in (None, 443) or u.fragment or ";" in u.path
+            ):
+                return False
+        return (
+            a.hostname.lower().removeprefix("www.")
+            == b.hostname.lower().removeprefix("www.")
+            and (a.path.rstrip("/") or "/") == (b.path.rstrip("/") or "/")
+            and a.query == b.query
+        )
+    except ValueError:
+        return False
+
+
+def registry_health_status(
+    registry_stale: bool, summary: Any, rows: Any, registered_sources: Any
+) -> str:
+    """Require a complete, identity-bound registry, not just coherent counters.
+
+    An attacker or partial run could omit failed sources, recompute the counters,
+    and produce a superficially healthy ledger. Compare every observation with
+    the versioned official-source roster, including identity and authority
+    metadata. Health-only: this never authorizes material publication.
+    """
+    if (not isinstance(summary, dict) or not isinstance(rows, list) or not rows
+            or not isinstance(registered_sources, list) or not registered_sources):
+        return "DEGRADED"
+    registered = {}
+    for source in registered_sources:
+        if not isinstance(source, dict) or not isinstance(source.get("id"), str):
+            return "DEGRADED"
+        source_id = source["id"]
+        if not source_id or source_id in registered:
+            return "DEGRADED"
+        registered[source_id] = source
+    observed_ids = set()
+    for row in rows:
+        if not isinstance(row, dict) or row.get("id") not in registered:
+            return "DEGRADED"
+        source_id = row["id"]
+        if source_id in observed_ids:
+            return "DEGRADED"
+        observed_ids.add(source_id)
+        expected = registered[source_id]
+        if (any(row.get(field) != expected.get(field)
+                for field in ("tier", "class", "url"))
+                or row.get("material_fact_use") is not bool(expected.get("material_fact_use"))):
+            return "DEGRADED"
+        # Health provenance is source-family bound. An otherwise complete
+        # counter ledger cannot substitute a different programme family.
+        if row.get("source_families") != list(expected.get("source_families") or []):
+            return "DEGRADED"
+        # A PASS label and coherent counters are not proof that an official
+        # document was successfully acquired. Refuse corrupted, challenge,
+        # missing-body and unbound-hash rows even if all sources say PASS.
+        if row.get("health") == "PASS":
+            allowed_transports = [expected.get("url"), *(expected.get("canonical_aliases") or [])]
+            if (
+                row.get("ok") is not True
+                or row.get("content_quality_ok") is not True
+                or row.get("quality_issue") is not None
+                or type(row.get("http_status")) is not int
+                or row["http_status"] != 200
+                or not isinstance(row.get("content_type"), str)
+                or row["content_type"].split(";", 1)[0].strip().casefold()
+                   not in {"text/html", "application/xhtml+xml", "application/pdf"}
+                or type(row.get("bytes")) is not int
+                or row["bytes"] <= 0
+                or type(row.get("semantic_bytes")) is not int
+                or row["semantic_bytes"] <= 0
+                or type(row.get("semantic_chars")) is not int
+                or row["semantic_chars"] <= 0
+                or row.get("selected_url") not in allowed_transports
+                or not same_official_endpoint(row.get("selected_url"), row.get("final_url"))
+                or not all(
+                    isinstance(row.get(key), str)
+                    and re.fullmatch(r"[0-9a-f]{64}", row[key])
+                    for key in ("raw_sha256", "semantic_sha256")
+                )
+            ):
+                return "DEGRADED"
+    if observed_ids != set(registered):
+        return "DEGRADED"
+    counts = {"PASS": 0, "DEGRADED": 0, "FAIL": 0}
+    quarantined = 0
+    for row in rows:
+        if not isinstance(row, dict) or row.get("health") not in counts:
+            return "DEGRADED"
+        counts[row["health"]] += 1
+        quarantined += bool(row.get("quarantined"))
+    expected = {
+        "total": len(rows),
+        "pass": counts["PASS"],
+        "degraded": counts["DEGRADED"],
+        "fail": counts["FAIL"],
+        "quarantined": quarantined,
+    }
+    if any(type(summary.get(key)) is not int or summary[key] != value
+           for key, value in expected.items()):
+        return "DEGRADED"
+    if registry_stale or counts["DEGRADED"] or counts["FAIL"] or quarantined:
+        return "DEGRADED"
+    return "PASS"
 
 
 def task_is_fail_closed(path: pathlib.Path) -> bool:
@@ -162,9 +302,22 @@ def main() -> int:
             "hash_changes": sum(bool(x.get("semantic_hash_changed")) for x in rows),
         }
     registry_summary = registry.get("summary") or {}
-    registry_health = "PASS"
-    if registry_stale or registry_summary.get("degraded") or registry_summary.get("fail"):
-        registry_health = "DEGRADED"
+    registered_sources = (load(ROOT / "ingest" / "source_registry.json", {}) or {}).get("sources")
+    registry_health = registry_health_status(
+        registry_stale, registry_summary, registry_rows, registered_sources
+    )
+    # Surface acquisition gaps explicitly: staged registry growth must not be
+    # confused with completed official-source monitoring or publication proof.
+    expected_ids = {
+        source["id"] for source in (registered_sources or [])
+        if isinstance(source, dict) and isinstance(source.get("id"), str)
+    }
+    observed_ids = {
+        source["id"] for source in registry_rows
+        if isinstance(source, dict) and isinstance(source.get("id"), str)
+    }
+    missing_observations = sorted(expected_ids - observed_ids)
+    unexpected_observations = sorted(observed_ids - expected_ids)
     if missing_registry_tasks or unsafe_registry_updates:
         registry_health = "FAIL_POLICY"
 
@@ -192,6 +345,7 @@ def main() -> int:
     mipe = load(INGEST_STATE / "mipe_state.json", {}) or {}
     mipe_last = mipe.get("lastRun") or {}
     mipe_status = mipe.get("status") or mipe_last.get("status") or "UNKNOWN"
+    mipe_health = mipe_health_status(mipe_status)
 
     mff = load(INGEST_STATE / "mff_2028_health.json", {}) or {}
     mff_rows = mff.get("sources") or []
@@ -229,7 +383,7 @@ def main() -> int:
         and pages_handoff_integrated
         and not duplicate_direct_handoffs
     )
-    scheduled_validation_configured = "schedule:" in validation_workflow_text and "45 * * * *" in validation_workflow_text
+    scheduled_validation_configured = "schedule:" in validation_workflow_text and "55 * * * *" in validation_workflow_text
     peo_candidate_state_only = (
         "peo_calendar_state.json" in peo_workflow_text
         and "git add partener-eu/web/peo-calendar.js" not in peo_workflow_text
@@ -273,6 +427,10 @@ def main() -> int:
             "stale_after_seconds": MAX_REGISTRY_AGE_SECONDS,
             "stale": registry_stale,
             "health": registry_health,
+            "registered_source_count": len(registered_sources) if isinstance(registered_sources, list) else None,
+            "observed_source_count": len(registry_rows),
+            "unobserved_registered_source_ids": missing_observations,
+            "unregistered_observed_source_ids": unexpected_observations,
             "summary": registry_summary,
             "tier_counts": tier_counts,
             "changed_source_ids": [x.get("id") for x in changed_rows],
@@ -314,8 +472,8 @@ def main() -> int:
             "candidate_count": mipe_last.get("candidateCount"),
             "parsed_relevant_count": mipe_last.get("parsedRelevantCount"),
             "published_item_count": mipe_last.get("publishedItemCount"),
-            "last_known_good_preserved": mipe_status == "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
-            "health": "DEGRADED_FAIL_CLOSED" if mipe_status == "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED" else "PASS",
+            "last_known_good_preserved": mipe_lkg_preserved(mipe_status),
+            "health": mipe_health,
         },
         "mff_2028_2034": {
             "observed_at": mff.get("observed_at"),
@@ -352,7 +510,7 @@ def main() -> int:
             "registry_hash_changes": len(changed_rows),
             "afir_hash_changes": len(afir_changed),
             "peo_calendar_changes": peo_change_count,
-            "mipe_health": "DEGRADED_FAIL_CLOSED" if mipe_status == "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED" else "PASS",
+            "mipe_health": mipe_health,
             "autonomous_orchestration_configured": workflow_run_integrated and scheduled_validation_configured and peo_candidate_state_only,
             "policy_errors": errors,
             "critical_policy_fail": bool(errors),

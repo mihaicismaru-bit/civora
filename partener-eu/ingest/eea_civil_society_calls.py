@@ -14,6 +14,7 @@ import datetime as dt
 import hashlib
 import json
 import re
+from zoneinfo import ZoneInfo
 from typing import Any, Iterable
 from urllib.parse import urlparse
 
@@ -76,13 +77,24 @@ def _official_call_url(value: Any) -> str | None:
     parsed = urlparse(url)
     host = (parsed.hostname or "").lower()
     path = parsed.path or ""
-    if parsed.scheme != "https" or host not in OFFICIAL_HOSTS:
+    if (
+        parsed.scheme != "https"
+        or host not in OFFICIAL_HOSTS
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.port not in (None, 443)
+        or parsed.params
+        or parsed.query
+        or parsed.fragment
+    ):
         return None
     prefix = next((candidate for candidate in CALL_PATH_PREFIXES if path.startswith(candidate)), None)
     if not prefix:
         return None
     slug = path[len(prefix):].strip("/")
-    if not slug:
+    # Exact article identity: reject nested/encoded paths and unregistered
+    # endpoint suffixes instead of treating them as the verified call page.
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*", slug):
         return None
     return url
 
@@ -132,6 +144,38 @@ def _observation_state(
     return "UNKNOWN"
 
 
+def _open_conflicts_with_elapsed_deadline(record: dict[str, Any], fetched_at: str) -> bool:
+    """A legacy official OPEN badge cannot override its elapsed deadline.
+
+    Detail pages display DD/MM/YYYY without a cutoff hour. The official
+    programme call index explicitly fixes 08/10/2026 at 16:00 Bucharest time;
+    only that source-bound deadline may use an exact hour. Other date-only
+    same-day observations are UNKNOWN, never assumed open until midnight.
+    Unparseable dates/timestamps cannot establish OPEN.
+    """
+    deadline_text = _text(_first(record, "submissionDeadline", "submission_deadline", "deadline"))
+    if not deadline_text:
+        return False
+    try:
+        deadline = dt.datetime.strptime(deadline_text, "%d/%m/%Y").date()
+        observed = dt.datetime.fromisoformat(fetched_at.replace("Z", "+00:00"))
+        if observed.tzinfo is None:
+            return True
+        # Official programme index: https://eeagrants.org/en/eea-civil-society-fund-romania/calls
+        # Seven 2026 calls closed on 08/10/2026 at 16:00 Europe/Bucharest.
+        # This fixed historical cutoff must not be projected onto later calls.
+        bucharest = ZoneInfo("Europe/Bucharest")
+        local_observed = observed.astimezone(bucharest)
+        if deadline == dt.date(2026, 10, 8):
+            exact_cutoff = dt.datetime(2026, 10, 8, 16, 0, tzinfo=bucharest)
+            return local_observed >= exact_cutoff
+        # Any other date-only deadline lacks a proven official cutoff hour:
+        # same-day OPEN badges cannot certify remaining submission time.
+        return local_observed.date() >= deadline
+    except (ValueError, TypeError, AttributeError):
+        return True
+
+
 def _semantic_fields(record: dict[str, Any], call_identifier: str, authority_url: str | None,
                      status_label: str | None) -> dict[str, Any]:
     return {
@@ -164,6 +208,15 @@ def normalize_record(
         return None
     authority_url = _official_call_url(_first(record, "authorityUrl", "authority_url", "url"))
     verified = authority_url in set(verified_authority_urls) if authority_url else False
+    # When the official slug itself embeds a call number, a record claiming a
+    # different number is not exact-call evidence, even after URL readback.
+    # Historical unnumbered canonical slugs remain valid, but require the
+    # independent downstream semantic reconciliation as before.
+    if verified:
+        slug = urlparse(authority_url).path.rstrip("/").rsplit("/", 1)[-1]
+        path_call_number = re.match(r"call-(\d+)-", slug, flags=re.IGNORECASE)
+        if path_call_number and int(path_call_number.group(1)) != int(call_number):
+            verified = False
     status_label = _status_label(record)
     observation_state = _observation_state(
         record,
@@ -172,6 +225,10 @@ def normalize_record(
         authority_url_verified=verified,
         status_label=status_label,
     )
+    # An elapsed official deadline contradicts OPEN, but is not independent
+    # evidence of CLOSED. Preserve the source as UNKNOWN for reconciliation.
+    if observation_state == "OPEN_CALL" and _open_conflicts_with_elapsed_deadline(record, fetched_at):
+        observation_state = "UNKNOWN"
     semantic = _semantic_fields(record, call_identifier, authority_url, status_label)
     return {
         "schema": "PARTENER_EU_EEA_CSF_CALL_EVIDENCE_V1",

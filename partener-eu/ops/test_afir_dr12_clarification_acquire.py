@@ -1,0 +1,253 @@
+#!/usr/bin/env python3
+"""Hermetic DR-12 dated clarification acquisition and replay; no publication."""
+import copy
+import hashlib
+import importlib.util
+import json
+import sys
+import tempfile
+import urllib.parse
+from pathlib import Path
+from unittest.mock import patch
+
+INGEST = Path(__file__).resolve().parents[1] / "ingest"
+spec = importlib.util.spec_from_file_location("dr12_note", INGEST / "afir_dr12_clarification_acquire.py")
+assert spec and spec.loader
+note = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(note)
+
+URL = "https://stportalafirprod.blob.core.windows.net/media/media/nzghktz5/nota-clarificare-dr12_06112026.pdf"
+PDF = b"%PDF-1.7\n1 0 obj\n<</Type/Catalog>>\nendobj\n%%EOF\n"
+PROXY = "/api/file/document?" + urllib.parse.urlencode({
+    "filename": note.LINK_LABEL, "filetype": "pdf",
+    "url": "/media/nzghktz5/nota-clarificare-dr12_06112026.pdf",
+})
+
+
+def html(href=PROXY, label=None):
+    return ("<html><h1>DR 12</h1><a href=\"" + href.replace("&", "&amp;") + "\">"
+            + (note.LINK_LABEL if label is None else label) + "</a></html>").encode("utf-8")
+
+
+def refused(fn, marker=None):
+    try:
+        fn()
+    except (ValueError, KeyError, TypeError) as exc:
+        if marker:
+            assert marker in str(exc), str(exc)
+    else:
+        raise AssertionError("Unsafe DR-12 evidence admitted")
+
+
+def test_delegation():
+    assert note.delegated_url(html()) == URL
+    for bad in (
+        b"<html>DR-12 notice without link</html>",
+        html() + html(),
+        html(label="Clarificare DR-12"),
+        html(href="https://evil.example/api/file/document?" + PROXY.split("?")[1]),
+        html(href=PROXY + "&filetype=html"),
+        html(href=PROXY.replace("06112026", "05112026")),
+        html(href=PROXY.replace("%2Fmedia%2F", "%2Fexternal%2F")),
+        html(href=PROXY.replace("filetype=pdf", "filetype=html")),
+    ):
+        refused(lambda bad=bad: note.delegated_url(bad))
+    refused(lambda: note.validate_pdf(b"<html>login</html>"))
+    refused(lambda: note.validate_pdf(b"%PDF-1.7 only header"))
+
+
+
+def test_visibility_delegation():
+    """A hidden or fabricated index link is not authority for a PDF."""
+    link = ('<a href="' + PROXY.replace("&", "&amp;") + '">'
+            + note.LINK_LABEL + '</a>')
+    for wrapper in (
+        '<div hidden>{}</div>',
+        '<section aria-hidden="true">{}</section>',
+        '<div style="display:none!important">{}</div>',
+        '<div style="visibility:hidden">{}</div>',
+        '<span class="visually-hidden">{}</span>',
+        '<template>{}</template>',
+        '<dialog>{}</dialog>',
+        '<div inert>{}</div>',
+        '<details>{}</details>',
+        '<div hidden/>{}</div>',
+        '<script>{}</script>',
+    ):
+        hidden_link = ('<html><h1>DR 12</h1>' + wrapper.format(link) + '</html>').encode()
+        refused(lambda hidden_link=hidden_link: note.delegated_url(hidden_link),
+                "official link missing")
+    # Hidden impostors must not override a real visible link.
+    assert note.delegated_url(('<div hidden>' + link + '</div>' + link).encode()) == URL
+    refused(lambda: note.delegated_url((link + link).encode()), "ambiguous")
+    refused(lambda: note.delegated_url(
+        ('<a href="' + PROXY.replace("&", "&amp;")
+         + '" href="https://evil.example/">' + note.LINK_LABEL + '</a>').encode()
+    ), "official link missing")
+    refused(lambda: note.delegated_url(
+        ('<a href="' + PROXY.replace("&", "&amp;")
+         + '"><span hidden>' + note.LINK_LABEL + '</span></a>').encode()
+    ), "official link missing")
+    # Truly self-closing SVG and void HTML do not hide subsequent visible text.
+    assert note.delegated_url(('<svg/><br/>' + link).encode()) == URL
+    assert note.delegated_url(('<div><span>Header</span></div>' + link).encode()) == URL
+
+
+def test_transport():
+    class Response:
+        status = 200
+        def __init__(self, url, content, *, kind, encoding="identity", length=None):
+            self._url, self._content, self.reads = url, content, 0
+            self.headers = {
+                "Content-Type": "text/html" if kind == "index" else "application/pdf",
+                "Content-Encoding": encoding,
+                "Content-Length": str(len(content) if length is None else length),
+            }
+
+        def geturl(self):
+            return self._url
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self, n):
+            self.reads += 1
+            return self._content[:n]
+
+    class Opener:
+        def __init__(self, response):
+            self.response = response
+
+        def open(self, request, timeout):
+            return self.response
+
+    def fetch(r, kind, url):
+        with patch.object(note.urllib.request, "build_opener", return_value=Opener(r)):
+            return note.acquire_exact(url, kind, authorized_pdf=URL)
+
+    a = Response(note.INDEX_URL, html(), kind="index")
+    assert fetch(a, "index", note.INDEX_URL)[0] == html()
+    p = Response(URL, PDF, kind="pdf")
+    assert fetch(p, "pdf", URL)[0] == PDF
+    # A common Azure blob default is octet-stream, but the PDF signature
+    # and final EOF marker remain compulsory on this allowed binary type.
+    p.headers["Content-Type"] = "application/octet-stream"
+    assert fetch(p, "pdf", URL)[0] == PDF
+    a.headers["Content-Type"] = "application/xhtml+xml; charset=utf-8"
+    assert fetch(a, "index", note.INDEX_URL)[0] == html()
+    # MIME parameters or lookalike types never establish official provenance.
+    for kind, url, raw, spoofed_types in (
+        ("index", note.INDEX_URL, html(), (
+            "text/html-fake", "text/plain; note=text/html",
+            "application/json; foo=text/html", "application/xhtml+xml-fake", "")),
+        ("pdf", URL, PDF, (
+            "application/pdf-fake", "text/html", "application/json; name=application/pdf",
+            "text/plain; filetype=pdf", "application/x-pdf-html", "")),
+    ):
+        for spoof in spoofed_types:
+            response = Response(url, raw, kind=kind)
+            response.headers["Content-Type"] = spoof
+            refused(lambda response=response, kind=kind, url=url:
+                    fetch(response, kind, url), "MIME")
+            assert response.reads == 0
+    refused(lambda: note.acquire_exact(URL, "pdf", authorized_pdf="https://example.com"))
+    for r in (Response(URL, PDF, kind="pdf", encoding="gzip"),
+              Response(URL, PDF, kind="pdf", length=len(PDF) + 2)):
+        refused(lambda r=r: fetch(r, "pdf", URL))
+    r = Response(URL, b"<html>access denied</html>", kind="pdf")
+    refused(lambda: fetch(r, "pdf", URL))
+
+
+def test_capture_replay():
+    def fake_download(url, kind, *, authorized_pdf=None):
+        if kind == "index":
+            assert url == note.INDEX_URL
+            return html(), "text/html; charset=utf-8"
+        assert kind == "pdf" and url == authorized_pdf == URL
+        return PDF, "application/pdf"
+
+    with tempfile.TemporaryDirectory() as tmp:
+        target = Path(tmp) / "capture"
+        with patch.object(note, "acquire_exact", side_effect=fake_download):
+            assert note.run(target, "42299999999", "2026-11-06T18:30:00Z") == 0
+        record = note.replay(target)
+        assert record["document"]["sha256"] == hashlib.sha256(PDF).hexdigest()
+        assert not any(record[k] for k in ("call_status_authorized", "eligibility_authorized",
+                                           "publish_authorized", "distribution_authorized"))
+        original = (target / "manifest.json").read_bytes()
+        assert record["parser_version"] == note.VERSION
+        assert note.VERSION.endswith("-v3")
+        # Historical immutable v1 receipts remain replayable under the newer,
+        # stricter content-type gate; their parser label is not rewritten.
+        historical = copy.deepcopy(record)
+        historical["parser_version"] = "afir-dr12-clarification-original-v1"
+        (target / "manifest.json").write_text(json.dumps(historical), encoding="utf-8")
+        assert note.replay(target)["parser_version"] == "afir-dr12-clarification-original-v1"
+        historical["parser_version"] = "afir-dr12-clarification-original-v2"
+        (target / "manifest.json").write_text(json.dumps(historical), encoding="utf-8")
+        assert note.replay(target)["parser_version"] == "afir-dr12-clarification-original-v2"
+        (target / "manifest.json").write_bytes(original)
+        for document, mime in (
+            ("index", "text/html-fake"),
+            ("index", "text/plain; note=text/html"),
+            ("document", "application/pdf-fake"),
+            ("document", "application/json; note=application/pdf"),
+            ("document", "text/html"),
+        ):
+            altered = copy.deepcopy(record)
+            altered[document]["content_type"] = mime
+            (target / "manifest.json").write_text(json.dumps(altered), encoding="utf-8")
+            refused(lambda: note.replay(target), "MIME")
+        (target / "manifest.json").write_bytes(original)
+        for k, value in (
+            ("status", "OPEN_CALL"),
+            ("source_url", "https://evil.example"),
+            ("parser_version", "other"),
+            ("run_id", ""),
+            ("eligibility_authorized", True),
+            ("publish_authorized", True),
+            ("distribution_authorized", True),
+            ("fetched_at", "2026-11-06T18:30:00"),
+        ):
+            altered = copy.deepcopy(record)
+            altered[k] = value
+            (target / "manifest.json").write_text(json.dumps(altered), encoding="utf-8")
+            refused(lambda: note.replay(target))
+        altered = copy.deepcopy(record)
+        altered["document"]["sha256"] = "0" * 64
+        (target / "manifest.json").write_text(json.dumps(altered), encoding="utf-8")
+        refused(lambda: note.replay(target))
+        altered = copy.deepcopy(record)
+        altered["open_call_status"] = "OPEN_CALL"
+        (target / "manifest.json").write_text(json.dumps(altered), encoding="utf-8")
+        refused(lambda: note.replay(target))
+        (target / "manifest.json").write_bytes(
+            original.replace(b'"schema":', b'"schema":"OPEN_CALL","schema":', 1))
+        refused(lambda: note.replay(target), "Duplicate")
+        (target / "manifest.json").write_bytes(original)
+        (target / "clarification.raw.pdf").write_bytes(PDF + b"corruption")
+        refused(lambda: note.replay(target), "integrity")
+        (target / "clarification.raw.pdf").write_bytes(PDF)
+        (target / "unauthorized.txt").write_text("OPEN_CALL")
+        refused(lambda: note.replay(target), "contaminated")
+        (target / "unauthorized.txt").unlink()
+        assert note.replay(target) == record
+
+        failed = Path(tmp) / "failed"
+        with patch.object(note, "acquire_exact", side_effect=ValueError("HTTP access denied")):
+            assert note.run(failed, "42299999998", "2026-11-06T18:35:00Z") == 2
+        assert json.loads((failed / "manifest.json").read_text())["status"] == "RAW_FETCH_FAILED"
+        assert not (failed / "clarification.raw.pdf").exists()
+        refused(lambda: note.replay(failed))
+        refused(lambda: note.run(target, "999", "2026-11-06T18:40:00Z"), "exists")
+
+
+if __name__ == "__main__":
+    test_delegation()
+    test_visibility_delegation()
+    test_transport()
+    test_capture_replay()
+    print("DR-12 clarification: hermetic acquisition, delegation and replay checks passed")

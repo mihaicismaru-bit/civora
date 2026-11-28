@@ -11,6 +11,8 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import hashlib
+import html
+import io
 import json
 import pathlib
 import re
@@ -25,6 +27,17 @@ DEFAULT_BASE_URL = "https://partener.eu/"
 DEFAULT_MANIFEST = "partener-eu/web/static-public-manifest.json"
 DEFAULT_OUTPUT = "/tmp/partener-pages-readback.json"
 CARD_RE = re.compile(r"\bdata-dossier-id\s*=\s*[\"']", re.IGNORECASE)
+MAX_READBACK_BYTES = 8_000_000
+
+OPEN_CARD_RE = re.compile(
+    r"""<article\b(?=[^>]*\bdata-dossier-id\s*=\s*["'][^"']+["'])[^>]*>.*?</article>""",
+    re.IGNORECASE | re.DOTALL,
+)
+OPEN_TERM_RE = re.compile(
+    r"""<span[^>]*>\s*<b>\s*Termen:\s*</b>\s*([^<]+?)\s*</span>""",
+    re.IGNORECASE | re.DOTALL,
+)
+OPEN_BADGE_RE = re.compile(r"""class=["']status\s+status-open["']""", re.IGNORECASE)
 
 
 def canonical_bytes(value: Any) -> bytes:
@@ -42,6 +55,21 @@ def cache_busted(url: str, token: str) -> str:
     return urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, urllib.parse.urlencode(query), parts.fragment))
 
 
+class NoPublicReadbackRedirect(urllib.request.HTTPRedirectHandler):
+    """Never follow redirects: inspect neither an untrusted host nor stale routes."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise ValueError("Public readback redirects are not proof of the exact HTTPS route")
+
+
+def bounded_read(response: Any, limit: int = MAX_READBACK_BYTES) -> bytes:
+    """Accept only bounded, nonempty receipts before parsing public HTML/JSON."""
+    raw = response.read(limit + 1)
+    if not raw or len(raw) > limit:
+        raise ValueError("Public readback response is empty or exceeds the byte limit")
+    return raw
+
+
 def fetch_bytes(url: str, *, timeout: float, token: str) -> tuple[int, bytes, str]:
     target = cache_busted(url, token)
     req = urllib.request.Request(
@@ -54,8 +82,41 @@ def fetch_bytes(url: str, *, timeout: float, token: str) -> tuple[int, bytes, st
         },
         method="GET",
     )
-    with urllib.request.urlopen(req, timeout=timeout) as response:
-        return int(getattr(response, "status", 200)), response.read(), response.geturl()
+    # The default urlopen() redirect handler follows the redirect *before*
+    # readback_target_is_trusted() can reject it. Refuse at transport boundary.
+    opener = urllib.request.build_opener(NoPublicReadbackRedirect())
+    with opener.open(req, timeout=timeout) as response:
+        resolved = response.geturl()
+        if not readback_target_is_trusted(target, resolved):
+            raise ValueError("Public readback must use the exact HTTPS route and cache-busting query")
+        return int(getattr(response, "status", 200)), bounded_read(response), resolved
+
+
+def readback_target_is_trusted(requested_url: str, resolved_url: str) -> bool:
+    """Require the exact HTTPS origin, route and cache-busting query after redirects.
+
+    A same-count manifest from a redirected route/host is not evidence that the
+    intended PARTENER.EU production page has actually been deployed.
+    """
+    try:
+        requested = urllib.parse.urlsplit(requested_url)
+        resolved = urllib.parse.urlsplit(resolved_url)
+        return (
+            requested.scheme.lower() == resolved.scheme.lower() == "https"
+            and requested.hostname is not None
+            and requested.hostname.lower() == (resolved.hostname or "").lower()
+            and requested.netloc.lower() == resolved.netloc.lower()
+            and requested.username is None
+            and requested.password is None
+            and resolved.username is None
+            and resolved.password is None
+            and requested.path.rstrip("/") == resolved.path.rstrip("/")
+            and requested.fragment == resolved.fragment == ""
+            and sorted(urllib.parse.parse_qsl(requested.query, keep_blank_values=True))
+                == sorted(urllib.parse.parse_qsl(resolved.query, keep_blank_values=True))
+        )
+    except ValueError:
+        return False
 
 
 def parse_json_bytes(raw: bytes) -> Any:
@@ -64,6 +125,46 @@ def parse_json_bytes(raw: bytes) -> Any:
 
 def count_cards(raw: bytes) -> int:
     return len(CARD_RE.findall(raw.decode("utf-8", "replace")))
+
+
+def open_semantics_ok(
+    raw: bytes,
+    evaluated_at: dt.datetime | None = None,
+    *,
+    require_all_open: bool = True,
+) -> bool:
+    """Reject expired OPEN cards even if the deployed manifest matches.
+
+    For the mixed /dosare/ catalogue, non-OPEN cards are permitted, but each
+    advertised OPEN card still needs a precise, future official deadline.
+
+    A source artifact's generatedAt is provenance, not a live evaluation clock.
+    """
+    from build_public_static_pages import parse_date
+
+    clock = evaluated_at if evaluated_at is not None else dt.datetime.now(dt.timezone.utc)
+    if clock.tzinfo is None or clock.utcoffset() is None:
+        return False
+    clock = clock.astimezone(dt.timezone.utc)
+    cards = OPEN_CARD_RE.findall(raw.decode("utf-8", "replace"))
+    if len(cards) != count_cards(raw):
+        return False
+    for card in cards:
+        if not OPEN_BADGE_RE.search(card):
+            if require_all_open:
+                return False
+            continue
+        terms = OPEN_TERM_RE.findall(card)
+        if len(terms) != 1:
+            return False
+        term = html.unescape(terms[0]).strip()
+        # Date-only dates cannot authorize precise current OPEN availability.
+        if not re.search(r"\d{1,2}[:.]\d{2}", term):
+            return False
+        closes = parse_date(term)
+        if closes is None or closes <= clock:
+            return False
+    return True
 
 
 def consultation_semantics_ok(raw: bytes) -> bool:
@@ -104,8 +205,54 @@ def self_test() -> int:
     assert count_cards(b"<article></article>") == 0
     assert consultation_semantics_ok(b"<article><b>Termen:</b> 29 septembrie 2026</article>")
     assert not consultation_semantics_ok(b"<article><b>Termen:</b> Neconfirmat</article>")
+    # ADR Centru 1.2.2: 6 November 2026 12:00 Bucharest == 10:00 UTC.
+    cluster = (b'<article class="staticCard" data-dossier-id="cluster">'
+               b'<span class="status status-open">DESCHIS</span>'
+               b'<span><b>Termen:</b> 2026-11-06T12:00:00+02:00</span>'
+               b'</article>')
+    before = dt.datetime(2026, 11, 6, 9, 59, 59, tzinfo=dt.timezone.utc)
+    cutoff = dt.datetime(2026, 11, 6, 10, 0, 0, tzinfo=dt.timezone.utc)
+    assert open_semantics_ok(cluster, before)
+    assert not open_semantics_ok(cluster, cutoff)
+    assert not open_semantics_ok(cluster, dt.datetime(2026, 11, 16, tzinfo=dt.timezone.utc))
+    assert not open_semantics_ok(cluster.replace(b"2026-11-06T12:00:00+02:00", b"6 noiembrie 2026"), before)
+    assert not open_semantics_ok(cluster.replace(b"<b>Termen:</b>", b"<b>Grant:</b>"), before)
+    assert not open_semantics_ok(cluster.replace(b"status-open", b"status-review"), before)
+    # P0 #1404: the all-dossiers listing is mixed; an expired OPEN card must
+    # fail even when its manifest and card count match a successful deployment.
+    review = (b'<article class="staticCard" data-dossier-id="review">'
+              b'<span class="status status-review">IN VERIFICARE</span></article>')
+    assert open_semantics_ok(review, before, require_all_open=False)
+    assert open_semantics_ok(cluster + review, before, require_all_open=False)
+    assert not open_semantics_ok(cluster + review, cutoff, require_all_open=False)
+    assert not open_semantics_ok(cluster + review, before, require_all_open=True)
     busted = cache_busted("https://partener.eu/consultari/?x=1", "abc")
     assert "x=1" in busted and "partener_readback=abc" in busted
+    assert readback_target_is_trusted(busted, busted)
+    assert bounded_read(io.BytesIO(b"ok"), 2) == b"ok"
+    for unsafe in (io.BytesIO(b""), io.BytesIO(b"toolong")):
+        try:
+            bounded_read(unsafe, 2)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Empty/oversized public readback was accepted")
+    try:
+        NoPublicReadbackRedirect().redirect_request(
+            None, None, 302, "Found", {}, "https://untrusted.example/steal"
+        )
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("Public readback followed a redirect before validating it")
+    assert readback_target_is_trusted(
+        busted, "https://partener.eu/consultari/?partener_readback=abc&x=1"
+    )
+    assert not readback_target_is_trusted(busted, "https://partener.eu/consultari/?x=1")
+    assert not readback_target_is_trusted(busted, "https://www.partener.eu/consultari/?x=1&partener_readback=abc")
+    assert not readback_target_is_trusted(busted, "http://partener.eu/consultari/?x=1&partener_readback=abc")
+    assert not readback_target_is_trusted(busted, "https://partener.eu/finantari/deschise/?x=1&partener_readback=abc")
+    assert not readback_target_is_trusted(busted, "https://attacker@partener.eu/consultari/?x=1&partener_readback=abc")
     print("PASS public deploy readback proof self-test")
     return 0
 
@@ -132,9 +279,10 @@ def main() -> int:
         "finantari/deschise/": int(expected.get("currentOpen", -1)),
         "finantari/in-pregatire/": int(expected.get("prepare", -1)),
         "consultari/": int(expected.get("consultations", -1)),
+        "dosare/": int(expected.get("publishableDossiers", -1)),
     }
     if any(value < 0 for value in required_counts.values()):
-        raise SystemExit("Manifest missing one of currentOpen/prepare/consultations")
+        raise SystemExit("Manifest missing currentOpen/prepare/consultations/publishableDossiers")
 
     base_url = args.base_url.rstrip("/") + "/"
     manifest_url = urllib.parse.urljoin(base_url, "static-public-manifest.json")
@@ -174,8 +322,12 @@ def main() -> int:
                 r_code, r_raw, r_resolved = fetch_bytes(route_url, timeout=args.timeout_seconds, token=token)
                 observed_count = count_cards(r_raw)
                 semantic_ok = True
-                if route == "consultari/":
+                if route == "finantari/deschise/":
+                    semantic_ok = open_semantics_ok(r_raw)
+                elif route == "consultari/":
                     semantic_ok = consultation_semantics_ok(r_raw)
+                elif route == "dosare/":
+                    semantic_ok = open_semantics_ok(r_raw, require_all_open=False)
                 route_ok = r_code == 200 and observed_count == expected_count and semantic_ok
                 route_results[route] = {
                     "http_status": r_code,
@@ -210,6 +362,7 @@ def main() -> int:
             "currentOpen": expected.get("currentOpen"),
             "prepare": expected.get("prepare"),
             "consultations": expected.get("consultations"),
+            "publishableDossiers": expected.get("publishableDossiers"),
         },
         "observed_counts": {
             route: details.get("observed_cards") for route, details in final_routes.items()

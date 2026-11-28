@@ -56,9 +56,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout exact PR/push head
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+      - name: Assert exact checkout head before any MIPE replay
+        shell: bash
+        env:
+          EXPECTED_HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_HEAD_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_HEAD_SHA" = "$EXPECTED_HEAD_SHA" || {
+            echo "::error::MIPE QA checkout drift: expected $EXPECTED_HEAD_SHA got $ACTUAL_HEAD_SHA"
+            exit 2
+          }
+          echo "Exact MIPE QA head verified: $ACTUAL_HEAD_SHA"
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
@@ -131,12 +146,15 @@ jobs:
 
       - name: Build evidence receipt
         if: always()
+        env:
+          EXPECTED_HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: |
           python - <<'PY'
           import datetime as dt
           import hashlib
           import json
           import os
+          import subprocess
           from pathlib import Path
 
           root=Path('.')
@@ -146,11 +164,17 @@ jobs:
           except Exception:
               audit={}
           resilient=root/'partener-eu/ingest/mipe_resilient_ingest.py'
+          actual_head=subprocess.run(['git','rev-parse','HEAD'],capture_output=True,text=True,check=False)
+          actual_sha=actual_head.stdout.strip() if actual_head.returncode == 0 else None
+          expected_sha=os.environ.get('EXPECTED_HEAD_SHA')
           receipt={
               'schema':'PARTENER_MIPE_FINAL_CLEANUP_PROOF_V1',
               'status':'EVIDENCE_CAPTURED',
               'capturedAt':dt.datetime.now(dt.timezone.utc).isoformat(),
-              'gitSha':os.environ.get('GITHUB_SHA'),
+              'gitSha':actual_sha,
+              'eventSha':os.environ.get('GITHUB_SHA'),
+              'expectedHeadSha':expected_sha,
+              'checkoutMatchesExpectedHead':bool(actual_sha and expected_sha and actual_sha == expected_sha),
               'runId':os.environ.get('GITHUB_RUN_ID'),
               'runAttempt':os.environ.get('GITHUB_RUN_ATTEMPT'),
               'auditSummary':audit.get('summary'),

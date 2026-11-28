@@ -16,6 +16,7 @@ Both paths are fail-closed and require the canonical reporting host.
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,7 @@ STATE_PATH = ROOT / "partener-eu" / "ingest" / "state" / "mipe_state.json"
 OUTPUT_PATH = ROOT / "partener-eu" / "web" / "mysmis-registry.js"
 OFFICIAL_HOST = "reporting.mysmis2021.gov.ro"
 DEFAULT_URL = "https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027"
+MYSMIS_FRESHNESS_SLA = dt.timedelta(hours=8)
 
 
 def load_state() -> dict[str, Any]:
@@ -39,8 +41,41 @@ def load_state() -> dict[str, Any]:
 
 
 def official_reporting_url(value: str) -> bool:
-    parsed = urlparse(value)
-    return parsed.scheme == "https" and (parsed.hostname or "").lower() == OFFICIAL_HOST
+    try:
+        parsed = urlparse(value)
+        return (
+            parsed.scheme == "https"
+            and (parsed.hostname or "").lower() == OFFICIAL_HOST
+            and parsed.port in (None, 443)
+            and not parsed.username
+            and not parsed.password
+            and parsed.path.rstrip("/") == urlparse(DEFAULT_URL).path
+            and not parsed.query
+            and not parsed.fragment
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def parse_observed_at(value: Any) -> dt.datetime | None:
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        observed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if observed.tzinfo is None:
+        return None
+    return observed.astimezone(dt.timezone.utc)
+
+
+def fresh_observation(value: Any, reference_time: dt.datetime | None = None) -> bool:
+    observed = parse_observed_at(value)
+    now = reference_time or dt.datetime.now(dt.timezone.utc)
+    if observed is None or now.tzinfo is None:
+        return False
+    age = now.astimezone(dt.timezone.utc) - observed
+    return dt.timedelta(0) <= age <= MYSMIS_FRESHNESS_SLA
 
 
 def clean_call(row: dict[str, Any]) -> dict[str, str] | None:
@@ -63,7 +98,10 @@ def clean_call(row: dict[str, Any]) -> dict[str, str] | None:
     }
 
 
-def current_item_snapshot(state: dict[str, Any]) -> dict[str, Any] | None:
+def current_item_snapshot(
+    state: dict[str, Any], reference_time: dt.datetime | None = None
+) -> dict[str, Any] | None:
+    candidates: list[tuple[dt.datetime, dict[str, Any]]] = []
     for item in state.get("items") or []:
         if not isinstance(item, dict):
             continue
@@ -72,33 +110,47 @@ def current_item_snapshot(state: dict[str, Any]) -> dict[str, Any] | None:
             continue
         verification = str(item.get("verification") or "")
         transport = str(item.get("retrievalTransport") or "")
-        directly_verified = verification == "CANONICAL_OFFICIAL_FETCH" or transport.startswith("direct")
-        snapshot = item.get("registrySnapshot")
-        if not directly_verified or not isinstance(snapshot, dict) or not snapshot:
+        # Both proofs are required. A transport string alone is not a
+        # canonical official fetch; neither is a bare verification marker.
+        if verification != "CANONICAL_OFFICIAL_FETCH" or not transport.startswith("direct"):
             continue
-        rows = list(snapshot.values())
-        return {
+        snapshot = item.get("registrySnapshot")
+        observed_at = str(item.get("observedAt") or "")
+        observed = parse_observed_at(observed_at)
+        if not isinstance(snapshot, dict) or not snapshot or not fresh_observation(observed_at, reference_time):
+            continue
+        candidates.append((observed, {
             "status": "OK",
             "directOnly": True,
             "canonicalUrl": canonical_url,
-            "observedAt": str(item.get("observedAt") or item.get("date") or ""),
+            "observedAt": observed_at,
             "title": "Finanțări programe 2021-2027",
             "validatedCallCount": item.get("validatedCallCount"),
             "paginationText": str(item.get("paginationText") or ""),
             "explicitStatuses": item.get("explicitStatuses") or [],
-            "calls": rows,
+            "calls": list(snapshot.values()),
             "sourceItemId": str(item.get("id") or ""),
-        }
-    return None
+        }))
+    # A historical LKG may remain in state; never make the first stale row
+    # authoritative when a later, directly verified observation exists.
+    return max(candidates, key=lambda row: row[0])[1] if candidates else None
 
 
-def legacy_run_snapshot(state: dict[str, Any]) -> dict[str, Any] | None:
+def legacy_run_snapshot(
+    state: dict[str, Any], reference_time: dt.datetime | None = None
+) -> dict[str, Any] | None:
     run = state.get("lastRun") if isinstance(state.get("lastRun"), dict) else {}
     snapshot = run.get("registrySnapshot") if isinstance(run.get("registrySnapshot"), dict) else None
     if not snapshot:
         return None
     canonical_url = str(snapshot.get("canonicalUrl") or DEFAULT_URL).strip()
-    if snapshot.get("status") != "OK" or snapshot.get("directOnly") is not True or not official_reporting_url(canonical_url):
+    observed_at = str(snapshot.get("observedAt") or run.get("observedAt") or "")
+    if (
+        snapshot.get("status") != "OK"
+        or snapshot.get("directOnly") is not True
+        or not official_reporting_url(canonical_url)
+        or not fresh_observation(observed_at, reference_time)
+    ):
         return None
     calls = snapshot.get("calls")
     if not isinstance(calls, list) or not calls:
@@ -106,13 +158,14 @@ def legacy_run_snapshot(state: dict[str, Any]) -> dict[str, Any] | None:
     return {
         **snapshot,
         "canonicalUrl": canonical_url,
-        "observedAt": str(snapshot.get("observedAt") or run.get("observedAt") or ""),
+        "observedAt": observed_at,
     }
 
 
-def extract_snapshot(state: dict[str, Any]) -> dict[str, Any] | None:
-    return current_item_snapshot(state) or legacy_run_snapshot(state)
-
+def extract_snapshot(
+    state: dict[str, Any], reference_time: dt.datetime | None = None
+) -> dict[str, Any] | None:
+    return current_item_snapshot(state, reference_time) or legacy_run_snapshot(state, reference_time)
 
 def main() -> int:
     state = load_state()

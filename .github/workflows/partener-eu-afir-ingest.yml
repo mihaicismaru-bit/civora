@@ -3,11 +3,27 @@ name: PARTENER.EU AFIR Ingestion
 on:
   workflow_dispatch:
   schedule:
-    - cron: '55 5,15 * * *'
+    - cron: '30 * * * *'
   push:
     branches: [main]
     paths:
       - 'partener-eu/ingest/afir_ingest.py'
+      - 'partener-eu/ingest/afir_selection_results_acquire.py'
+      - 'partener-eu/ingest/afir_dr12_quality_watch.py'
+      - 'partener-eu/ingest/afir_dr12_clarification_acquire.py'
+      - 'partener-eu/ingest/afir_dr12_exhaustion_acquire.py'
+      - 'partener-eu/ops/test_afir_dr12_exhaustion_acquire.py'
+      - 'partener-eu/ingest/afir_counter_pair_watch.py'
+      - 'partener-eu/ingest/afir_dr14_dr18_extension_acquire.py'
+      - 'partener-eu/ops/test_afir_dr12_quality_watch.py'
+      - 'partener-eu/ops/test_afir_dr12_clarification_acquire.py'
+      - 'partener-eu/ops/test_afir_counter_pair_watch.py'
+      - 'partener-eu/ops/test_afir_dr14_dr18_extension_acquire.py'
+      - 'partener-eu/ops/test_afir_selection_results_acquire.py'
+      - 'partener-eu/ops/test_afir_solar_aggregate_observation.py'
+      - 'partener-eu/ops/afir_solar_raw_replay.py'
+      - 'partener-eu/ops/test_afir_solar_raw_replay.py'
+      - 'partener-eu/validation/afir-solar-3-2026-aggregate-observation.json'
       - 'partener-eu/ingest/build_afir_live_funds.py'
       - 'partener-eu/ingest/build_afir_material_resolution_queue.py'
       - 'partener-eu/ingest/build_decision_products.py'
@@ -30,6 +46,22 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/afir_ingest.py'
+      - 'partener-eu/ingest/afir_selection_results_acquire.py'
+      - 'partener-eu/ingest/afir_dr12_quality_watch.py'
+      - 'partener-eu/ingest/afir_dr12_clarification_acquire.py'
+      - 'partener-eu/ingest/afir_dr12_exhaustion_acquire.py'
+      - 'partener-eu/ops/test_afir_dr12_exhaustion_acquire.py'
+      - 'partener-eu/ingest/afir_counter_pair_watch.py'
+      - 'partener-eu/ingest/afir_dr14_dr18_extension_acquire.py'
+      - 'partener-eu/ops/test_afir_dr12_quality_watch.py'
+      - 'partener-eu/ops/test_afir_dr12_clarification_acquire.py'
+      - 'partener-eu/ops/test_afir_counter_pair_watch.py'
+      - 'partener-eu/ops/test_afir_dr14_dr18_extension_acquire.py'
+      - 'partener-eu/ops/test_afir_selection_results_acquire.py'
+      - 'partener-eu/ops/test_afir_solar_aggregate_observation.py'
+      - 'partener-eu/ops/afir_solar_raw_replay.py'
+      - 'partener-eu/ops/test_afir_solar_raw_replay.py'
+      - 'partener-eu/validation/afir-solar-3-2026-aggregate-observation.json'
       - 'partener-eu/ingest/build_afir_live_funds.py'
       - 'partener-eu/ingest/build_afir_material_resolution_queue.py'
       - 'partener-eu/ingest/build_decision_products.py'
@@ -65,11 +97,183 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Assert exact PR head before any AFIR evidence/test
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          echo "AFIR preflight exact head: $EXPECTED_SHA"
       - name: Validate AFIR live-funds parser and material-change queue fail-closed
         run: |
           python partener-eu/ops/test_afir_live_funds.py
+          python partener-eu/ops/test_afir_dr12_quality_watch.py
+          python partener-eu/ops/test_afir_dr12_clarification_acquire.py
+          python partener-eu/ops/test_afir_dr12_exhaustion_acquire.py
+          python partener-eu/ops/test_afir_counter_pair_watch.py
+          python partener-eu/ops/test_afir_selection_results_acquire.py
+          python partener-eu/ops/test_afir_solar_aggregate_observation.py
           python partener-eu/ingest/build_afir_material_resolution_queue.py
           python partener-eu/ops/test_afir_material_resolution_queue.py
+      - name: Verify AFIR DR-14/DR-18 conditional extension notice replay contract
+        run: python partener-eu/ops/test_afir_dr14_dr18_extension_acquire.py
+      - name: PR-only official DR-14/DR-18 notice original (non-authorizing)
+        shell: bash
+        env:
+          PARTENER_AFIR_NOTICE_EVIDENCE_DIR: ${{ runner.temp }}/afir-dr14-dr18-notice-pr-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set +e
+          python partener-eu/ingest/afir_dr14_dr18_extension_acquire.py --out "$PARTENER_AFIR_NOTICE_EVIDENCE_DIR"
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo '::warning title=AFIR conditional extension original unavailable::No DR-14/DR-18 deadline or call-state promotion.'
+          elif [ "$result" -ne 0 ]; then
+            exit "$result"
+          else
+            python partener-eu/ingest/afir_dr14_dr18_extension_acquire.py --replay-dir "$PARTENER_AFIR_NOTICE_EVIDENCE_DIR"
+          fi
+      - name: Preserve PR-only immutable AFIR DR-14/DR-18 notice proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr14-dr18-notice-pr-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/afir-dr14-dr18-notice-pr-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: PR-only official DR-12 quality-stage raw capture (non-authorizing)
+        shell: bash
+        env:
+          PARTENER_AFIR_DR12_EVIDENCE_DIR: ${{ runner.temp }}/afir-dr12-pr-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set +e
+          python partener-eu/ingest/afir_dr12_quality_watch.py
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo '::warning title=DR12 official receipt unavailable::Source-stage observation held; no quality, eligibility or call-status publication.'
+          elif [ "$result" -ne 0 ]; then
+            exit "$result"
+          fi
+          if [ "$result" -eq 0 ]; then
+            python partener-eu/ingest/afir_dr12_quality_watch.py --replay-dir "$PARTENER_AFIR_DR12_EVIDENCE_DIR"
+          fi
+      - name: Preserve PR-only DR-12 exact official raw proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr12-quality-pr-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/afir-dr12-pr-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: PR-only official DR-12 06.11 clarification PDF (raw, non-authorizing)
+        shell: bash
+        env:
+          PARTENER_AFIR_DR12_NOTE_EVIDENCE_DIR: ${{ runner.temp }}/afir-dr12-note-pr-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set +e
+          python partener-eu/ingest/afir_dr12_clarification_acquire.py
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo '::warning title=DR12 06.11 PDF acquisition held::Index/delegation/PDF proof incomplete; no eligibility or publication.'
+          elif [ "$result" -ne 0 ]; then
+            exit "$result"
+          else
+            python partener-eu/ingest/afir_dr12_clarification_acquire.py --replay-dir "$PARTENER_AFIR_DR12_NOTE_EVIDENCE_DIR"
+          fi
+      - name: Preserve PR-only DR-12 06.11 clarification original
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr12-clarification-pr-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/afir-dr12-note-pr-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: PR-only DR-12 11.11 other-sectors exhaustion original (non-authorizing)
+        shell: bash
+        env:
+          PARTENER_DR12_EXHAUSTION_OUT: ${{ runner.temp }}/afir-dr12-exhaustion-pr-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set +e
+          python partener-eu/ingest/afir_dr12_exhaustion_acquire.py --out "$PARTENER_DR12_EXHAUSTION_OUT"
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo '::warning title=AFIR DR12 exhaustion original unavailable::Other-sectors closure observation held; no call status/deadline/publication authority.'
+          elif [ "$result" -ne 0 ]; then
+            exit "$result"
+          else
+            python partener-eu/ingest/afir_dr12_exhaustion_acquire.py --replay-dir "$PARTENER_DR12_EXHAUSTION_OUT"
+          fi
+      - name: Preserve PR-only original DR-12 exhaustion notice
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr12-exhaustion-pr-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/afir-dr12-exhaustion-pr-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: PR-only paired AFIR counter original capture and review-only replay
+        shell: bash
+        env:
+          PARTENER_AFIR_COUNTER_PAIR_EVIDENCE_DIR: ${{ runner.temp }}/afir-counter-pair-pr-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set +e
+          python partener-eu/ingest/afir_counter_pair_watch.py
+          code=$?
+          set -e
+          if [ "$code" -eq 2 ]; then
+            echo '::warning title=AFIR counter pair unavailable::Both original counters required before comparison; public facts held.'
+          elif [ "$code" -ne 0 ]; then
+            exit "$code"
+          else
+            python partener-eu/ingest/afir_counter_pair_watch.py --replay-dir "$PARTENER_AFIR_COUNTER_PAIR_EVIDENCE_DIR"
+          fi
+      - name: Preserve PR-only paired original counters (non-authorizing)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-counter-pair-pr-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/afir-counter-pair-pr-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: PR-only original AFIR selection source probe (non-authorizing)
+        shell: bash
+        env:
+          PARTENER_AFIR_SELECTION_EVIDENCE_DIR: ${{ runner.temp }}/afir-selection-pr-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set +e
+          python partener-eu/ingest/afir_selection_results_acquire.py
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo '::warning title=AFIR selection source unavailable::Original report bytes not admitted; inspect immutable manifest. No material fact/publication.'
+          elif [ "$result" -ne 0 ]; then
+            echo "Unexpected AFIR selection acquisition exit $result" >&2
+            exit "$result"
+          fi
+          cat "$PARTENER_AFIR_SELECTION_EVIDENCE_DIR/manifest.json"
+          if [ "$result" -eq 0 ]; then
+            # Read raw XLSX XML independently: serials, per-row values, headers,
+            # footers and official-index source delegation, NEVER publication.
+            python partener-eu/ops/afir_solar_raw_replay.py \
+              --evidence-dir "$PARTENER_AFIR_SELECTION_EVIDENCE_DIR"
+            python partener-eu/ops/test_afir_solar_raw_replay.py \
+              --evidence-dir "$PARTENER_AFIR_SELECTION_EVIDENCE_DIR"
+          fi
+      - name: Upload PR-only immutable AFIR selection source evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-solar-selection-pr-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/afir-selection-pr-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: warn
       - name: Rebuild and validate the deterministic public-language boundary
         run: |
           python partener-eu/ops/recover_decision_products_lkg.py
@@ -81,16 +285,21 @@ jobs:
           python partener-eu/ingest/polish_decision_products.py
           python partener-eu/ingest/finalize_decision_products.py
           python partener-eu/ingest/localize_decision_products.py
+          # AFIR is a source-scoped writer. Keep all non-AFIR public LKG
+          # dossiers byte-identical; a partial MIPE discovery is not authority
+          # to overwrite or erase the broader canonical product projection.
+          cp /tmp/decision-products-lkg.json partener-eu/ingest/state/decision_products.json
           python partener-eu/ingest/apply_afir_current_authoritative_dossiers.py
-          python partener-eu/ingest/apply_step_lll_authoritative_dossier.py
-          python partener-eu/ingest/sync_decision_products_projection.py
+          PARTENER_PRODUCT_SOURCE_SCOPE=AFIR python partener-eu/ingest/sync_decision_products_projection.py
           python partener-eu/ops/test_decision_products.py
           python partener-eu/ops/test_public_language.py
           python partener-eu/ops/test_afir_current_dossiers.py
-          python partener-eu/ops/test_step_lll_dossier.py
+          # PEO-STEP-LLL has its own canonical Decision Products writer/test;
+          # AFIR acquisition must not mutate or demand new PEO dossier state.
           if python partener-eu/ops/validate_decision_products_lkg.py \
               --baseline /tmp/decision-products-lkg.json \
-              --candidate partener-eu/ingest/state/decision_products.json; then
+              --candidate partener-eu/ingest/state/decision_products.json \
+              --afir-source-scoped; then
             echo 'Fresh AFIR projection is admissible over the public LKG.'
           else
             echo 'Fresh AFIR projection is correctly blocked; the checked-in public LKG remains publishable.'
@@ -117,7 +326,144 @@ jobs:
           python -m py_compile partener-eu/ingest/build_afir_live_funds.py
 
       - name: Discover and fingerprint official AFIR corpus fail-closed
+        env:
+          PARTENER_AFIR_EVIDENCE_DIR: ${{ runner.temp }}/partener-afir-evidence
         run: python partener-eu/ingest/afir_ingest.py
+
+      - name: Capture official DR-12 monthly-quality threshold raw bytes (review only)
+        shell: bash
+        env:
+          PARTENER_AFIR_DR12_EVIDENCE_DIR: ${{ runner.temp }}/partener-afir-dr12-quality
+        run: |
+          set +e
+          python partener-eu/ingest/afir_dr12_quality_watch.py
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo 'DR-12 threshold raw proof missing/contradictory; preserve public LKG.'
+          elif [ "$result" -ne 0 ]; then
+            exit "$result"
+          fi
+          if [ "$result" -eq 0 ]; then
+            python partener-eu/ingest/afir_dr12_quality_watch.py --replay-dir "$PARTENER_AFIR_DR12_EVIDENCE_DIR"
+          fi
+      - name: Upload original DR-12 quality-stage source and provenance (non-authorizing)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr12-quality-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/partener-afir-dr12-quality/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Capture DR-12 06.11 clarification official PDF (raw review only)
+        shell: bash
+        env:
+          PARTENER_AFIR_DR12_NOTE_EVIDENCE_DIR: ${{ runner.temp }}/partener-afir-dr12-clarification
+        run: |
+          set +e
+          python partener-eu/ingest/afir_dr12_clarification_acquire.py
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo 'DR-12 06.11 clarification original inaccessible or mismatched: no eligibility/publication authority.'
+          elif [ "$result" -ne 0 ]; then
+            exit "$result"
+          else
+            python partener-eu/ingest/afir_dr12_clarification_acquire.py --replay-dir "$PARTENER_AFIR_DR12_NOTE_EVIDENCE_DIR"
+          fi
+      - name: Preserve original DR-12 clarification proof (non-authorizing)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr12-clarification-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/partener-afir-dr12-clarification/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Capture 11.11 DR-12 other-sectors exhaustion notice (review only)
+        shell: bash
+        env:
+          PARTENER_DR12_EXHAUSTION_OUT: ${{ runner.temp }}/partener-afir-dr12-exhaustion
+        run: |
+          set +e
+          python partener-eu/ingest/afir_dr12_exhaustion_acquire.py --out "$PARTENER_DR12_EXHAUSTION_OUT"
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo 'DR-12 closure raw source unavailable; preserve public LKG and current material facts.'
+          elif [ "$result" -ne 0 ]; then
+            exit "$result"
+          else
+            python partener-eu/ingest/afir_dr12_exhaustion_acquire.py --replay-dir "$PARTENER_DR12_EXHAUSTION_OUT"
+          fi
+      - name: Preserve original DR-12 component-exhaustion notice proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr12-exhaustion-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/partener-afir-dr12-exhaustion/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Capture AFIR and delegated application counters in the same run
+        shell: bash
+        env:
+          PARTENER_AFIR_COUNTER_PAIR_EVIDENCE_DIR: ${{ runner.temp }}/partener-afir-counter-pair
+        run: |
+          set +e
+          python partener-eu/ingest/afir_counter_pair_watch.py
+          code=$?
+          set -e
+          if [ "$code" -eq 2 ]; then
+            echo 'Counter pair unavailable: preserve official LKG and require source-health review.'
+          elif [ "$code" -ne 0 ]; then
+            exit "$code"
+          else
+            python partener-eu/ingest/afir_counter_pair_watch.py --replay-dir "$PARTENER_AFIR_COUNTER_PAIR_EVIDENCE_DIR"
+          fi
+      - name: Preserve paired AFIR counter originals and source-health review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-counter-pair-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/partener-afir-counter-pair/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Upload official AFIR DR-14/DR-18 original notice (non-authorizing)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr14-dr18-raw-notice-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/partener-afir-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Capture original AFIR solar >1 MW final selection reports (non-authorizing)
+        shell: bash
+        env:
+          PARTENER_AFIR_SELECTION_EVIDENCE_DIR: ${{ runner.temp }}/partener-afir-selection-evidence
+        run: |
+          set +e
+          python partener-eu/ingest/afir_selection_results_acquire.py
+          status=$?
+          set -e
+          if [ "$status" -eq 2 ]; then
+            echo 'AFIR solar final results raw evidence unavailable: no material or OPEN_CALL admission.'
+          elif [ "$status" -ne 0 ]; then
+            echo "Unexpected selection acquisition exit $status" >&2
+            exit "$status"
+          fi
+          if [ "$status" -eq 0 ]; then
+            python partener-eu/ops/afir_solar_raw_replay.py \
+              --evidence-dir "$PARTENER_AFIR_SELECTION_EVIDENCE_DIR"
+          fi
+
+      - name: Preserve immutable original AFIR solar selection evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-solar-selection-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/partener-afir-selection-evidence/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Build authoritative AFIR live-funds snapshot fail-closed
         shell: bash
@@ -152,19 +498,24 @@ jobs:
           python partener-eu/ingest/polish_decision_products.py
           python partener-eu/ingest/finalize_decision_products.py
           python partener-eu/ingest/localize_decision_products.py
+          # AFIR is a source-scoped writer. Keep all non-AFIR public LKG
+          # dossiers byte-identical; a partial MIPE discovery is not authority
+          # to overwrite or erase the broader canonical product projection.
+          cp /tmp/decision-products-lkg.json partener-eu/ingest/state/decision_products.json
           python partener-eu/ingest/apply_afir_current_authoritative_dossiers.py
-          python partener-eu/ingest/apply_step_lll_authoritative_dossier.py
-          python partener-eu/ingest/sync_decision_products_projection.py
+          PARTENER_PRODUCT_SOURCE_SCOPE=AFIR python partener-eu/ingest/sync_decision_products_projection.py
 
       - name: Validate decision products, Romanian public language and LKG continuity
         run: |
           python partener-eu/ops/test_decision_products.py
           python partener-eu/ops/test_public_language.py
           python partener-eu/ops/test_afir_current_dossiers.py
-          python partener-eu/ops/test_step_lll_dossier.py
+          # PEO-STEP-LLL has its own canonical Decision Products writer/test;
+          # AFIR acquisition must not mutate or demand new PEO dossier state.
           if python partener-eu/ops/validate_decision_products_lkg.py \
               --baseline /tmp/decision-products-lkg.json \
-              --candidate partener-eu/ingest/state/decision_products.json; then
+              --candidate partener-eu/ingest/state/decision_products.json \
+              --afir-source-scoped; then
             echo 'Fresh AFIR projection supersedes the public LKG.'
           else
             echo 'Fresh AFIR projection blocked; persisting the recovered public LKG.'
@@ -192,7 +543,8 @@ jobs:
             accept_product_candidate=true
             if ! python partener-eu/ops/validate_decision_products_lkg.py \
               --baseline /tmp/current-main-decision-products.json \
-              --candidate /tmp/decision_products.json; then
+              --candidate /tmp/decision_products.json \
+              --afir-source-scoped; then
               accept_product_candidate=false
               echo 'Fresh AFIR product projection no longer supersedes latest main; preserving current public LKG while persisting fresh AFIR evidence.'
             fi
