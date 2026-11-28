@@ -397,11 +397,16 @@ jobs:
           set -euo pipefail
           ACQUISITION_HEAD="$(git rev-parse HEAD)"
           cp partener-eu/ingest/state/source_registry_health.json /tmp/source_registry_health.json
+          # BEGIN source-resolution snapshot copy guard
           rm -rf /tmp/source-resolution-tasks
           mkdir -p /tmp/source-resolution-tasks
-          if [ -d partener-eu/validation/resolution-tasks ]; then
-            cp -a partener-eu/validation/resolution-tasks/. /tmp/source-resolution-tasks/
+          if [ ! -d partener-eu/validation/resolution-tasks ]; then
+            echo "FAIL source-resolution task directory missing; refusing partial persistence." >&2
+            exit 1
           fi
+          cp -a partener-eu/validation/resolution-tasks/. /tmp/source-resolution-tasks/
+          diff -qr partener-eu/validation/resolution-tasks /tmp/source-resolution-tasks
+          # END source-resolution snapshot copy guard
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
@@ -427,8 +432,11 @@ jobs:
             # END source-registry optimistic persistence guard
             git reset --hard origin/main
             cp /tmp/source_registry_health.json partener-eu/ingest/state/source_registry_health.json
+            # BEGIN source-resolution restore copy guard
             mkdir -p partener-eu/validation/resolution-tasks
-            cp -a /tmp/source-resolution-tasks/. partener-eu/validation/resolution-tasks/ || true
+            cp -a /tmp/source-resolution-tasks/. partener-eu/validation/resolution-tasks/
+            diff -qr /tmp/source-resolution-tasks partener-eu/validation/resolution-tasks
+            # END source-resolution restore copy guard
             python partener-eu/ingest/intelligence_index.py
             git add partener-eu/ingest/state/source_registry_health.json partener-eu/ingest/state/intelligence_index.json partener-eu/validation/resolution-tasks
             if git diff --cached --quiet; then
