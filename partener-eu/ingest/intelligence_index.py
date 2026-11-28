@@ -42,14 +42,17 @@ def iso_z(value: dt.datetime) -> str:
 
 
 def parse_time(value: Any) -> Optional[dt.datetime]:
-    if not value or not isinstance(value, str):
+    # Receipt and replay timestamps must identify an exact instant.
+    # Do not silently interpret a calendar date or local time as UTC.
+    if not isinstance(value, str) or not re.fullmatch(
+        r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}"
+        r"(?:\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])",
+        value,
+    ):
         return None
     try:
-        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
-        if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=dt.timezone.utc)
-        return parsed.astimezone(dt.timezone.utc)
-    except ValueError:
+        return dt.datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(dt.timezone.utc)
+    except (ValueError, OverflowError):
         return None
 
 
@@ -926,11 +929,11 @@ def main() -> int:
     parser.add_argument("--state-dir", type=pathlib.Path, default=STATE)
     parser.add_argument("--contract", type=pathlib.Path, default=DEFAULT_CONTRACT)
     parser.add_argument("--source-registry", type=pathlib.Path, default=DEFAULT_SOURCE_REGISTRY)
-    parser.add_argument("--as-of", help="ISO-8601 reference time for deterministic tests")
+    parser.add_argument("--as-of", help="ISO-8601 reference timestamp with explicit UTC offset for deterministic tests")
     args = parser.parse_args()
     reference = parse_time(args.as_of) if args.as_of else None
     if args.as_of and not reference:
-        parser.error("--as-of must be an ISO-8601 timestamp")
+        parser.error("--as-of must be an ISO-8601 timestamp with explicit UTC offset")
     index = compile_with_replay(
         state_dir=args.state_dir,
         reference=reference,
