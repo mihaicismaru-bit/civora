@@ -223,3 +223,58 @@ with tempfile.TemporaryDirectory() as td:
     check_guard(1)
 
 print("PASS source registry optimistic persistence regression")
+
+
+# Replay the exact workflow copy boundaries in an isolated workspace. A
+# partially copied task ledger must never advance to index rebuild/push.
+import os
+import subprocess
+import tempfile
+import textwrap
+
+copy_workflow = (ROOT / ".github/workflows/partener-eu-source-registry.yml").read_text(encoding="utf-8")
+copy_cases = [
+    ("snapshot", "normal"), ("snapshot", "missing"),
+    ("snapshot", "partial_error"), ("snapshot", "partial_success"),
+    ("restore", "normal"), ("restore", "partial_error"),
+    ("restore", "partial_success"), ("restore", "extra"),
+]
+for phase, mode in copy_cases:
+    marker = f"source-resolution {phase} copy guard"
+    block = textwrap.dedent(copy_workflow.split(f"# BEGIN {marker}\n", 1)[1]
+                           .split(f"# END {marker}", 1)[0])
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        tasks = root / "partener-eu/validation/resolution-tasks"
+        snap = root / "snapshot"
+        source = tasks if phase == "snapshot" else snap
+        dest = snap if phase == "snapshot" else tasks
+        if mode != "missing":
+            source.mkdir(parents=True)
+            for name in ("A.json", "B.json"):
+                (source / name).write_text("new " + name, encoding="utf-8")
+        if phase == "restore":
+            dest.mkdir(parents=True)
+            (dest / "A.json").write_text("old A", encoding="utf-8")
+            (dest / "B.json").write_text("old B", encoding="utf-8")
+            if mode == "extra":
+                (dest / "C.json").write_text("unexpected", encoding="utf-8")
+        block = block.replace("/tmp/source-resolution-tasks", str(snap))
+        fault = ""
+        if mode.startswith("partial"):
+            # Inject a partial copy, including a false-success return code.
+            exit_code = 1 if mode == "partial_error" else 0
+            fault = 'cp() { command cp "$2/A.json" "$3/A.json"; return ' + str(exit_code) + '; }\n'
+        result = subprocess.run(
+            ["bash", "-c", "set -euo pipefail\n" + fault + block + "\ntouch reached-next-step"],
+            cwd=root, capture_output=True, text=True,
+        )
+        expected_ok = mode == "normal"
+        assert (result.returncode == 0) == expected_ok, (phase, mode, result.stderr, result.stdout)
+        assert (root / "reached-next-step").exists() == expected_ok, (phase, mode)
+        if expected_ok:
+            assert {p.name: p.read_bytes() for p in source.iterdir()} == {
+                p.name: p.read_bytes() for p in dest.iterdir()
+            }, (phase, mode)
+
+print("PASS source-resolution copy integrity regression (8 scenarios)")
