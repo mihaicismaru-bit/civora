@@ -13,7 +13,10 @@ eligibility, scoring, beneficiary or lifecycle changes in the general dossier.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -21,7 +24,7 @@ ROOT = Path(__file__).resolve().parent
 DEFAULT_CORPUS = ROOT / "state" / "afir_corpus.json"
 DEFAULT_OUTPUT = ROOT / "state" / "afir_material_resolution_queue.json"
 DEFAULT_LIVE_FUNDS = ROOT / "state" / "afir_live_funds.json"
-COUNTER_PATH = "/finantare/contor-fonduri-disponibile"
+COUNTER_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile"
 
 BLOCKED_FACT_CLASSES = [
     "deadline",
@@ -51,6 +54,72 @@ def normalize_url(url: str) -> str:
     return str(url or "").strip().rstrip("/").lower()
 
 
+def snapshot_integrity_valid(live_funds: dict[str, Any]) -> bool:
+    """Check internal evidence consistency, not freshness or original raw receipts."""
+    if live_funds.get("schemaVersion") != 1 or live_funds.get("source") != "AFIR":
+        return False
+    rows = live_funds.get("rows")
+    summary = live_funds.get("summary")
+    policy = live_funds.get("policy")
+    provenance = live_funds.get("provenance")
+    if not isinstance(rows, list) or not rows or not all(isinstance(row, dict) for row in rows):
+        return False
+    if not all(isinstance(value, dict) for value in (summary, policy, provenance)):
+        return False
+    identities = set()
+    for row in rows:
+        code, sector = row.get("interventionCode"), row.get("sector")
+        if not isinstance(code, str) or not re.fullmatch(r"DR-\d{1,3}", code):
+            return False
+        if not isinstance(sector, str) or not sector.strip():
+            return False
+        key = (code, sector.strip().casefold())
+        if key in identities:
+            return False
+        identities.add(key)
+    codes = sorted({code for code, _ in identities})
+    if (
+        type(summary.get("rowCount")) is not int
+        or summary["rowCount"] != len(rows)
+        or type(summary.get("interventionCount")) is not int
+        or summary["interventionCount"] != len(codes)
+        or summary.get("interventions") != codes
+    ):
+        return False
+    for field in ("corpusFingerprint", "sourceFingerprint", "snapshotFingerprint"):
+        value = live_funds.get(field)
+        if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
+            return False
+        if provenance.get(field) != value:
+            return False
+    try:
+        canonical = json.dumps(
+            rows, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False
+        ).encode("utf-8")
+    except (TypeError, ValueError):
+        return False
+    if hashlib.sha256(canonical).hexdigest() != live_funds["snapshotFingerprint"]:
+        return False
+    observed_at = live_funds.get("sourceObservedAt")
+    if (
+        not isinstance(observed_at, str) or not observed_at.strip()
+        or provenance.get("sourceObservedAt") != observed_at
+        or provenance.get("corpusObservedAt") != observed_at
+        or provenance.get("authority") != "AFIR"
+        or provenance.get("evidenceType") != "OFFICIAL_LIVE_COUNTER"
+        or provenance.get("sourceFingerprintMatchesCorpus") is not True
+        or provenance.get("sourceFingerprintReconciledFromCanonicalLiveFetch") is not False
+        or live_funds.get("sourceFingerprintReconciledFromCanonicalLiveFetch") is not False
+    ):
+        return False
+    return policy.get("publishableDedicatedSnapshot") is True and all(
+        policy.get(field) is False for field in (
+            "autoPromoteIntoDossierBudget", "callStatusInferenceAllowed",
+            "eligibilityInferenceAllowed", "scoringInferenceAllowed",
+        )
+    )
+
+
 def matching_live_funds_resolution(
     item: dict[str, Any], live_funds: dict[str, Any] | None
 ) -> dict[str, Any] | None:
@@ -60,7 +129,7 @@ def matching_live_funds_resolution(
 
     item_url = normalize_url(item.get("url"))
     snapshot_url = normalize_url(live_funds.get("canonicalUrl"))
-    if not item_url.endswith(COUNTER_PATH) or snapshot_url != item_url:
+    if item_url != COUNTER_URL or snapshot_url != item_url:
         return None
 
     item_fingerprint = str(item.get("sha256") or item.get("fingerprint") or "").strip()
@@ -71,16 +140,24 @@ def matching_live_funds_resolution(
     if live_funds.get("sourceFingerprintMatchesCorpus") is not True:
         return None
 
-    policy = live_funds.get("policy") or {}
-    summary = live_funds.get("summary") or {}
-    row_count = summary.get("rowCount")
-    if (
-        policy.get("publishableDedicatedSnapshot") is not True
-        or policy.get("autoPromoteIntoDossierBudget") is not False
-        or not isinstance(row_count, int)
-        or row_count < 1
-    ):
+    if not snapshot_integrity_valid(live_funds):
         return None
+
+    # A matching content hash may recur across distinct acquisition attempts.
+    # Bind this resolution to the exact corpus observation, not just its hash.
+    observed_at = live_funds.get("sourceObservedAt")
+    if observed_at != item.get("observedAt"):
+        return None
+    generated_at = live_funds.get("generatedAt")
+    try:
+        observed = datetime.fromisoformat(observed_at)
+        generated = datetime.fromisoformat(generated_at)
+        if observed.utcoffset() is None or generated.utcoffset() is None or generated < observed:
+            return None
+    except (TypeError, ValueError, OverflowError):
+        return None
+    summary = live_funds["summary"]
+    row_count = summary["rowCount"]
 
     return {
         "status": "RESOLVED",

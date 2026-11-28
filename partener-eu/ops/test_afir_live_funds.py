@@ -109,10 +109,49 @@ def main() -> int:
         drifted["items"] = [dict(corpus["items"][0], sha256="0" * 64)]
         corpus_path.write_text(json.dumps(drifted, ensure_ascii=False), encoding="utf-8")
         drift = subprocess.run(command, check=False, capture_output=True, text=True)
-        drift_payload = json.loads(output_path.read_text(encoding="utf-8"))
+        drift_report = json.loads(drift.stdout)
         assert drift.returncode == 2
-        assert drift_payload["status"] == "DEGRADED_SOURCE_DRIFT"
-        assert drift_payload["policy"]["publishableDedicatedSnapshot"] is False
+        assert drift_report["attemptStatus"] == "DEGRADED_SOURCE_DRIFT"
+        assert drift_report["lastKnownGoodPreserved"] is True
+        assert output_path.read_bytes() == first, "source drift must preserve accepted LKG"
+
+        invalid_html = b"<html><body>No structured counter</body></html>"
+        invalid_corpus = dict(corpus)
+        invalid_corpus["items"] = [dict(corpus["items"][0], sha256=hashlib.sha256(invalid_html).hexdigest())]
+        corpus_path.write_text(json.dumps(invalid_corpus), encoding="utf-8")
+        fixture_path.write_bytes(invalid_html)
+        failed_parse = subprocess.run(command, check=False, capture_output=True, text=True)
+        assert failed_parse.returncode == 2
+        assert json.loads(failed_parse.stdout)["attemptStatus"] == "FAIL_PARSE"
+        assert output_path.read_bytes() == first, "parse failure must preserve accepted LKG"
+        # A partial recognized DR component or malformed amount/count is not
+        # an acceptable smaller counter: reject the entire candidate and keep LKG.
+        malformed_candidates = (
+            FIXTURE.replace("<td>283.310</td>", "<td>1.2.3</td>", 1),
+            FIXTURE.replace("<td>283.310</td>", "<td>NaN</td>", 1),
+            FIXTURE.replace("<td>283.310</td>", "<td>1E3</td>", 1),
+            FIXTURE.replace("<td>283.310</td>", "<td>-1</td>", 1),
+            FIXTURE.replace("<td>6</td>", "<td>1x2</td>", 1),
+            FIXTURE.replace("<td>6</td>", "<td>-1</td>", 1),
+            FIXTURE.replace("<td>6</td>", "<td>1,5</td>", 1),
+            FIXTURE.replace("<td>6</td>", "", 1),
+            FIXTURE.replace("<strong>Componenta LEGUMICULTURĂ</strong>", "", 1),
+            FIXTURE.replace("<td>6</td>", "<td>6</td><td>unexpected</td>", 1),
+        )
+        for malformed in malformed_candidates:
+            assert malformed != FIXTURE
+            raw = malformed.encode("utf-8")
+            fixture_path.write_bytes(raw)
+            malformed_corpus = dict(corpus, items=[
+                dict(corpus["items"][0], sha256=hashlib.sha256(raw).hexdigest())
+            ])
+            corpus_path.write_text(json.dumps(malformed_corpus), encoding="utf-8")
+            attempt = subprocess.run(command, check=False, capture_output=True, text=True)
+            assert attempt.returncode == 2, attempt.stdout + attempt.stderr
+            assert json.loads(attempt.stdout)["attemptStatus"] == "FAIL_PARSE"
+            assert output_path.read_bytes() == first
+
+        fixture_path.write_bytes(fixture_bytes)
 
         # The real AFIR counter mutates while submissions arrive. A second
         # canonical production fetch may therefore have a different byte hash
@@ -142,6 +181,53 @@ def main() -> int:
         assert live_reconciled["provenance"]["corpusObservedAt"] == corpus["items"][0]["observedAt"]
         assert live_reconciled["sourceObservedAt"] != corpus["items"][0]["observedAt"]
 
+        # A matching URL suffix or matching payload hash cannot establish
+        # authority. Exercise the real transport adapter, not its mock.
+        official_url = corpus["items"][0]["url"]
+        for url in (
+            "https://example.invalid/finantare/contor-fonduri-disponibile/",
+            "https://www.afir.ro.example.invalid/finantare/contor-fonduri-disponibile/",
+            "http://www.afir.ro/finantare/contor-fonduri-disponibile/",
+            official_url + "?copy=1",
+        ):
+            hostile = dict(corpus, items=[dict(corpus["items"][0], url=url)])
+            try:
+                builder.build_snapshot(hostile, fixture_path)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("noncanonical counter admitted: " + url)
+        duplicate = dict(corpus, items=corpus["items"] * 2)
+        try:
+            builder.find_counter_item(duplicate)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("ambiguous counter identity admitted")
+
+        original_fetch = builder.fetch
+        response = dict(ok=True, url=official_url, status=200,
+                        content_type="text/html; charset=utf-8", data=fixture_bytes)
+        try:
+            builder.fetch = lambda _url: response
+            assert builder.build_snapshot(corpus)["status"] == "PASS"
+            for changes in (
+                {"url": "https://example.invalid/finantare/contor-fonduri-disponibile/"},
+                {"url": "https://www.afir.ro/other-page/"},
+                {"url": None},
+                {"status": 206},
+                {"content_type": "application/octet-stream"},
+            ):
+                builder.fetch = lambda _url: dict(response, **changes)
+                try:
+                    builder.build_snapshot(corpus)
+                except builder.SourceTransportError:
+                    pass
+                else:
+                    raise AssertionError("unverified live response admitted: " + str(changes))
+        finally:
+            builder.fetch = original_fetch
+
         # Re-establish a validated PASS snapshot, then reproduce the production
         # TLS/transport outage. The LKG must remain byte-identical and the
         # builder must return the workflow's accepted fail-closed exit code 2.
@@ -163,14 +249,44 @@ def main() -> int:
             assert preserved["status"] == "PASS"
             assert preserved["policy"]["publishableDedicatedSnapshot"] is True
 
-            # With no LKG there is still no invented snapshot: the resolver
-            # remains fail-closed and does not create a replacement artifact.
+            builder.fetch = lambda _url: dict(
+                ok=True, url="https://example.invalid/finantare/contor-fonduri-disponibile/",
+                status=200, content_type="text/html", data=fixture_bytes,
+            )
+            assert builder.run(corpus_path, output_path, None) == 2
+            assert output_path.read_bytes() == lkg_bytes, "redirect rejection must preserve LKG"
+            builder.fetch = lambda _url: {"ok": False, "error": "simulated outage"}
+
+            corrupted = json.loads(lkg_bytes)
+            corrupted["rows"][0]["availableFundsEur"] = "999.00"
+            output_path.write_text(json.dumps(corrupted), encoding="utf-8")
+            corrupt_bytes = output_path.read_bytes()
+            assert builder.valid_last_known_good(output_path, corpus["items"][0]["url"]) is None
+            assert builder.run(corpus_path, output_path, None) == 1
+            assert output_path.read_bytes() == corrupt_bytes
+
+            corrupted = json.loads(lkg_bytes)
+            corrupted["summary"]["rowCount"] += 1
+            output_path.write_text(json.dumps(corrupted), encoding="utf-8")
+            assert builder.valid_last_known_good(output_path, corpus["items"][0]["url"]) is None
+
+            # With no LKG there is still no invented snapshot.
             output_path.unlink()
             no_lkg_status = builder.run(corpus_path, output_path, None)
             assert no_lkg_status == 2
             assert not output_path.exists()
         finally:
             builder.fetch = original_fetch
+
+        corpus_path.write_text(json.dumps(drifted), encoding="utf-8")
+        rejected = subprocess.run(command, check=False, capture_output=True, text=True)
+        assert rejected.returncode == 2
+        rejected_payload = json.loads(output_path.read_bytes())
+        assert rejected_payload["status"] == "DEGRADED_SOURCE_DRIFT"
+        assert rejected_payload["policy"]["publishableDedicatedSnapshot"] is False
+        corpus_path.write_text(json.dumps(corpus), encoding="utf-8")
+        subprocess.run(command, check=True, capture_output=True, text=True)
+        assert output_path.read_bytes() == first
 
     assert payload["status"] == "PASS"
     assert payload["sourceFingerprintMatchesCorpus"] is True

@@ -6,9 +6,9 @@ cross-checks the fetched byte fingerprint against the AFIR corpus candidate
 before resolving anything. A mismatch is fail-closed source drift, never a
 reason to auto-promote a material fact.
 
-Transient transport failures are also fail-closed. When a previously validated
-PASS snapshot exists, it is preserved byte-for-byte and the process returns the
-workflow's accepted degraded exit code instead of replacing the LKG or crashing.
+Transport failures and rejected source/parse candidates are fail-closed. When
+a previously validated PASS snapshot exists, preserve it byte-for-byte without
+renewing its age; report the rejected attempt separately in the process log.
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ from afir_ingest import fetch
 ROOT = Path(__file__).resolve().parent
 DEFAULT_CORPUS = ROOT / "state" / "afir_corpus.json"
 DEFAULT_OUTPUT = ROOT / "state" / "afir_live_funds.json"
-COUNTER_PATH = "/finantare/contor-fonduri-disponibile"
+COUNTER_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile"
 BUCHAREST = ZoneInfo("Europe/Bucharest")
 
 
@@ -87,30 +87,32 @@ def clean_cell(value: Any) -> str:
 
 
 def normalize_counter_url(url: str) -> str:
-    return (url or "").strip().rstrip("/").lower()
+    return (url or "").strip().rstrip("/")
 
 
 def find_counter_item(corpus: dict[str, Any]) -> dict[str, Any]:
-    for item in corpus.get("items") or []:
-        if not isinstance(item, dict):
-            continue
-        if normalize_counter_url(str(item.get("url") or "")).endswith(COUNTER_PATH):
-            return item
-    raise ValueError("AFIR live-funds counter was not found in the corpus")
+    matches = [
+        item for item in corpus.get("items") or []
+        if isinstance(item, dict)
+        and normalize_counter_url(str(item.get("url") or "")) == COUNTER_URL
+    ]
+    if len(matches) != 1:
+        raise ValueError("Expected exactly one official AFIR live-funds counter in the corpus")
+    return matches[0]
 
 
 def parse_eur(value: str) -> str | None:
     cell = clean_cell(value).replace("\u00a0", " ").strip()
     if cell.upper() in {"-", "–", "—", "N/A", "N/D"}:
         return None
-    raw = cell.upper().replace("EUR", "").strip()
-    raw = re.sub(r"\s+", "", raw)
-    if not raw:
-        raise ValueError("empty EUR value")
-    if "," in raw:
-        raw = raw.replace(".", "").replace(",", ".")
-    else:
-        raw = raw.replace(".", "")
+    raw = cell.upper()
+    if raw.endswith("EUR"):
+        raw = raw[:-3].strip()
+    # Accept only nonnegative Romanian-formatted amounts, without guessing
+    # what malformed punctuation, exponent notation or embedded text meant.
+    if not re.fullmatch(r"(?:[0-9]+|[0-9]{1,3}(?:\.[0-9]{3})+|[0-9]{1,3}(?: [0-9]{3})+)(?:,[0-9]{1,2})?", raw):
+        raise ValueError(f"invalid EUR value: {value!r}")
+    raw = raw.replace(".", "").replace(" ", "").replace(",", ".")
     try:
         amount = Decimal(raw)
     except InvalidOperation as exc:
@@ -127,10 +129,10 @@ def parse_available_funds(value: str) -> tuple[str | None, str]:
     return amount, "REPORTED" if amount is not None else "UNKNOWN"
 
 def parse_int(value: str) -> int:
-    raw = re.sub(r"[^\d-]", "", clean_cell(value))
-    if not raw:
+    raw = clean_cell(value)
+    if not re.fullmatch(r"(?:[0-9]+|[0-9]{1,3}(?:\.[0-9]{3})+|[0-9]{1,3}(?: [0-9]{3})+)", raw):
         raise ValueError(f"invalid integer value: {value!r}")
-    return int(raw)
+    return int(raw.replace(".", "").replace(" ", ""))
 
 
 def parse_local_datetime(value: str) -> tuple[str, str]:
@@ -152,9 +154,13 @@ def parse_rows(table_rows: list[list[Any]]) -> list[dict[str, Any]]:
         if not isinstance(raw_row, list):
             continue
         cells = [clean_cell(cell) for cell in raw_row]
-        if len(cells) < 9 or not re.fullmatch(r"DR-\d{1,3}", cells[0].upper()):
+        if not cells or not re.fullmatch(r"DR-\d{1,3}", cells[0].upper()):
             continue
         code = cells[0].upper()
+        # A recognized but truncated/shifted component must invalidate the
+        # whole candidate, never disappear silently from a PASS snapshot.
+        if len(cells) != 9 or not cells[1]:
+            raise ValueError(f"invalid AFIR counter row shape: {code}")
         sector = cells[1]
         key = (code, sector.casefold())
         if key in seen:
@@ -199,6 +205,8 @@ def canonical_digest(rows: list[dict[str, Any]]) -> str:
 
 
 def load_source_bytes(url: str, fixture: Path | None) -> tuple[bytes, str | None, int | None]:
+    if normalize_counter_url(url) != COUNTER_URL:
+        raise SourceTransportError("AFIR counter requested URL is not the exact official endpoint")
     if fixture is not None:
         return fixture.read_bytes(), None, 200
     response = fetch(url)
@@ -206,6 +214,12 @@ def load_source_bytes(url: str, fixture: Path | None) -> tuple[bytes, str | None
         raise SourceTransportError(
             f"AFIR counter fetch failed: status={response.get('status')} error={response.get('error')}"
         )
+    # urllib follows redirects. The final endpoint, not the requested URL,
+    # identifies the actual authority of the bytes.
+    if normalize_counter_url(str(response.get("url") or "")) != COUNTER_URL:
+        raise SourceTransportError("AFIR counter final URL is not the exact official endpoint")
+    if response.get("status") != 200 or "html" not in str(response.get("content_type") or "").lower():
+        raise SourceTransportError("AFIR counter response is not a successful HTML representation")
     return response["data"], response.get("content_type"), response.get("status")
 
 
@@ -229,15 +243,60 @@ def valid_last_known_good(path: Path, canonical_url: str) -> dict[str, Any] | No
     rows = payload.get("rows")
     if payload.get("source") != "AFIR" or payload.get("status") != "PASS":
         return None
-    if normalize_counter_url(str(payload.get("canonicalUrl") or "")) != normalize_counter_url(canonical_url):
+    if (
+        normalize_counter_url(canonical_url) != COUNTER_URL
+        or normalize_counter_url(str(payload.get("canonicalUrl") or "")) != COUNTER_URL
+    ):
         return None
     if policy.get("publishableDedicatedSnapshot") is not True:
         return None
     if not isinstance(rows, list) or not rows:
         return None
-    for key in ("sourceFingerprint", "snapshotFingerprint"):
-        if not re.fullmatch(r"[0-9a-f]{64}", clean_cell(payload.get(key))):
+    if not all(isinstance(row, dict) for row in rows):
+        return None
+    provenance = payload.get("provenance")
+    summary = payload.get("summary")
+    if not isinstance(provenance, dict) or not isinstance(summary, dict):
+        return None
+    for key in ("corpusFingerprint", "sourceFingerprint", "snapshotFingerprint"):
+        value = payload.get(key)
+        if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
             return None
+        if provenance.get(key) != value:
+            return None
+    if provenance.get("authority") != "AFIR" or provenance.get("evidenceType") != "OFFICIAL_LIVE_COUNTER":
+        return None
+    try:
+        if canonical_digest(rows) != payload["snapshotFingerprint"]:
+            return None
+        identities = {(row["interventionCode"], row["sector"].strip().casefold()) for row in rows}
+        if len(identities) != len(rows) or any(
+            not re.fullmatch(r"DR-\d{1,3}", code) or not sector for code, sector in identities
+        ):
+            return None
+        codes = sorted({code for code, _ in identities})
+        if (
+            type(summary.get("rowCount")) is not int
+            or summary["rowCount"] != len(rows)
+            or type(summary.get("interventionCount")) is not int
+            or summary["interventionCount"] != len(codes)
+            or summary.get("interventions") != codes
+        ):
+            return None
+    except (KeyError, TypeError, ValueError, AttributeError):
+        return None
+    observed_at = payload.get("sourceObservedAt")
+    try:
+        observed = dt.datetime.fromisoformat(observed_at)
+        if observed.utcoffset() is None or provenance.get("sourceObservedAt") != observed_at:
+            return None
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if any(policy.get(field) is not False for field in (
+        "autoPromoteIntoDossierBudget", "callStatusInferenceAllowed",
+        "eligibilityInferenceAllowed", "scoringInferenceAllowed",
+    )):
+        return None
     return payload
 
 
@@ -386,8 +445,27 @@ def run(corpus_path: Path, output_path: Path, fixture: Path | None = None) -> in
                 }
             )
         print(json.dumps(report, ensure_ascii=False, sort_keys=True))
-        return 2
+        # Stop downstream readers when the existing artifact is invalid.
+        return 1 if not lkg and output_path.exists() else 2
 
+    if snapshot["status"] != "PASS":
+        lkg = valid_last_known_good(output_path, canonical_url)
+        if lkg:
+            print(json.dumps({
+                "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+                "attemptStatus": snapshot["status"],
+                "failClosed": True,
+                "lastKnownGoodPreserved": True,
+                "outputUnchanged": True,
+                "canonicalUrl": canonical_url,
+                "attemptSourceFingerprint": snapshot.get("sourceFingerprint"),
+                "attemptCorpusFingerprint": snapshot.get("corpusFingerprint"),
+                "attemptParseError": snapshot.get("parseError"),
+                "lastKnownGoodSourceObservedAt": lkg.get("sourceObservedAt"),
+                "lastKnownGoodSnapshotFingerprint": lkg.get("snapshotFingerprint"),
+            }, ensure_ascii=False, sort_keys=True))
+            return 2
+        # No valid LKG: retain the existing non-publishable diagnostic contract.
     write_json(output_path, snapshot)
     print(json.dumps({"status": snapshot["status"], **snapshot["summary"]}, ensure_ascii=False, sort_keys=True))
     return 0 if snapshot["status"] == "PASS" else 2
