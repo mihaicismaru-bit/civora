@@ -265,6 +265,16 @@ def main():
             ("2026-08-12T05:59:59Z", "STALE", 4),
             ("invalid", "UNKNOWN", None),
             (None, "UNKNOWN", None),
+            ("2026-08-12", "UNKNOWN", None),
+            ("2026-08-12T08:00:00", "UNKNOWN", None),
+            ("2026-08-12 08:00:00Z", "UNKNOWN", None),
+            ("2026-08-12T08:00:00+00:60", "UNKNOWN", None),
+            ("2026-08-12T08:00:00+00:00:01", "UNKNOWN", None),
+            ("0001-01-01T00:00:00+01:00", "UNKNOWN", None),
+            ("9999-12-31T23:59:59-01:00", "UNKNOWN", None),
+            ("2026-02-30T08:00:00Z", "UNKNOWN", None),
+            ("2026-08-12T10:00:00+02:00", "CURRENT", 2),
+            ("2026-08-12T08:00:00.123456+00:00", "CURRENT", 2),
         ):
             assert mod.freshness(timestamp, reference, 4) == {
                 "status": expected, "ageHours": age, "maxAgeHours": 4,
