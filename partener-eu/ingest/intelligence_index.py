@@ -18,6 +18,7 @@ import re
 import tempfile
 import urllib.parse
 from collections import Counter
+from zoneinfo import ZoneInfo
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 
@@ -41,14 +42,17 @@ def iso_z(value: dt.datetime) -> str:
 
 
 def parse_time(value: Any) -> Optional[dt.datetime]:
-    if not value or not isinstance(value, str):
+    # Receipt and replay timestamps must identify an exact instant.
+    # Do not silently interpret a calendar date or local time as UTC.
+    if not isinstance(value, str) or not re.fullmatch(
+        r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}"
+        r"(?:\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])",
+        value,
+    ):
         return None
     try:
-        parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
-        if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=dt.timezone.utc)
-        return parsed.astimezone(dt.timezone.utc)
-    except ValueError:
+        return dt.datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(dt.timezone.utc)
+    except (ValueError, OverflowError):
         return None
 
 
@@ -92,13 +96,23 @@ def corpus_config(contract: Dict[str, Any], source_id: str) -> Dict[str, Any]:
 def canonical_url(value: Any) -> Optional[str]:
     if not value or not isinstance(value, str):
         return None
-    parsed = urllib.parse.urlparse(value.strip())
-    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+    # Malformed external ledger URLs must not abort the whole index or
+    # silently become credential-free official identities.
+    try:
+        parsed = urllib.parse.urlparse(value.strip())
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            return None
+        if parsed.username is not None or parsed.password is not None:
+            return None
+        host = parsed.hostname.lower()
+        if host.startswith("www."):
+            host = host[4:]
+        if not host or any(ch.isspace() for ch in host):
+            return None
+        port_number = parsed.port
+    except ValueError:
         return None
-    host = parsed.hostname.lower()
-    if host.startswith("www."):
-        host = host[4:]
-    port = f":{parsed.port}" if parsed.port else ""
+    port = f":{port_number}" if port_number else ""
     path = re.sub(r"/{2,}", "/", parsed.path or "/")
     if path != "/":
         path = path.rstrip("/")
@@ -107,14 +121,26 @@ def canonical_url(value: Any) -> Optional[str]:
 
 def freshness(observed_at: Any, reference: dt.datetime, max_age_hours: int) -> Dict[str, Any]:
     observed = parse_time(observed_at)
-    if not observed:
+    # A receipt from the future cannot establish freshness at this replay time.
+    if not observed or observed > reference:
         return {"status": "UNKNOWN", "ageHours": None, "maxAgeHours": max_age_hours}
-    age = max(0.0, (reference - observed).total_seconds() / 3600)
+    age = (reference - observed).total_seconds() / 3600
     return {
         "status": "CURRENT" if age <= max_age_hours else "STALE",
         "ageHours": round(age, 2),
         "maxAgeHours": max_age_hours,
     }
+
+
+def evidence_record_freshness(
+    source: Dict[str, Any], observed_at: Any, reference: dt.datetime, sla: int
+) -> str:
+    """A current corpus does not refresh a retained or unobserved item."""
+    source_status = source["freshness"]["status"]
+    item_status = freshness(observed_at, reference, sla)["status"]
+    if "UNKNOWN" in (source_status, item_status):
+        return "UNKNOWN"
+    return "STALE" if "STALE" in (source_status, item_status) else "CURRENT"
 
 
 def afir_records(
@@ -140,6 +166,8 @@ def afir_records(
         url = canonical_url(row.get("url"))
         if not url or urllib.parse.urlparse(url).hostname != "afir.ro":
             continue
+        item_observed_at = row.get("observedAt")
+        item_freshness = evidence_record_freshness(source, item_observed_at, reference, sla)
         material_candidate = bool(row.get("materialChangeCandidate"))
         content_type = str(row.get("contentType") or "").lower()
         path = urllib.parse.urlparse(url).path.lower()
@@ -155,10 +183,12 @@ def afir_records(
             "programme": "AFIR / PS PAC 2023-2027",
             "canonicalUrl": url,
             "fingerprint": row.get("sha256"),
-            "observedAt": observed_at,
-            "freshness": source["freshness"]["status"],
+            "observedAt": item_observed_at,
+            "freshness": item_freshness,
             "textExtracted": bool(row.get("textExtracted")),
-            "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+            "decisionUse": ("OFFICIAL_EVIDENCE_INDEX"
+                            if source["status"] == "PASS" and item_freshness == "CURRENT"
+                            else "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
             "materialChangeCandidate": material_candidate,
             "materialFactAction": "RESOLUTION_REQUIRED" if material_candidate else "NO_AUTO_PROMOTION",
             "publishMaterialFacts": False,
@@ -166,6 +196,66 @@ def afir_records(
             "provenance": [{"url": url, "tier": "T1", "label": "AFIR"}],
         })
     return source, records
+
+
+def planning_horizon(launch_value: Any, close_value: Any, reference: dt.datetime) -> str:
+    """Classify calendar estimates, never actual call lifecycle or deadlines."""
+    def calendar_day(value: Any) -> Optional[dt.date]:
+        if not isinstance(value, str) or not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}(?:T00:00:00)?", value):
+            return None
+        try:
+            return dt.date.fromisoformat(value[:10])
+        except ValueError:
+            return None
+
+    launch, close = calendar_day(launch_value), calendar_day(close_value)
+    if launch is None or close is None or launch > close:
+        return "UNKNOWN_ESTIMATE_WINDOW"
+    today = reference.astimezone(ZoneInfo("Europe/Bucharest")).date()
+    if close < today:
+        return "HISTORICAL_ESTIMATE"
+    if launch > today:
+        return "FUTURE_LAUNCH_ESTIMATE"
+    return "CURRENT_ESTIMATE_WINDOW"
+
+
+def peo_workbook_provenance(state: Dict[str, Any], row: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Expose the existing ledger reference, not a new verification of RAW bytes."""
+    raw_url = state.get("retrievalSource")
+    url = canonical_url(raw_url)
+    if not url:
+        return []
+    entry = {"url": url, "tier": "T1B", "label": "PEO calendar — source ledger",
+             "observationState": "UNBOUND_LEDGER_REFERENCE"}
+    run = state.get("lastRun") or {}
+    sheet, number = row.get("sourceSheet"), row.get("sourceRow")
+    digest = run.get("sha256")
+    observed = run.get("observedAt")
+    # Only the currently supported institutional-copy contract has a known
+    # row-to-workbook binding. Do not infer direct MIPE verification.
+    if (
+        state.get("status") == "OK_OFFICIAL_OIR_COPY"
+        and state.get("retrievalSourceClass") == "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST"
+        and state.get("directMipeVerified") is False
+        and isinstance(raw_url, str) and raw_url.startswith("https://")
+        and urllib.parse.urlparse(url).hostname == "oirvest.ro"
+        and run.get("source") == raw_url
+        and isinstance(digest, str) and re.fullmatch(r"[0-9a-f]{64}", digest)
+        and isinstance(observed, str) and parse_time(observed) is not None
+        and isinstance(sheet, str) and sheet.strip()
+        and type(number) is int and number > 0
+    ):
+        entry.update({
+            "label": "OIR PECU Vest — copie instituțională",
+            "observationState": "WORKBOOK_LEDGER_REFERENCE_ONLY",
+            "fetchedUrl": raw_url,
+            "sha256": digest,
+            "observedAt": observed,
+            "sourceSheet": sheet,
+            "sourceRow": number,
+            "retrievalSourceClass": state["retrievalSourceClass"],
+        })
+    return [entry]
 
 
 def peo_calendar_records(
@@ -208,6 +298,7 @@ def peo_calendar_records(
             "region": row.get("region"),
             "plannedLaunch": row.get("plannedLaunch"),
             "plannedClose": row.get("plannedClose"),
+            "planningHorizon": planning_horizon(row.get("plannedLaunch"), row.get("plannedClose"), reference),
             "applicantsSignal": row.get("applicants"),
             "budgetSignal": row.get("budget"),
             "observedAt": observed_at,
@@ -217,7 +308,7 @@ def peo_calendar_records(
             "materialFactAction": "VERIFY_LAUNCH_AND_GUIDE_BEFORE_PUBLICATION",
             "publishMaterialFacts": False,
             "blockedFactClasses": MATERIAL_FACT_CLASSES,
-            "provenance": ([{"url": retrieval_url, "tier": "T1B", "label": "OIR PECU Vest — copie instituțională"}] if retrieval_url else []),
+            "provenance": peo_workbook_provenance(state, row),
         })
     return source, records
 
@@ -227,8 +318,14 @@ def mipe_records(
 ) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     run = state.get("lastRun") or {}
     observed_at = run.get("observedAt")
-    available = bool(run.get("sourceAvailable"))
+    available = run.get("sourceAvailable") is True
     sla = int(config.get("freshnessSlaHours") or 8)
+    # A recent failed acquisition is a fresh *attempt*, not fresh official
+    # evidence. Keep its recency observable without refreshing the LKG corpus.
+    attempt_freshness = freshness(observed_at, reference, sla)
+    state_status = str(state.get("status") or "UNKNOWN").upper()
+    verified = available and (state_status in {"PASS", "OK"} or state_status.startswith("OK_"))
+    evidence_freshness = attempt_freshness if verified else freshness(None, reference, sla)
     source = {
         "id": "MIPE_CORPUS",
         "tier": config.get("tier") or "T1",
@@ -238,7 +335,8 @@ def mipe_records(
         "dependencyScopes": config.get("dependencyScopes") or [],
         "status": state.get("status") or "UNKNOWN",
         "observedAt": observed_at,
-        "freshness": freshness(observed_at, reference, sla),
+        "freshness": evidence_freshness,
+        "lastAttemptFreshness": attempt_freshness,
         "itemCount": len(state.get("items") or []),
         "sourceAvailable": available,
         "lastKnownGoodPreserved": "LAST_KNOWN_GOOD_PRESERVED" in str(state.get("status") or ""),
@@ -247,24 +345,36 @@ def mipe_records(
     records = []
     for row in state.get("items") or []:
         url = canonical_url(row.get("url") or row.get("sourceUrl"))
-        if not url or urllib.parse.urlparse(url).hostname != "mfe.gov.ro":
+        # The MIPE ledger can retain the official MySMIS reporting registry as
+        # discovery. Admit only this exact registry URL, not arbitrary APEX
+        # pages or aliases, and never treat its retained index as call evidence.
+        mysmis_registry = url == (
+            "https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/"
+            "finantari-programe-2021-2027"
+        )
+        if not url or (urllib.parse.urlparse(url).hostname != "mfe.gov.ro" and not mysmis_registry):
             continue
+        item_observed_at = row.get("observedAt")
+        item_freshness = evidence_record_freshness(source, item_observed_at, reference, sla)
         records.append({
             "id": stable_id("mipe", url),
             "sourceId": source["id"],
             "sourceTier": source["tier"],
             "recordType": "OFFICIAL_MIPE_ITEM",
             "title": str(row.get("title") or row.get("headline") or url)[:500],
-            "programme": row.get("programme") or "MIPE",
+            "programme": row.get("programme") or ("MIPE / MySMIS" if mysmis_registry else "MIPE"),
             "canonicalUrl": url,
             "fingerprint": row.get("sha256") or row.get("contentHash"),
-            "observedAt": row.get("observedAt") or observed_at,
-            "freshness": source["freshness"]["status"],
-            "decisionUse": "OFFICIAL_EVIDENCE_INDEX" if available else "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+            "observedAt": item_observed_at,
+            "freshness": item_freshness,
+            "decisionUse": ("OFFICIAL_EVIDENCE_INDEX"
+                            if verified and item_freshness == "CURRENT" and not mysmis_registry
+                            else "LAST_KNOWN_GOOD_DISCOVERY_ONLY"),
             "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
             "publishMaterialFacts": False,
             "blockedFactClasses": MATERIAL_FACT_CLASSES,
-            "provenance": [{"url": url, "tier": "T1", "label": "MIPE"}],
+            "provenance": [{"url": url, "tier": "T1",
+                            "label": "MIPE / MySMIS registry (discovery only)" if mysmis_registry else "MIPE"}],
         })
     return source, records
 
@@ -331,7 +441,12 @@ def state_contract_result(
 def registry_families(source: Dict[str, Any]) -> List[str]:
     source_id = str(source.get("id") or "")
     source_class = str(source.get("class") or "").lower()
-    families = []
+    # Registry-declared families are authoritative metadata; preserve them
+    # alongside legacy routing tags instead of dropping EU/EEA/Interreg coverage.
+    declared = source.get("source_families")
+    families = [
+        tag for tag in declared if isinstance(tag, str) and tag and tag == tag.strip()
+    ] if isinstance(declared, list) else []
     if source_id.startswith("SRC-MYSMIS"):
         families.append("MYSMIS")
     if source_id.startswith(("SRC-OIR", "SRC-OI-", "SRC-ADR")) or "intermediate_body" in source_class:
@@ -339,6 +454,19 @@ def registry_families(source: Dict[str, Any]) -> List[str]:
     if "calendar" in source_class:
         families.append("CALENDARS")
     return sorted(set(families))
+
+
+def registry_planning_only(source: Dict[str, Any]) -> bool:
+    source_class = str(source.get("class") or "").lower()
+    return (
+        "calendar" in source_class
+        or source_class in {
+            "official_programming_pipeline",
+            "official_programming_framework",
+            "official_intermediate_body_consultation_index",
+        }
+        or "PROGRAMMING_PIPELINE" in registry_families(source)
+    )
 
 
 def registry_domains(source: Dict[str, Any], contract: Dict[str, Any]) -> List[str]:
@@ -353,6 +481,18 @@ def registry_domains(source: Dict[str, Any], contract: Dict[str, Any]) -> List[s
     return sorted(domains)
 
 
+def registry_observation_verified(health: Dict[str, Any]) -> bool:
+    """Only a successful high-information registry response supports evidence recency."""
+    return (
+        health.get("health") == "PASS"
+        and health.get("ok") is True
+        and health.get("content_quality_ok") is True
+        and health.get("quarantined") is False
+        and all(isinstance(health.get(key), str) and re.fullmatch(r"[0-9a-f]{64}", health[key])
+                for key in ("raw_sha256", "semantic_sha256"))
+    )
+
+
 def source_availability(source: Dict[str, Any]) -> str:
     contract_status = (source.get("contract") or {}).get("status")
     if contract_status == "FAIL":
@@ -361,6 +501,13 @@ def source_availability(source: Dict[str, Any]) -> str:
         return "UNAVAILABLE_LAST_KNOWN_GOOD"
     freshness_status = (source.get("freshness") or {}).get("status")
     status = str(source.get("status") or "UNKNOWN").upper()
+    # Retain explicit transport failure diagnostics even when the evidence
+    # timestamp is unknown (the registry batch only establishes attempt time).
+    if source.get("kind") == "REGISTERED_OFFICIAL_SOURCE":
+        if status == "FAIL":
+            return "UNAVAILABLE_LAST_KNOWN_GOOD"
+        if status == "DEGRADED":
+            return "DEGRADED_LAST_KNOWN_GOOD"
     if freshness_status == "STALE":
         return "STALE_LAST_KNOWN_GOOD"
     if freshness_status == "UNKNOWN":
@@ -408,6 +555,19 @@ def dependency_gate(source: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def registry_endpoint_bound(definition: Dict[str, Any], health: Dict[str, Any]) -> bool:
+    """Bind health to the exact current registry identity and declared HTTPS endpoints."""
+    primary = definition.get("url")
+    aliases = definition.get("canonical_aliases")
+    allowed = [primary, *(aliases if isinstance(aliases, list) else [])]
+    allowed = {url for url in allowed if isinstance(url, str)
+               and url.startswith("https://") and canonical_url(url) is not None}
+    return (isinstance(primary, str) and primary in allowed
+            and health.get("url") == primary
+            and isinstance(health.get("selected_url"), str) and health["selected_url"] in allowed
+            and isinstance(health.get("final_url"), str) and health["final_url"] in allowed)
+
+
 def build_source_inventory(
     corpus_sources: List[Dict[str, Any]],
     source_registry: Dict[str, Any],
@@ -428,7 +588,9 @@ def build_source_inventory(
         })
         inventory.append(row)
 
-    health_by_id = {str(row.get("id")): row for row in registry_health.get("sources") or []}
+    health_rows = registry_health.get("sources") or []
+    health_by_id = {str(row.get("id")): row for row in health_rows}
+    health_counts = Counter(str(row.get("id")) for row in health_rows)
     registry_freshness = next(
         (row.get("freshness") for row in corpus_sources if row.get("id") == "VERIFIED_SOURCE_REGISTRY"),
         {"status": "UNKNOWN", "ageHours": None, "maxAgeHours": None},
@@ -439,6 +601,15 @@ def build_source_inventory(
         if not source_id:
             continue
         health = health_by_id.get(source_id) or {}
+        unknown_freshness = {"status": "UNKNOWN", "ageHours": None,
+                             "maxAgeHours": registry_freshness.get("maxAgeHours")}
+        attempt_freshness = registry_freshness if health else unknown_freshness
+        endpoint_binding = (
+            "MISSING" if not health else
+            "AMBIGUOUS" if health_counts[source_id] != 1 else
+            "MATCHED" if registry_endpoint_bound(definition, health) else "MISMATCH"
+        )
+        verified = endpoint_binding == "MATCHED" and registry_observation_verified(health)
         inventory.append({
             "id": source_id,
             "kind": "REGISTERED_OFFICIAL_SOURCE",
@@ -451,15 +622,20 @@ def build_source_inventory(
             "owner": definition.get("owner"),
             "canonicalUrl": canonical_url(definition.get("url")),
             "status": health.get("health") or "UNKNOWN",
-            "observedAt": observed_at,
-            "freshness": registry_freshness,
+            "endpointBinding": endpoint_binding,
+            # The health schema has a batch observation time, not a
+            # per-document fetched_at. Never use a failed batch row as evidence.
+            "observedAt": observed_at if verified else None,
+            "freshness": registry_freshness if verified else unknown_freshness,
+            "lastAttemptObservedAt": observed_at if health else None,
+            "lastAttemptFreshness": attempt_freshness,
             "materialFactUse": bool(definition.get("material_fact_use")),
-            "planningOnly": "calendar" in str(definition.get("class") or "").lower(),
+            "planningOnly": registry_planning_only(definition),
             "resolutionTaskRequired": bool(health.get("resolution_task_required")),
             "lastKnownGoodPreserved": bool(
                 health.get("semantic_sha256")
                 or health.get("last_known_semantic_sha256")
-                or health.get("health") == "PASS"
+                or verified
             ),
             "contract": {"status": "PASS", "errors": []},
         })
@@ -753,11 +929,11 @@ def main() -> int:
     parser.add_argument("--state-dir", type=pathlib.Path, default=STATE)
     parser.add_argument("--contract", type=pathlib.Path, default=DEFAULT_CONTRACT)
     parser.add_argument("--source-registry", type=pathlib.Path, default=DEFAULT_SOURCE_REGISTRY)
-    parser.add_argument("--as-of", help="ISO-8601 reference time for deterministic tests")
+    parser.add_argument("--as-of", help="ISO-8601 reference timestamp with explicit UTC offset for deterministic tests")
     args = parser.parse_args()
     reference = parse_time(args.as_of) if args.as_of else None
     if args.as_of and not reference:
-        parser.error("--as-of must be an ISO-8601 timestamp")
+        parser.error("--as-of must be an ISO-8601 timestamp with explicit UTC offset")
     index = compile_with_replay(
         state_dir=args.state_dir,
         reference=reference,
