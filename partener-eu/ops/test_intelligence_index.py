@@ -63,7 +63,70 @@ def main():
         fixture_state(root)
         reference = dt.datetime(2026, 8, 12, 10, tzinfo=dt.timezone.utc)
         registry_path = root / "source_registry.json"
-        index = mod.compile_with_replay(root, reference, source_registry_path=registry_path)
+        # The domestic-only fixture deliberately lacks the international roster.
+        # Test the full production contract separately before using a local
+        # reduced contract for the pre-existing domestic behavior assertions.
+        full_contract = json.loads(mod.DEFAULT_CONTRACT.read_text(encoding="utf-8"))
+        international = {"EU_DIRECT", "BRUSSELS", "EEA_NORWAY", "INTERREG", "PROGRAMMING_PIPELINE"}
+        domestic = {"MIPE", "MYSMIS", "AFIR", "OI_ADR", "CALENDARS"}
+        assert set(full_contract["requiredSourceFamilies"]) == domestic | international
+        incomplete = mod.compile_with_replay(root, reference, source_registry_path=registry_path)
+        assert set(incomplete["dataPlane"]["coverage"]["missingRequiredFamilies"]) == international
+        assert incomplete["dataPlane"]["coverage"]["status"] == "FAIL"
+        assert incomplete["readiness"] == "BLOCKED_CONTRACT_FAIL_CLOSED"
+        assert incomplete["summary"]["materialFactsAutopromoted"] == 0
+
+        extended_registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        for source_id, programme, source_class, families in (
+            ("SRC-EU-TEST-ROSTER", "EU direct programmes", "official_direct_call_registry", ["EU_DIRECT", "BRUSSELS"]),
+            ("SRC-EEA-TEST-ROSTER", "EEA Grants 2021-2028", "official_programming_framework", ["EEA_NORWAY"]),
+            ("SRC-INTERREG-TEST-ROSTER", "Interreg Danube Region Programme 2021-2027", "official_interreg_call_registry", ["INTERREG"]),
+            ("SRC-MFF-TEST-ROSTER", "MFF 2028-2034", "official_programming_pipeline", ["PROGRAMMING_PIPELINE"]),
+        ):
+            extended_registry["sources"].append({
+                "id": source_id, "tier": "T1", "class": source_class,
+                "url": "https://official.example/" + source_id,
+                "programmes": [programme], "source_families": families,
+                "material_fact_use": False,
+            })
+        extended_path = root / "extended_registry.json"
+        write(extended_path, extended_registry)
+        complete = mod.compile_with_replay(root, reference, source_registry_path=extended_path)
+        coverage = complete["dataPlane"]["coverage"]
+        assert coverage["status"] == "PASS", coverage
+        assert coverage["missingRequiredFamilies"] == []
+        assert complete["dataPlane"]["contract"]["status"] == "PASS"
+        families = {row["family"]: row for row in coverage["requiredFamilies"]}
+        for family in international:
+            assert families[family]["status"] == "PRESENT_DEGRADED", families[family]
+            assert families[family]["availableSourceIds"] == []
+        assert complete["summary"]["recordCount"] == incomplete["summary"]["recordCount"]
+        assert complete["summary"]["materialFactsAutopromoted"] == 0
+        assert all(gate["publishMaterialFacts"] is False
+                   for gate in complete["dataPlane"]["dependencyIsolation"]["gates"])
+        assert complete["dataPlane"]["replay"]["byteEquivalent"] is True
+
+        # A registered roster is not a verified acquisition. Remove each
+        # family independently to ensure no required family can disappear.
+        for family in sorted(international):
+            reduced = json.loads(json.dumps(extended_registry))
+            for definition in reduced["sources"]:
+                definition["source_families"] = [
+                    value for value in definition.get("source_families", []) if value != family
+                ]
+            write(extended_path, reduced)
+            absent = mod.compile_with_replay(root, reference, source_registry_path=extended_path)
+            assert absent["dataPlane"]["coverage"]["missingRequiredFamilies"] == [family]
+            assert absent["readiness"] == "BLOCKED_CONTRACT_FAIL_CLOSED"
+            assert absent["summary"]["materialFactsAutopromoted"] == 0
+
+        domestic_contract = dict(full_contract)
+        domestic_contract["requiredSourceFamilies"] = [
+            family for family in full_contract["requiredSourceFamilies"] if family in domestic
+        ]
+        domestic_contract_path = root / "domestic_contract.json"
+        write(domestic_contract_path, domestic_contract)
+        index = mod.compile_with_replay(root, reference, contract_path=domestic_contract_path, source_registry_path=registry_path)
         assert index["contract"]["status"] == "PASS", index["contract"]
         assert index["readiness"] == "DEGRADED_FAIL_CLOSED"
         assert index["dataPlane"]["contract"]["status"] == "PASS"
@@ -347,7 +410,7 @@ def main():
                 row["semantic_hash_changed"] = False
                 row["resolution_task_required"] = False
         write(root / "source_registry_health.json", registry)
-        healthy_material = mod.compile_with_replay(root, reference, source_registry_path=registry_path)
+        healthy_material = mod.compile_with_replay(root, reference, contract_path=domestic_contract_path, source_registry_path=registry_path)
         assert healthy_material["readiness"] == "READY_FOR_DISCOVERY_ONLY"
         assert healthy_material["sources"][-1]["status"] == "DEGRADED"
         assert healthy_material["summary"]["materialResolutionTasksRequired"] == 0
@@ -359,7 +422,7 @@ def main():
         stale = mod.compile_with_replay(
             root,
             dt.datetime(2026, 8, 14, tzinfo=dt.timezone.utc),
-            source_registry_path=registry_path,
+            contract_path=domestic_contract_path, source_registry_path=registry_path,
         )
         assert set(stale["summary"]["staleOrUnknownSources"]) == {
             "AFIR_CORPUS", "PEO_CALENDAR", "MIPE_CORPUS", "VERIFIED_SOURCE_REGISTRY",
@@ -371,7 +434,7 @@ def main():
 
         del afir["policy"]
         write(root / "afir_corpus.json", afir)
-        invalid = mod.compile_with_replay(root, reference, source_registry_path=registry_path)
+        invalid = mod.compile_with_replay(root, reference, contract_path=domestic_contract_path, source_registry_path=registry_path)
         assert invalid["contract"]["status"] == "FAIL"
         assert invalid["readiness"] == "BLOCKED_CONTRACT_FAIL_CLOSED"
     print("PASS intelligence_index")
