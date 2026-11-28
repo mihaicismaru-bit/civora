@@ -93,13 +93,23 @@ def corpus_config(contract: Dict[str, Any], source_id: str) -> Dict[str, Any]:
 def canonical_url(value: Any) -> Optional[str]:
     if not value or not isinstance(value, str):
         return None
-    parsed = urllib.parse.urlparse(value.strip())
-    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+    # Malformed external ledger URLs must not abort the whole index or
+    # silently become credential-free official identities.
+    try:
+        parsed = urllib.parse.urlparse(value.strip())
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            return None
+        if parsed.username is not None or parsed.password is not None:
+            return None
+        host = parsed.hostname.lower()
+        if host.startswith("www."):
+            host = host[4:]
+        if not host or any(ch.isspace() for ch in host):
+            return None
+        port_number = parsed.port
+    except ValueError:
         return None
-    host = parsed.hostname.lower()
-    if host.startswith("www."):
-        host = host[4:]
-    port = f":{parsed.port}" if parsed.port else ""
+    port = f":{port_number}" if port_number else ""
     path = re.sub(r"/{2,}", "/", parsed.path or "/")
     if path != "/":
         path = path.rstrip("/")
@@ -547,7 +557,8 @@ def registry_endpoint_bound(definition: Dict[str, Any], health: Dict[str, Any]) 
     primary = definition.get("url")
     aliases = definition.get("canonical_aliases")
     allowed = [primary, *(aliases if isinstance(aliases, list) else [])]
-    allowed = {url for url in allowed if isinstance(url, str) and url.startswith("https://")}
+    allowed = {url for url in allowed if isinstance(url, str)
+               and url.startswith("https://") and canonical_url(url) is not None}
     return (isinstance(primary, str) and primary in allowed
             and health.get("url") == primary
             and isinstance(health.get("selected_url"), str) and health["selected_url"] in allowed
